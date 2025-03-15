@@ -1,0 +1,20 @@
+services:
+  app:
+    container_name: ${PROJECT_NAME}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - APP_PORT=${APP_PORT}
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    volumes:
+      - .:/app
+    # network_mode: "host"
+    env_file: 
+      - .env
+    deploy:
+      resources:
+        limits:
+          cpus: "2" # Using 2 Cores Maximum
+          memory: 2g # Using 2GB Memory
