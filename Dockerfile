@@ -2,13 +2,7 @@
 FROM python:3.12-slim
 
 # Install required system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libdbus-1-dev \
-    build-essential \
-    libportaudio2 \
-    libportaudiocpp0 \
-    portaudio19-dev \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends
 
 # Set the working directory inside the container
 WORKDIR /app
