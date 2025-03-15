@@ -1,0 +1,6 @@
+__pycache__
+venv/
+venv312/
+.env.dev
+.env.prod
+uploads/

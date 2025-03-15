@@ -93,7 +93,6 @@ class Settings(BaseSettings):
                 print(f"Warning: YAML file not found at {yaml_file_path}")
             except yaml.YAMLError as e:
                 print(f"Error parsing YAML file: {e}")
-        print(values)
         return values
 
     class Config:
