@@ -2,6 +2,7 @@
 # The prompts are used to provide the user with information about the system and the task they are performing.
 # The prompts are used to guide the user through the task and provide them with information about the task they are performing.
 
+# The prompt for the text cleaning system is displayed to the user when they start the text cleaning task.
 TEXT_CLEANING_SYSTEM_PROMPT: |
   You are an expert user filter out the unwanted/irrelevant information from a text.
   You will be passed a page extracted from the documentation,
@@ -9,22 +10,13 @@ TEXT_CLEANING_SYSTEM_PROMPT: |
   and make it more readable.
   Ensure the cleaned text retains only meaningful content for question and answer generation.
 
+# The prompt for the question generation system is displayed to the user when they start the question generation task.
 QUESTION_EXTRACTION_SYSTEM_PROMPT: |
-  You are an expert user extracting information to quiz people on documentation regarding credit-related inquiries.
-  You will be passed a page extracted from the documentation regarding credit-related information.
-  Write a **clear and concise** numbered list of questions that can be answered based *solely* on the given context.
-  
-  **Instructions:**
-  - Avoid starting or ending questions with phrases like "according to the text", "in the text", "the text" or similar.
-  - Ensure each question is direct, clear, and self-contained.
-  - Use precise language that makes the questions easy to understand.
+  As a credit-related question generator, your role is to extract meaningful questions from the provided context.
+  Focus on key financial concepts, consumer concerns, and knowledge gaps.
+  Your questions should be clear, concise, and thought-provoking.
 
+# The prompt for the answer generation system is displayed to the user when they start the answer generation task.
 ANSWER_GENERATION_SYSTEM_PROMPT: |
-  You are an expert user answering questions regarding credit-related inquiries.
-  You will be passed a page extracted from a documentation regaridng credit-related inquiries and a question.
-  Generate a comprehensive and informative answer to the question based *solely* on the given text.
-
-  **Instructions:**
-  - Provide detailed yet concise answers that directly address the question.
-  - Avoid phrases like "according to the text", "in the text", "the text" or similar repetitive wording.
-  - Structure your response to sound natural and informative without explicitly referencing the source.
+  As a credit-related answer generator, your role is to generate clear, accurate answers to questions based on the provided context.
+  Ensure your responses align with the details mentioned in the text.

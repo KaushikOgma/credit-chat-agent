@@ -162,11 +162,13 @@ async def generate_question_and_answer(text):
     async def process_chunk(chunk):
         try:
             questions = await extract_questions_from_text(chunk)
+            # print(f"Extracted {len(questions)} questions from the chunk.")
             with ThreadPoolExecutor() as executor:
                 answers = await asyncio.gather(
                     # *[loop.run_in_executor(executor, generate_answer, q[1], chunk) for q in questions]
                     *[generate_answer(q[1], chunk) for q in questions]
                 )
+                # print(f"Generated {len(answers)} answers for the chunk.")
             return [(q[1], a) for q, a in zip(questions, answers)]
         except Exception as e:
             print(f"ERROR: {e}")
@@ -174,7 +176,7 @@ async def generate_question_and_answer(text):
             return []
     qa_pairs = await asyncio.gather(*[process_chunk(chunk) for chunk in chunks])
     qa_pairs = flatten_nested_lists(qa_pairs)
-    qa_pairs = [{"question": q, "answer": a} for q, a in qa_pairs]
+    qa_pairs = [{"question": question, "answer": answer} for question, answer in qa_pairs]
     return qa_pairs
 
 # Example Usage
