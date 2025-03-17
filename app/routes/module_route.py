@@ -74,4 +74,4 @@ async def evaluate_system_accuracy(
     **Returns:**
     The evaluation score of the question answering system.
     """
-    await qa_evaluation_controller.get_evaluation_score(req_data)
+    return await qa_evaluation_controller.get_evaluation_score(req_data.data)

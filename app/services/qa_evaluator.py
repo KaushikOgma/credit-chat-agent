@@ -1,7 +1,10 @@
 import asyncio
+import json
+import traceback
 from typing import List, Union
 
 import numpy as np
+from tqdm import tqdm
 from app.services.pinecone_vectorizer import OpenAIEmbedding, VectorizerEngine
 from app.utils.config import settings
 import openai
@@ -153,14 +156,17 @@ class QAEvaluator:
             dict: Similarity score and matched response from the vector DB.
         """
         try:
+            print("qa_pairs:: ",json.dumps(qa_pairs, indent=4))
             score_list = {}
             agg_scores = None
-            is_synced = await asyncio.to_thread(self.sync_vector_db, qa_pairs)
+            is_synced = await self.sync_vector_db(qa_pairs)
+            print("is_synced:: ",is_synced)
             if is_synced:
-                for qa_pair in qa_pairs:
+                for qa_pair in tqdm(qa_pairs, desc="Evaluating QA pairs"):
                     question = qa_pair['question'].strip()
-                    score = await asyncio.to_thread(self.evaluate_single_qa, question)
+                    score = await self.evaluate_single_qa(question)
                     score_list[question] = score
+
                 agg_scores = await self.get_precision_recall_f1(list(score_list.values()))
  
             return {
@@ -169,4 +175,5 @@ class QAEvaluator:
             }
         except Exception as e:
             print(f"Error evaluating QA pairs: {e}")
+            print(traceback.format_exc())
             return None

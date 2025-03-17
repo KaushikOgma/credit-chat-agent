@@ -1,7 +1,7 @@
 import io
 import os
 import tempfile
-from app.services.data_ingestion import process_folder
+from app.services.data_ingestor import process_folder
 from app.schemas.module_schema import FolderPathRequest
 
 
