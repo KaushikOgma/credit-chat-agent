@@ -80,6 +80,12 @@ class Settings(BaseSettings):
     AVERAGE_ANSWER_TOKEN_SIZE: int = Field(..., env="AVERAGE_ANSWER_TOKEN_SIZE")
     AVERAGE_QUESTION_TEXT_RATIO: float = Field(..., env="AVERAGE_QUESTION_TEXT_RATIO")
 
+    # DB Configuration
+    PINECONE_API_KEY: str = Field(..., env="PINECONE_API_KEY")
+
+    MAX_THREADS: int = Field(..., env="MAX_THREADS")
+    MAX_PROCESSES: int = Field(..., env="MAX_PROCESSES")
+
 
     @model_validator(mode="before")
     def load_yaml_values(cls, values):
