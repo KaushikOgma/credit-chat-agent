@@ -1,6 +1,4 @@
 import os
-# import sys
-# sys.path.append(os.getcwd())
 from langchain.schema import HumanMessage, SystemMessage
 from app.utils.config import settings
 
