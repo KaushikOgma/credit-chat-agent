@@ -347,7 +347,7 @@ class VectorizerEngine:
             print(f"Method: create_vectorstore :: Error: {error}")
             return False
 
-    async def delete_food_chunk(
+    async def delete_item_chunk(
         self, chunk, retry_count=0, delay=2, max_retries=3
     ) -> bool:
         try:
@@ -363,18 +363,18 @@ class VectorizerEngine:
                     return True  # Success
                 except Exception as error:
                     print(
-                        f"delete_food_chunk: Chunk delete error: {error} - Attempt {attempt + 1}"
+                        f"delete_item_chunk: Chunk delete error: {error} - Attempt {attempt + 1}"
                     )
-                    print("delete_food_chunk traceback: ", traceback.format_exc())
+                    print("delete_item_chunk traceback: ", traceback.format_exc())
                     if attempt < max_retries - 1:  # Avoid delay on the last attempt
                         await asyncio.sleep(delay)  # Async wait for exponential backoff
                         delay *= 2  # Exponential backoff
             return False  # All retries failed
         except Exception as error:
-            print(f"Method: delete_food_chunk :: Error: {error}")
+            print(f"Method: delete_item_chunk :: Error: {error}")
             raise error
 
-    async def delete_food(self, food_id_list: List[str]) -> bool:
+    async def delete_items(self, food_id_list: List[str]) -> bool:
         """
         Deletes the specified food items from the vector database.
 
@@ -387,26 +387,27 @@ class VectorizerEngine:
         Retries the deletion process up to a maximum of `max_retries` times with
         exponential backoff delay if an exception occurs during the deletion.
         """
-        retry_count = 0
-        max_retries = 3
-        initial_delay = 2  # Initial delay for retry logic (in seconds)
-        chunk_size = 100
-        # Split food_id_list into chunks for parallel processing
-        id_chunks = [
-            food_id_list[i : i + chunk_size]
-            for i in range(0, len(food_id_list), chunk_size)
-        ]
-
-        # Prepare async tasks for each chunk
-        tasks = [
-            self.delete_food_chunk(chunk, retry_count, initial_delay, max_retries)
-            for chunk in id_chunks
-        ]
-
-        # Run tasks concurrently and collect results
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-
-        return all(results)  # Returns True if all chunks are successfully deleted
+        try:
+            retry_count = 0
+            max_retries = 3
+            initial_delay = 2  # Initial delay for retry logic (in seconds)
+            chunk_size = 100
+            # Split food_id_list into chunks for parallel processing
+            id_chunks = [
+                food_id_list[i : i + chunk_size]
+                for i in range(0, len(food_id_list), chunk_size)
+            ]
+            # Prepare async tasks for each chunk
+            tasks = [
+                self.delete_item_chunk(chunk, retry_count, initial_delay, max_retries)
+                for chunk in id_chunks
+            ]
+            # Run tasks concurrently and collect results
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            return all(results)  # Returns True if all chunks are successfully deleted
+        except Exception as error:
+            print(f"Method: delete_items :: Error: {error}")
+            raise error
 
     def load_vectorstore(self) -> None:
         """
