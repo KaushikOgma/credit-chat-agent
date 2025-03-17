@@ -7,14 +7,17 @@ from app.utils.config import settings
 import openai
 from sklearn.metrics import precision_score, recall_score, f1_score
 
-class SingleQAHandler:
-    def __init__(self, model_id):
+class QAEvaluator:
+    """
+    A class to evaluate the quality of the AI-generated responses.
+    """
+    def __init__(self):
         # Initialize the OpenAI Embedding
         self.encoder = OpenAIEmbedding(model_name=settings.EMBEDDING_MODEL_NAME)
         # Initialize the Vectorizer Engine
         self.temperature = 0.7
         self.max_tokens = 500
-        self.model_id = model_id
+        self.model_id = settings.FINETUNED_MODEL_NAME
         self.openai = openai
         self.openai.api_key = settings.OPENAI_API_KEY
         self.vectorizer = VectorizerEngine(
