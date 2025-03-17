@@ -3,6 +3,5 @@ venv/
 venv312/
 .env.dev
 .env.prod
-uploads/
 *__pycache__*
 *.pyc
