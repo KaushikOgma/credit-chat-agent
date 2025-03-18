@@ -18,19 +18,14 @@ import numpy as np
 import pandas as pd
 import traceback
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
-from langchain.embeddings import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from app.utils.config import settings
 import openai
 from langchain_pinecone import PineconeVectorStore
 from scipy.spatial.distance import cdist
 from joblib import Parallel, delayed
-
-
-# from langchain_chroma import Chroma
 from langchain.docstore.document import Document
-
-# from langchain.embeddings import Embeddings
-
+from app.utils.helpers.common_helper import preprocess_text
 
 
 class OpenAIEmbedding:
@@ -116,7 +111,7 @@ class VectorizerEngine:
             # Build Document instances
             chunk_documents = []
             for text_item, meta in zip(corpus, metadata):
-                chunk_documents.append(Document(page_content=text_item, metadata=meta))
+                chunk_documents.append(Document(page_content=preprocess_text(text_item), metadata=meta))
 
             return chunk_documents, chunk_qa_pair_id_list
 
@@ -240,7 +235,7 @@ class VectorizerEngine:
             # embeddings = self.encoder.embed_query(text_batch)
             embeddings = await asyncio.to_thread(self.encoder.embed_documents, text_batch)
             upsert_data = [
-                (id, embedding.values, metadata)
+                (id, embedding, metadata)
                 for id, embedding, metadata in zip(ids, embeddings, metadata_batch)
             ]
             # self.vectordb.upsert(
@@ -439,21 +434,29 @@ class VectorizerEngine:
             raise error
 
     async def cosine_similarity(self, X: np.ndarray, Y: np.ndarray, batch_size: int = 1000, n_jobs: int = -1) -> np.ndarray:
-        """Efficient cosine similarity using scipy with parallel execution for large batches."""
-        
-        def compute_batch(X_batch: np.ndarray) -> np.ndarray:
-            return 1 - cdist(X_batch, Y, metric='cosine')
-        
-        # Split the data into smaller batches
-        X_batches = np.array_split(X, max(1, len(X) // batch_size))
+        """
+        Efficient cosine similarity using scipy with parallel execution for large batches.
+        """
+        try:
+            # Ensure both X and Y are 2D
+            X = X.reshape(1, -1) if X.ndim == 1 else X
+            Y = Y.reshape(1, -1) if Y.ndim == 1 else Y
+            
+            def compute_batch(X_batch: np.ndarray) -> np.ndarray:
+                return 1 - cdist(X_batch, Y, metric='cosine')
+            # Split the data into smaller batches
+            X_batches = np.array_split(X, max(1, len(X) // batch_size))
 
-        # Parallel execution using joblib
-        similarity_batches = Parallel(n_jobs=n_jobs, prefer='threads')(
-            delayed(compute_batch)(X_batch) for X_batch in X_batches
-        )
+            # Parallel execution using joblib
+            similarity_batches = Parallel(n_jobs=n_jobs, prefer='threads')(
+                delayed(compute_batch)(X_batch) for X_batch in X_batches
+            )
 
-        # Combine the results
-        return np.vstack(similarity_batches)
+            # Combine the results
+            return np.vstack(similarity_batches).item() * 100
+        except Exception as error:
+            print(f"Method: cosine_similarity :: Error: {error}")
+            raise error
 
     async def get_data_by_ids(self, question_ids: List[str]) -> Optional[Dict]:
         try:
@@ -481,20 +484,35 @@ class VectorizerEngine:
             float: The similarity score between the question and the answer.
         """
         try:
-            question_embedding = await asyncio.to_thread(self.encoder.embed_query, question)
+            cleaned_question = preprocess_text(question)
+            question_embedding = await asyncio.to_thread(self.encoder.embed_query, cleaned_question)
+            cleaned_answer = preprocess_text(answer)
+            answer_embedding = await asyncio.to_thread(self.encoder.embed_query, cleaned_answer)
             matched_data = await asyncio.to_thread(
                 lambda: self.vectordb.query(
                     namespace=self.namespace,
                     vector=question_embedding,
                     top_k=1,
                     include_metadata=True,
-                    include_values=False,
+                    include_values=True,
                 )["matches"]
             )
-            answer_embedding = await asyncio.to_thread(self.encoder.embed_query, answer)
-            matched_embedding = matched_data[0]["value"] if matched_data else None
-            similarity_score = await asyncio.to_thread(self.cosine_similarity, matched_embedding, answer_embedding)
-            return similarity_score
+            if not matched_data:
+                print("No relevant match found in vector database.")
+                return 0.0, 0.0  # Or any appropriate fallback score
+            else:
+                matched_answer = matched_data[0]["metadata"].get("answer")
+                cleaned_matched_answer = preprocess_text(matched_answer)
+                matched_question_embedding = matched_data[0].get("values", question_embedding)
+                matched_answer_embedding = await asyncio.to_thread(self.encoder.embed_query, cleaned_matched_answer)
+
+                # Compute similarity scores between the matched answer and the actual answer
+                answer_similarity_score = await self.cosine_similarity(np.array(matched_answer_embedding), np.array(answer_embedding))
+                # Compute similarity scores between the matched question and the matched answer
+                true_similarity_score = await self.cosine_similarity(np.array(matched_question_embedding), np.array(matched_answer_embedding))
+                # print(f"answer_similarity_score: {answer_similarity_score}")
+                # print(f"true_similarity_score: {true_similarity_score}")
+                return round(answer_similarity_score, 3), round(true_similarity_score, 3)
         except Exception as error:
             print(f"Method: get_qa_similarity_score :: Error : {error}")
             raise error
