@@ -103,22 +103,6 @@ class QAEvaluator:
             print(f"Error getting AI response: {e}")
             return None
     
-    # async def get_ai_response(self, question) -> Union[str, None]:
-    #     try:
-    #         response = self.openai.ChatCompletion.create(
-    #             model=self.model_id,
-    #             messages=[
-    #                 {"role": "system", "content": "You are a Genius Assistant."},
-    #                 {"role": "user", "content": question}
-    #             ],
-    #             temperature= self.temperature,
-    #             max_tokens=self.max_tokens
-    #         )
-    #         return response['choices'][0]['message']['content'].strip()
-    #     except Exception as e:
-    #         print(f"Error getting AI response: {e}")
-    #         return None
-
 
     async def sync_vector_db(self, qa_pairs: List[dict]) -> bool: 
         """
