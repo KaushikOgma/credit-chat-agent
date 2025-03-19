@@ -1,101 +1,129 @@
 """
-This Module is responsible for Managing
-all of the logging actions
+Setting up the logger so that it can add log to the db
+usage examples:
+logger.info("message", extra={"moduleName": "credit_genius_ai", "serviceName": "qa_generator"})
+logger.error(error, extra={"moduleName": "credit_genius_ai", "serviceName": "qa_generator"})
+logger.exception(error, extra={"moduleName": "credit_genius_ai", "serviceName": "qa_generator"})
 
-Usage:
-    from app.utils.logger import LogHandler
-
-    logger = LogHandler.get_logger()
-
-    logger.info("This is an info message")
-
-    logger.error("This is an error message")
-
-    logger.exception("This is an exception message")
 """
-
-import sys
 import logging
-from setuptools._distutils.util import strtobool
-from loguru import logger
+import sys
+from schemas.log_schema import SaveLogSchema
+from app.db import get_db_instance
 from app.utils.config import settings
+from app.utils.helpers.date_helper import get_user_time
+from app.utils.helpers.common_helper import generate_uuid
 
-
-class LogHandler:
-    """
-    This class is responsible for managing the logger.
-    """
-
-    _logger = None
-
-    @classmethod
-    def get_logger(cls, log_file_path: str = settings.LOG_FILE):
+class DBLogHandler(logging.Handler):
+    def emit(self, record):
         """
-        Gets the logger instance.
+        **Summary:**
+        Emit a log entry to the database.
+        This function takes a log record and emits it to the database. It creates a log entry dictionary based on the record's attributes, including the message, type, stack trace, module name, request ID, and order ID. It then retrieves the module ID from the database based on the module name. The log entry dictionary is updated with the module ID, creation timestamp, and update timestamp.
+        If there are no filters specified for the log entry (no request ID or order ID), the log entry is inserted into the database as a new document. If there are filters specified, the function checks if a log entry with the same filters already exists in the database. If not, a new log entry is inserted with the appropriate log type (INFO or ERROR) and the log entry is added to the corresponding log list. If a log entry with the same filters already exists, the log entry is appended to the existing log entry's log list and the update timestamp is updated.
+        If there is an error while logging to the database, an exception is raised.
 
-        Args:
-            log_file_path (str): The path to the log file. Defaults to `settings.LOG_FILE`.
+        **Args:**
+        - `record` (LogRecord): The log record to emit.
 
-        Returns:
-            loguru.Logger: The logger instance.
+        **Raises:**
+        - `Exception`: If there is an error while logging to the database.
 
-        Notes:
-            The logger is a singleton, meaning that it is only initialized once.
-            The log format is set to "{time} {level} {message}" and the log level is set to INFO.
-            The log is also serialized to JSON.
-            Backtraces are enabled, which will show full stack traces for errors.
-            The log is compressed to a zip file when it reaches 100 MB in size.
-            Optionally, if `settings.SQL_LOG` is set to True, SQLAlchemy logging is enabled.
+        **Note:**
+        - The function closes the database connection after logging.
         """
-        if cls._logger is None:
-            # Initialize the logger only once (singleton)
-            cls._logger = logger
-            cls._logger.remove()
-
-            # Log to the console
-            cls._logger.add(sys.stdout, level="INFO", format="{time} {level} {message}")
-
-            # Log to a file with custom settings
-            cls._logger.add(
-                log_file_path,
-                format="{time} {level} {message}",  # log format
-                serialize=True,  # Enable JSON serialization
-                level="INFO",  # Set log level to INFO
-                backtrace=True,  # Enable backtrace to show full stack traces
-                compression="zip",  # Compress old log files as .zip
-                rotation="100 MB",  # Rotate the log when it reaches 100 MB
+        db = get_db_instance()
+        try:
+            log_entry = SaveLogSchema(
+                message = record.getMessage(),
+                type = record.levelname.upper(),
+                stackTrace = self.format(record) if record.exc_info else None,
+                moduleName = getattr(record, 'moduleName', int(settings.MODULE)),
+                serviceName = getattr(record, 'serviceName', None),
             )
+            log_entry_data = log_entry.model_dump()
+            if "id" in log_entry_data:
+                del log_entry_data["id"]
+            newLogId = generate_uuid()
+            log_entry_data["_id"] = newLogId
+            log_entry_data["createdAt"] = get_user_time()
+            log_entry_data["updatedAt"] = get_user_time()
+            log_entry = {
+                "message": log_entry_data["message"],
+                "type": log_entry_data["type"],
+                "stackTrace": log_entry_data["stackTrace"],
+                "timestamp": get_user_time()
+            }
+            log_filter = {}
+            if "serviceName" in log_entry_data and log_entry_data["serviceName"] is not None:
+                log_entry_data["serviceName"] = str(log_entry_data["serviceName"])
+                log_filter["serviceName"] = log_entry_data["serviceName"]
+            if len(log_filter) > 0:
+                log_filter["moduleName"] = log_entry_data["moduleName"]
 
-            # if bool(strtobool(settings.SQL_LOG)):
-            #     # Optionally, set up SQLAlchemy logging
-            #     cls._setup_sqlalchemy_logging()
-        return cls._logger
+            existing_log = db.log.find_one(log_filter)
+            if len(log_filter) == 0 or not existing_log:
+                log_entry_data["logTrail"] = [log_entry]
+                if log_entry_data["type"] == "INFO":
+                    log_entry_data["status"] = "SUCCESS"
+                else:
+                    log_entry_data["status"] = "ERROR"
+                del log_entry_data["type"]
+                del log_entry_data["stackTrace"]
+                db.log.insert_one(log_entry_data)
+            else:
+                existing_log["logTrail"].append(log_entry)
+                if log_entry_data["type"] == "INFO":
+                    existing_log["status"] = "SUCCESS"
+                else:
+                    existing_log["status"] = "ERROR"
+                existing_log["message"] = log_entry_data["message"]
+                existing_log["updatedAt"] = get_user_time()
+                del log_entry_data["type"]
+                del log_entry_data["stackTrace"]
+                db.log.update_one(
+                    {"_id": existing_log["_id"]},
+                    {"$set": existing_log}
+                )
+        except Exception as e:
+            # print(f"Failed to log to database: {e}")
+            raise e
+        finally:
+            # Close the db connection
+            db.client.close()
 
-    # @staticmethod
-    # def _setup_sqlalchemy_logging():
-        """Redirect SQLAlchemy logs to Loguru"""
 
-        class LoguruHandler(logging.Handler):
-            """
-            A custom logging handler that redirects SQLAlchemy logs to Loguru.
+def setup_logger():
+    """
+    **Summary:**
+    Set up the logger for the module.
+    This function initializes the logger for the module specified in the `settings.MODULE` variable. If the logger does not have any handlers, it sets the logger's level to `logging.INFO` and creates two handlers: a `DBLogHandler` for logging to the database and a `StreamHandler` for logging to the console. The handlers are added to the logger.
 
-            This handler is used to capture SQLAlchemy logs and redirect them to the Loguru logger.
-            """
+    **Returns:**
+    - `logger` (logging.Logger): The logger object for the module.
 
-            def emit(self, record):
-                """
-                Redirects a logging record to Loguru.
+    **Raises:**
+    - `Exception`: If an error occurs while setting up the logger.
 
-                This method is called by the logging system for each log record. It redirects
-                the log record to the Loguru logger, which is configured to log to the console
-                and a file.
+    """
+    try:
+        logger = logging.getLogger(settings.MODULE)
+        
+        if not logger.handlers:
+            logger.setLevel(logging.INFO)
+            formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
-                :param record: The log record to redirect.
-                :type record: logging.LogRecord
-                """
-                logger_opt = logger.opt(depth=6, exception=record.exc_info)
-                logger_opt.log(record.levelno, record.getMessage())
+            # Create DBLogHandler for logging to the database
+            db_handler = DBLogHandler()
+            db_handler.setFormatter(formatter)
+            logger.addHandler(db_handler)
 
-        sqlalchemy_logger = logging.getLogger("sqlalchemy.engine")
-        sqlalchemy_logger.setLevel(logging.INFO)
-        sqlalchemy_logger.addHandler(LoguruHandler())
+            
+            # Create StreamHandler for logging to the console
+            console_handler = logging.StreamHandler(sys.stdout)
+            console_handler.setFormatter(formatter)
+            logger.addHandler(console_handler)
+        return logger
+    except Exception as e:
+        # print(f"setup_logger:: Failed to setup the logger: {e}")
+        raise e

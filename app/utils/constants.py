@@ -15,6 +15,7 @@ class RoutePrefix(Enum):
     """
 
     MODULE = "/module"
+    LOG = "/log"
 
 
 class RouteTag(Enum):
@@ -27,3 +28,4 @@ class RouteTag(Enum):
     """
 
     MODULE = "Modules"
+    LOG = "Log"

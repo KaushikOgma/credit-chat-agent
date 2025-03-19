@@ -42,6 +42,13 @@ class Settings(BaseSettings):
     APP_PORT: int = Field(..., env="APP_PORT")
     PROJECT_ROOT_PATH: str = Field(..., env="PROJECT_ROOT_PATH")
     PROJECT_ENV: str = Field(..., env="PROJECT_ENV")
+    MODULE: str = Field(..., env="MODULE")
+    MAX_THREADS: int = Field(..., env="MAX_THREADS")
+    MAX_PROCESSES: int = Field(..., env="MAX_PROCESSES")
+    APP_TIMEZONE: str = Field(..., env="APP_TIMEZONE")
+    ACCEPTED_DATE_TIME_STRING: str = Field(..., env="ACCEPTED_DATE_TIME_STRING")
+    LOG_FILE: str = Field(..., env="LOG_FILE")
+    LOCAL_UPLOAD_LOCATION: str = Field(..., env="LOCAL_UPLOAD_LOCATION")
 
     # # JWT Configuration
     # ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(..., env="ACCESS_TOKEN_EXPIRE_MINUTES")
@@ -49,12 +56,8 @@ class Settings(BaseSettings):
     # ENCRYPTION_KEY: str = Field(..., env="ENCRYPTION_KEY")
 
     # Extra Settings
-    # APP_TIMEZONE: str = Field(..., env="APP_TIMEZONE")
-    # ACCEPTED_DATE_TIME_STRING: str = Field(..., env="ACCEPTED_DATE_TIME_STRING")
     # SEEDING: str = Field(..., env="SEEDING")
     # SQL_LOG: str = Field(..., env="SQL_LOG")
-    LOG_FILE: str = Field(..., env="LOG_FILE")
-    LOCAL_UPLOAD_LOCATION: str = Field(..., env="LOCAL_UPLOAD_LOCATION")
 
     # # s3 settings
     # S3_BUCKET: str = Field(..., env="S3_BUCKET")
@@ -62,13 +65,6 @@ class Settings(BaseSettings):
     # AWS_SECRET_ACCESS_KEY: str = Field(..., env="AWS_SECRET_ACCESS_KEY")
     # AWS_REGION: str = Field(..., env="AWS_REGION")
 
-    # # Database Configuration
-    # DB_PROTOCOL: str = Field(..., env="DB_PROTOCOL")
-    # DB_HOST: str = Field(..., env="DB_HOST")
-    # DB_PORT: int = Field(..., env="DB_PORT")
-    # DB_USER: str = Field(..., env="DB_USER")
-    # DB_PASSWORD: str = Field(..., env="DB_PASSWORD")
-    # DB_NAME: str = Field(..., env="DB_NAME")
 
     # Model Configuration
     OPENAI_API_KEY: str = Field(..., env="OPENAI_API_KEY")
@@ -87,8 +83,12 @@ class Settings(BaseSettings):
     PINECONE_API_KEY: str = Field(..., env="PINECONE_API_KEY")
     VECTOR_DB_NAME: str = Field(..., env="VECTOR_DB_NAME")
 
-    MAX_THREADS: int = Field(..., env="MAX_THREADS")
-    MAX_PROCESSES: int = Field(..., env="MAX_PROCESSES")
+    DB_NAME: str = Field(..., env="DB_NAME")
+    DB_PROTOCOL: str = Field(..., env="DB_PROTOCOL")
+    DB_HOST: str = Field(..., env="DB_HOST")
+    DB_PORT: str = Field(..., env="DB_PORT")
+    DB_USER: str = Field(..., env="DB_USER")
+    DB_PASSWORD: str = Field(..., env="DB_PASSWORD")
 
 
     @model_validator(mode="before")
