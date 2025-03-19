@@ -1,86 +1,68 @@
 import asyncio
+import json
 import os
-import sys
-sys.path.append(os.getcwd())
 import fitz
 import pytesseract
 from PIL import Image
 from docx import Document
-from langchain.schema import Document as LCDocument
 import whisper
+from app.utils.config import settings
 
-async def extract_text(file_path: str, file_extension: str) -> str:
-    try:
-        if file_extension == "pdf":
-            return await asyncio.to_thread(extract_pdf_text, file_path)
-        elif file_extension in {"png", "jpg", "jpeg", "tiff", "bmp", "gif"}:
-            return await asyncio.to_thread(extract_image_text, file_path)
-        elif file_extension == "docx":
-            return await asyncio.to_thread(extract_docx_text, file_path)
-        elif file_extension in {"mp3", "wav", "m4a", "flac"}:
-            return await transcribe_audio(file_path)  # Await here since it's async
-        elif file_extension == "txt":
-            return await asyncio.to_thread(extract_txt_text, file_path)
-    except Exception as e:
-        print(f"Error processing {file_path}: {e}")
-    return ""
+class DataIngestor:
+    
+    def extract_text(self, file_path, file_extension):
+        try:
+            if file_extension == "pdf":
+                with fitz.open(file_path) as doc:
+                    return "\n".join([page.get_text() for page in doc])
 
-# ✅ Convert these to synchronous functions (no async)
-def extract_pdf_text(file_path: str) -> str:
-    with fitz.open(file_path) as doc:
-        return "\n".join([page.get_text() for page in doc])
+            elif file_extension in ["png", "jpg", "jpeg", "tiff", "bmp", "gif"]:
+                image = Image.open(file_path)
+                return pytesseract.image_to_string(image)
 
-def extract_image_text(file_path: str) -> str:
-    image = Image.open(file_path)
-    return pytesseract.image_to_string(image)
+            elif file_extension == "docx":
+                doc = Document(file_path)
+                return "\n".join([para.text for para in doc.paragraphs])
 
-def extract_docx_text(file_path: str) -> str:
-    doc = Document(file_path)
-    return "\n".join([para.text for para in doc.paragraphs])
+            elif file_extension in ["mp3", "wav", "m4a", "flac"]:
+                model = whisper.load_model("base")
+                result = model.transcribe(file_path)
+                return result["text"]
 
-def extract_txt_text(file_path: str) -> str:
-    with open(file_path, "r", encoding="utf-8") as txt_file:
-        return txt_file.read()
+            elif file_extension == "txt":
+                with open(file_path, "r", encoding="utf-8") as txt_file:
+                    return txt_file.read()
 
-async def transcribe_audio(file_path: str) -> str:
-    model = whisper.load_model("base")
-    result = await asyncio.to_thread(model.transcribe, file_path)
-    return result["text"]
+        except Exception as e:
+            print(f"Error processing {file_path}: {e}")
+            return ""
 
-async def process_folder(input_folder: str) -> dict:
-    extracted_texts = {}
-    tasks = []
-    filenames = []
-
-    for filename in os.listdir(input_folder):
-        file_path = os.path.join(input_folder, filename)
-        if os.path.isfile(file_path):
-            file_extension = filename.lower().split('.')[-1]
-            filenames.append(filename)
-            tasks.append(extract_text(file_path, file_extension))
-
-    results = await asyncio.gather(*tasks)  # Gather coroutine results
-    for filename, text in zip(filenames, results):
-        if text:
-            extracted_texts[filename] = text
-
-    return extracted_texts
+    def ingest_files(self, file_path_list):
+        extracted_texts = {}
+        for curr_file_path in file_path_list:
+            file_name = os.path.split(curr_file_path)[-1]
+            file_extension = file_name.lower().split('.')[-1]
+            text = self.extract_text(curr_file_path, file_extension)
+            if text:
+                extracted_texts[file_name] = text
+        return extracted_texts
 
 
-# async def main():
-#     input_folder = "uploads"  # Change this to your actual folder path
-#     if not os.path.exists(input_folder) or not os.path.isdir(input_folder):
-#         print(f"Error: The folder '{input_folder}' does not exist or is not a directory.")
-#         return
 
-#     extracted_texts = await process_folder(input_folder)
 
-#     if extracted_texts:
-#         print("\nExtracted Texts:")
-#         for filename, text in extracted_texts.items():
-#             print(f"\n=== {filename} ===\n{text[:500]}...")  # Print first 500 chars
-#     else:
-#         print("No text extracted.")
+async def start_ingetion():
+    # Initialize the fine-tuner
+    data_ingestor = DataIngestor()
 
-# if __name__ == "__main__":
-#     asyncio.run(main())
+    
+    # create a directory called input_data under uploads directory
+    # and drop all testing files there
+
+    target_folder = os.path.join(".","uploads","input_data")
+    target_files = list(os.listdir(target_folder))
+    extracted_text = data_ingestor.ingest_files(target_files)
+    with open(os.path.join(settings.LOCAL_UPLOAD_LOCATION,'extracted_data.json'), 'w') as f:
+        json.dump(extracted_text, f, indent=4)
+
+if __name__ == "__main__":
+    asyncio.run(start_ingetion())

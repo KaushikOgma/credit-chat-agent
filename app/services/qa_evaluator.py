@@ -187,3 +187,43 @@ class QAEvaluator:
             print(f"Error evaluating QA pairs: {e}")
             print(traceback.format_exc())
             return None
+        
+
+
+
+
+async def start_evaluation():
+    # Initialize the fine-tuner
+    qa_evaluator = QAEvaluator()
+
+    # Sample Q&A data for testing
+    qa_pairs = [
+        {
+        "question": "What exactly is credit?",
+        "answer": "It's the system of borrowing money with the agreement to pay it back later, often with interest."
+        },
+        {
+        "question": "Why should I care about credit?",
+        "answer": "Good credit can help you get loans with better interest rates and is essential for big purchases like a car or home."
+        },
+        {
+        "question": "What’s a credit score?",
+        "answer": "A number that lenders use to determine how risky it is to lend you money, based on your credit history."
+        },
+        {
+        "question": "How can I improve my credit score?",
+        "answer": "Make payments on time, keep your credit card balances low, and manage your debts wisely."
+        },
+        {
+        "question": "Can someone my age have a credit score?",
+        "answer": "Yes, once you turn 18 and start using credit products, like a credit card or loan, you begin to build a credit history."
+        },
+        {
+        "question": "What’s on a credit report?",
+        "answer": "Details of your credit accounts, payment history, debts, and sometimes employment history, used to calculate your score."
+        }
+    ]
+    score = await qa_evaluator.evaluate_qa_pairs(qa_pairs)
+
+if __name__ == "__main__":
+    asyncio.run(start_evaluation())
