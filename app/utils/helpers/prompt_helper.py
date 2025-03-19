@@ -68,8 +68,7 @@ def create_answer_generation_conversation_messages(question, text):
     return [context_message, input_text_message, input_question_message]
 
 
-def jsonl_system_content_massage(self):
-    
-    context_message = SystemMessage(content=settings.JSONL_SYSTEM_PROMPT)
-    
-    return [context_message]
+class PromptHelper:
+    @staticmethod
+    def jsonl_system_content_massage():
+        return [SystemMessage(content=settings.JSONL_SYSTEM_PROMPT)]

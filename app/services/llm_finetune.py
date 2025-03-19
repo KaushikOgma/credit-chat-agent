@@ -8,7 +8,7 @@ import re
 import tempfile
 from openai import AsyncOpenAI
 from app.utils.config import settings
-from app.utils.helpers.prompt_helper import jsonl_system_content_massage
+from app.utils.helpers.prompt_helper import PromptHelper
 
 class OpenAIFineTuner:
     """
@@ -21,7 +21,7 @@ class OpenAIFineTuner:
         self.client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
         self.model = settings.BASE_MODEL_FOR_FINETUNE
         self.check_interval = 30  
-        self.system_prompt = jsonl_system_content_massage()[0].content 
+        self.system_prompt = PromptHelper.jsonl_system_content_massage()[0].content
 
     @staticmethod
     def clean_question(question: str) -> str:
