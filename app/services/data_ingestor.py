@@ -1,6 +1,8 @@
 import asyncio
 import json
 import os
+import sys
+sys.path.append(os.getcwd())
 import fitz
 import pytesseract
 from PIL import Image
