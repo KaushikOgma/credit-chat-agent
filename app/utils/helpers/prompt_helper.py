@@ -66,3 +66,10 @@ def create_answer_generation_conversation_messages(question, text):
     
     # Return the list of messages to be used in the answering conversation
     return [context_message, input_text_message, input_question_message]
+
+
+def jsonl_system_content_massage(self):
+    
+    context_message = SystemMessage(content=settings.JSONL_SYSTEM_PROMPT)
+    
+    return [context_message]
