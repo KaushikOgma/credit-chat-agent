@@ -9,6 +9,9 @@ from app.services.pinecone_vectorizer import OpenAIEmbedding, VectorizerEngine
 from app.utils.config import settings
 import openai
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
+from app.utils.logger import setup_logger
+logger = setup_logger()
+
 
 class QAEvaluator:
     """
@@ -32,6 +35,7 @@ class QAEvaluator:
             namespace="questions"
         )
         self.similarity_threshold = 0.8
+        self.service_name = "qa_evaluator"
 
     async def get_precision_recall_f1(self, generated_sim_scores: List[float], true_sim_scores: List[float]) -> Union[dict, None]:
         """
@@ -45,8 +49,8 @@ class QAEvaluator:
         Returns:
             dict: Average score, standard deviation, coefficient of variation, precision, recall, and F1 score
         """
+        score = {}
         try:
-            score = {}
             # Compute average score and standard deviation
             average_score = np.mean(generated_sim_scores)
             std_dev = np.std(generated_sim_scores)
@@ -82,8 +86,9 @@ class QAEvaluator:
             print(f"accuracy: {accuracy:.2f}%")
             print("--------------------------------------------------------------")
             return score
-        except Exception as e:
-            print()
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            return score
 
 
     async def get_ai_response(self, question) -> Union[str, None]:
@@ -99,8 +104,8 @@ class QAEvaluator:
                 max_tokens=self.max_tokens
             )
             return response.choices[0].message.content.strip()
-        except Exception as e:
-            print(f"Error getting AI response: {e}")
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return None
     
 
@@ -114,8 +119,8 @@ class QAEvaluator:
             # Sync the vector DB with the latest QA pairs
             await self.vectorizer.create_vectorstore(qa_pairs)
             return True
-        except Exception as e:
-            print(f"Error syncing vector DB: {e}")
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return False
         finally:
             # Unload the vector store
@@ -146,8 +151,8 @@ class QAEvaluator:
                 return ai_response, round(generated_similarity_score, 3), round(true_similarity_score, 3)
             else:
                 return None, 0.0, 0.0
-        except Exception as e:
-            print(f"Error evaluating single QA: {e}")
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return None, 0.0, 0.0
         finally:
             # Unload the vector store
@@ -183,9 +188,8 @@ class QAEvaluator:
                 "generated_answers": generated_answers,
                 "agg_scores": agg_scores
             }
-        except Exception as e:
-            print(f"Error evaluating QA pairs: {e}")
-            print(traceback.format_exc())
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return None
         
 

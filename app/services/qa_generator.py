@@ -17,6 +17,8 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from app.utils.config import settings
 from app.utils.helpers.openai_token_counter import count_tokens_text, count_tokens_messages, get_available_tokens, are_tokens_available_for_both_conversations
 from app.utils.helpers.prompt_helper import create_question_extraction_conversation_messages, create_answer_generation_conversation_messages, create_text_cleaning_conversation_messages
+from app.utils.logger import setup_logger
+logger = setup_logger()
 # Ensure we do not run too many concurent requests
 
 class QAGenerator:
@@ -31,6 +33,7 @@ class QAGenerator:
             chunk_overlap=self.chunk_overlap,
             separators=["\n\n", "\n", " ", ""]
         )
+        self.service_name = "qa_generator"
 
 
     def extract_questions_from_output(self, output):
@@ -56,9 +59,8 @@ class QAGenerator:
                 print(f"WARNING: Popping incomplete question: '{questions[-1]}'")
                 questions.pop()
             return questions
-        except Exception as e:
-            print(f"extract_questions_from_output:: ERROR: {e}")
-            print(traceback.format_exc())
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return []
 
 
@@ -66,8 +68,8 @@ class QAGenerator:
     def chunk_text(self, text):
         try:
             return self.text_splitter.split_text(text)
-        except Exception as e:
-            print(f"chunk_text:: ERROR: {e}")
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return [text]
 
 
@@ -89,7 +91,7 @@ class QAGenerator:
 
             # Check token availability before calling the model
             if num_tokens_available <= 0:
-                print("ERROR: Insufficient tokens available for this request.")
+                logger.exception("ERROR: Insufficient tokens available for this request.", extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
                 return 'ERROR'
 
             model = ChatOpenAI(temperature=0.0, max_tokens=num_tokens_available)
@@ -97,16 +99,16 @@ class QAGenerator:
             try:
                 async with self.throttler:
                     output = await model._agenerate(messages)
-            except (RateLimitError, APIConnectionError) as e:
-                print(f"ERROR ({e}): Retrying...")
-                raise e
-            except Exception as e:
-                print(f"ERROR ({e}): Could not generate text.")
+            except (RateLimitError, APIConnectionError) as error1:
+                logger.exception(error1, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+                raise error1
+            except Exception as error2:
+                logger.exception(error2, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
                 return 'ERROR'
 
             return output.generations[0].text.strip()
-        except Exception as e:
-            print(f"run_model:: ERROR: {e}")
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return 'ERROR'
     
     
@@ -115,8 +117,8 @@ class QAGenerator:
         try:
             messages = create_text_cleaning_conversation_messages(text)
             return await self.run_model(messages)
-        except Exception as e:
-            print(f"clean_text:: ERROR: {e}")
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return text
 
     # Flatten Nested Lists Function
@@ -135,10 +137,9 @@ class QAGenerator:
             # Iterate through the nested lists and add each element to the flattened_list
             for sublist in nested_lists:
                 flattened_list.extend(sublist)
-
             return flattened_list
-        except Exception as e:
-            print(f"flatten_nested_lists:: ERROR: {e}")
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return flattened_list
 
 
@@ -160,7 +161,7 @@ class QAGenerator:
             num_tokens_text = count_tokens_text(text)
 
             if not are_tokens_available_for_both_conversations(num_tokens_text):
-                print(f"WARNING: Splitting the chunk into smaller chunks.")
+                logger.warning("WARNING: Splitting the chunk into smaller chunks.", extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
                 tasks = []
                 self.chunk_size = 1500
                 self.chunk_overlap = 100
@@ -171,7 +172,6 @@ class QAGenerator:
                 )
                 for sub_text in self.chunk_text(text):
                     tasks.append(self.extract_questions_from_text(sub_text))
-
                 tasks_outputs = await asyncio.gather(*tasks)
                 self.chunk_size = 2000
                 self.chunk_overlap = 200
@@ -181,14 +181,13 @@ class QAGenerator:
                     separators=["\n\n", "\n", " ", ""]
                 )
                 return self.flatten_nested_lists(tasks_outputs)
-
             # Run the model if tokens are sufficient
             messages = create_question_extraction_conversation_messages(text)
             output = await self.run_model(messages)
             questions = self.extract_questions_from_output(output)
             return [(text, question.strip()) for question in questions]
-        except Exception as e:
-            print(f"extract_questions_from_text:: ERROR: {e}")
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return []
 
 
@@ -197,14 +196,13 @@ class QAGenerator:
         try:
             messages = create_answer_generation_conversation_messages(question, context)
             return await self.run_model(messages)
-        except Exception as e:
-            print(f"generate_answer:: ERROR: {e}")
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return 'ERROR'
 
     # Full Pipeline
     async def generate_question_and_answer(self, text):
         try:
-            print("Generating Q&A pairs...")
             chunks = self.chunk_text(text)
             async def process_chunk(chunk):
                 try:
@@ -217,16 +215,15 @@ class QAGenerator:
                         )
                         # print(f"Generated {len(answers)} answers for the chunk.")
                     return [(question[1], answer) for question, answer in zip(questions, answers)]
-                except Exception as e:
-                    print(f"ERROR: {e}")
-                    print(traceback.format_exc())
+                except Exception as error1:
+                    logger.exception(error1, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
                     return []
             qa_pairs = await asyncio.gather(*[process_chunk(chunk) for chunk in chunks])
             qa_pairs = self.flatten_nested_lists(qa_pairs)
             qa_pairs = [{"question": question, "answer": answer} for question, answer in qa_pairs]
             return qa_pairs
-        except Exception as e:
-            print(f"generate_question_and_answer:: ERROR: {e}")
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return []
 
 # Example Usage

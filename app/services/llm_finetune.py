@@ -10,6 +10,8 @@ from openai import AsyncOpenAI
 from app.utils.config import settings
 from app.utils.helpers.prompt_helper import finetune_system_content_massage
 import asyncio
+from app.utils.logger import setup_logger
+logger = setup_logger()
 
 class OpenAIFineTuner:
     """
@@ -23,14 +25,19 @@ class OpenAIFineTuner:
         self.model = settings.BASE_MODEL_FOR_FINETUNE
         self.check_interval = 30  
         self.system_prompt = finetune_system_content_massage()
+        self.service_name = "openai_finetuner"
 
     def clean_question(self, question: str) -> str:
         """
         Cleans and formats a question by removing unwanted characters.
         """
-        question = re.sub(r'^[\d]+[).\-*\s]*', '', question)  # Remove leading numbers
-        question = re.sub(r'^[#*\s]+|[#*\s]+$', '', question)  # Trim special chars
-        return question.strip()
+        try:
+            question = re.sub(r'^[\d]+[).\-*\s]*', '', question)  # Remove leading numbers
+            question = re.sub(r'^[#*\s]+|[#*\s]+$', '', question)  # Trim special chars
+            return question.strip()
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            return question
 
     async def convert_to_jsonl(self, qa_data: list) -> list:
         """
@@ -48,13 +55,10 @@ class OpenAIFineTuner:
                     ]
                 }
                 jsonl_data.append(json.dumps(formatted_entry, ensure_ascii=False))
-
-            print("Q&A successfully converted to JSONL format in memory!")
-            print(jsonl_data)
+            logger.info(f"Q&A successfully converted to JSONL format in memory!", extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return jsonl_data
-
-        except Exception as e:
-            print(f"Error processing JSONL conversion: {e}")
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return []
 
     async def upload_jsonl_data(self, jsonl_data: list) -> str:
@@ -70,10 +74,10 @@ class OpenAIFineTuner:
                 file=open(temp_file_path, "rb"),
                 purpose="fine-tune"
             )
-            print(f"File uploaded successfully! File ID: {response.id}")
+            logger.info(f"File uploaded successfully! File ID: {response.id}", extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return response.id
-        except Exception as e:
-            print(f"Error uploading file: {e}")
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return ""
 
     async def fine_tune_model(self, file_id: str) -> str:
@@ -86,28 +90,24 @@ class OpenAIFineTuner:
                 model=self.model
             )
             fine_tune_id = response.id
-            print(f"Fine-tuning started! Job ID: {fine_tune_id}")
-
+            logger.info(f"Fine-tuning started! Job ID: {fine_tune_id}", extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             while True:
                 job_status = await self.client.fine_tuning.jobs.retrieve(fine_tune_id)
                 status = job_status.status
 
                 if status in ["succeeded", "failed"]:
                     break
-
-                print(f"Fine-tuning in progress... (Status: {status})")
+                logger.info(f"Finge-tuning in progress... (Status: {status})", extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
                 await asyncio.sleep(self.check_interval)
-
             if status == "succeeded":
                 model_id = job_status.fine_tuned_model
-                print(f"Fine-tuning completed! Model ID: {model_id}")
+                logger.info(f"Fine-tuning completed! Model ID: {model_id}", extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
                 return model_id
             else:
-                print("Fine-tuning failed. Check OpenAI logs.")
+                logger.info(f"Fine-tuning Failed! Job ID: {fine_tune_id}", extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
                 return ""
-
-        except Exception as e:
-            print(f"Error during fine-tuning: {e}")
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return ""
 
 

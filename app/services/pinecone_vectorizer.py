@@ -26,6 +26,8 @@ from scipy.spatial.distance import cdist
 from joblib import Parallel, delayed
 from langchain.docstore.document import Document
 from app.utils.helpers.common_helper import preprocess_text
+from app.utils.logger import setup_logger
+logger = setup_logger()
 
 
 class OpenAIEmbedding:
@@ -33,6 +35,7 @@ class OpenAIEmbedding:
         """Initialize OpenAI embedding model."""
         openai.api_key = settings.OPENAI_API_KEY
         self.model = OpenAIEmbeddings(model=model_name)
+        self.service_name = "pinecone_embedder"
 
     def embed_documents(self, documents: List[str]) -> List[List[float]]:
         """Generate embeddings for a list of documents.
@@ -43,7 +46,11 @@ class OpenAIEmbedding:
         Returns:
             List[List[float]]: List of embeddings
         """
-        return self.model.embed_documents(documents)
+        try:
+            return self.model.embed_documents(documents)
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            raise error
 
     def embed_query(self, query: str) -> List[float]:
         """Generate embedding for a single query.
@@ -54,7 +61,11 @@ class OpenAIEmbedding:
         Returns:
             List[float]: Embedding vector
         """
-        return self.model.embed_query(query)
+        try:
+            return self.model.embed_query(query)
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            raise error
 
 
 class VectorizerEngine:
@@ -87,6 +98,7 @@ class VectorizerEngine:
         self.namespace = namespace
         self.semaphore = asyncio.Semaphore(settings.MAX_THREADS)
         self.encoder = encoder
+        self.service_name = "pinecone_vectorizer"
 
     @staticmethod
     def process_chunk(
@@ -116,7 +128,7 @@ class VectorizerEngine:
             return chunk_documents, chunk_qa_pair_id_list
 
         except Exception as error:
-            print(f"Method: process_chunk :: Error: {error}")
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return [], []
 
     async def generate_documents(
@@ -173,8 +185,7 @@ class VectorizerEngine:
                         process_executor.shutdown(wait=True)
             return documents, foodIdList
         except Exception as error:
-            print(f"Method: generate_documents :: Error: {error}")
-            print(f"Method: generate_documents :: traceback: ", traceback.format_exc())
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return [], []
 
     def split_into_batches(
@@ -207,10 +218,10 @@ class VectorizerEngine:
             return list(document_batches), list(id_batches)
 
         except ValueError as ve:
-            print(f"Method: split_into_batches :: Error: {ve}")
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return [], []
         except Exception as error:
-            print(f"Method: split_into_batches :: Unexpected Error: {error}")
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return [], []
 
     async def add_batch_in_vectordb(
@@ -250,28 +261,31 @@ class VectorizerEngine:
             )
             return True
         except Exception as error:
-            print(f"Method: add_batch_in_vectordb:: Error: {error}")
-            print("add_batch_in_vectordb traceback: ", traceback.format_exc())
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return False
 
     async def process_batch(self, document_batch, id_batch) -> bool:
         """Helper coroutine to process a single batch with retries."""
-        max_retry = 3
-        current_try = 0
-        while current_try <= max_retry:
-            if current_try > 0:
-                print(f"Batch Insert Retrying count: {current_try}")
-                await asyncio.to_thread(gc.collect)
-                await asyncio.sleep(3)  # Delay before retrying
+        try:
+            max_retry = 3
+            current_try = 0
+            while current_try <= max_retry:
+                if current_try > 0:
+                    print(f"Batch Insert Retrying count: {current_try}")
+                    await asyncio.to_thread(gc.collect)
+                    await asyncio.sleep(3)  # Delay before retrying
 
-            current_try += 1
-            # Acquire semaphore to limit the number of concurrent tasks
-            async with self.semaphore:
-                # Attempt to add the batch to vector database
-                if await self.add_batch_in_vectordb(document_batch, id_batch):
-                    return True  # Successfully inserted
+                current_try += 1
+                # Acquire semaphore to limit the number of concurrent tasks
+                async with self.semaphore:
+                    # Attempt to add the batch to vector database
+                    if await self.add_batch_in_vectordb(document_batch, id_batch):
+                        return True  # Successfully inserted
 
-        return False  # Failed after retries
+            return False  # Failed after retries
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            return False
 
     async def init_vectorstore(
         self, ids, documents, batch_size: int
@@ -304,7 +318,7 @@ class VectorizerEngine:
             results = await asyncio.gather(*tasks, return_exceptions=True)
             return all(results)
         except Exception as error:
-            print(f"Method: init_vectorstore :: Error: {error}")
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return False
 
     async def create_vectorstore(
@@ -339,7 +353,7 @@ class VectorizerEngine:
             # print("Unloaded vector store")
             return True
         except Exception as error:
-            print(f"Method: create_vectorstore :: Error: {error}")
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return False
 
     async def delete_item_chunk(
@@ -366,7 +380,7 @@ class VectorizerEngine:
                         delay *= 2  # Exponential backoff
             return False  # All retries failed
         except Exception as error:
-            print(f"Method: delete_item_chunk :: Error: {error}")
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
 
     async def delete_items(self, food_id_list: List[str]) -> bool:
@@ -401,7 +415,7 @@ class VectorizerEngine:
             results = await asyncio.gather(*tasks, return_exceptions=True)
             return all(results)  # Returns True if all chunks are successfully deleted
         except Exception as error:
-            print(f"Method: delete_items :: Error: {error}")
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
 
     def load_vectorstore(self) -> None:
@@ -415,11 +429,9 @@ class VectorizerEngine:
                 distance_strategy="COSINE",
             ).get_pinecone_index(self.vector_db_name)
             # print("loaded vector store")
-            # x = self.list_all_ids()
-            # print(len(x))
             return True
         except Exception as error:
-            print(f"Method: load_vectorstore :: Error: {error}")
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
 
     def unload_vectorstore(self) -> None:
@@ -430,7 +442,7 @@ class VectorizerEngine:
             self.vectordb = None
             return True
         except Exception as error:
-            print(f"Method: unload_vectorstore :: Error: {error}")
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
 
     async def cosine_similarity(self, X: np.ndarray, Y: np.ndarray, batch_size: int = 1000, n_jobs: int = -1) -> np.ndarray:
@@ -441,7 +453,6 @@ class VectorizerEngine:
             # Ensure both X and Y are 2D
             X = X.reshape(1, -1) if X.ndim == 1 else X
             Y = Y.reshape(1, -1) if Y.ndim == 1 else Y
-            
             def compute_batch(X_batch: np.ndarray) -> np.ndarray:
                 return 1 - cdist(X_batch, Y, metric='cosine')
             # Split the data into smaller batches
@@ -451,11 +462,10 @@ class VectorizerEngine:
             similarity_batches = Parallel(n_jobs=n_jobs, prefer='threads')(
                 delayed(compute_batch)(X_batch) for X_batch in X_batches
             )
-
             # Combine the results
             return np.vstack(similarity_batches).item() * 100
         except Exception as error:
-            print(f"Method: cosine_similarity :: Error: {error}")
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
 
     async def get_data_by_ids(self, question_ids: List[str]) -> Optional[Dict]:
@@ -465,7 +475,7 @@ class VectorizerEngine:
             )
             return target_item_vector_data
         except Exception as error:
-            print(f"Method: get_data_by_ids :: Error : {error}")
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
 
     async def get_qa_similarity_score(
@@ -510,11 +520,9 @@ class VectorizerEngine:
                 answer_similarity_score = await self.cosine_similarity(np.array(matched_answer_embedding), np.array(answer_embedding))
                 # Compute similarity scores between the matched question and the matched answer
                 true_similarity_score = await self.cosine_similarity(np.array(matched_question_embedding), np.array(matched_answer_embedding))
-                # print(f"answer_similarity_score: {answer_similarity_score}")
-                # print(f"true_similarity_score: {true_similarity_score}")
                 return round(answer_similarity_score, 3), round(true_similarity_score, 3)
         except Exception as error:
-            print(f"Method: get_qa_similarity_score :: Error : {error}")
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
 
 

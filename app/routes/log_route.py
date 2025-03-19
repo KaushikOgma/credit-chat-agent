@@ -5,10 +5,10 @@ from app.controllers import log_controller
 from fastapi.responses import JSONResponse
 from starlette import status as starlette_status
 from app.schemas.log_schema import LogSchemasResponse, LogSortFields, SaveLogSchema
-from app.utils.config import settings
 from fastapi.exceptions import HTTPException
 from app.db import get_db
 import datetime
+from app.utils.config import settings
 from app.utils.logger import setup_logger
 logger = setup_logger()
 router = APIRouter()

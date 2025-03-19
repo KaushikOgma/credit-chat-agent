@@ -9,9 +9,13 @@ from PIL import Image
 from docx import Document
 import whisper
 from app.utils.config import settings
+from app.utils.logger import setup_logger
+logger = setup_logger()
 
 class DataIngestor:
-    
+    def __init__(self):
+        self.service_name = "data_ingestor"
+
     def extract_text(self, file_path, file_extension):
         try:
             if file_extension == "pdf":
@@ -35,19 +39,23 @@ class DataIngestor:
                 with open(file_path, "r", encoding="utf-8") as txt_file:
                     return txt_file.read()
 
-        except Exception as e:
-            print(f"Error processing {file_path}: {e}")
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return ""
 
     def ingest_files(self, file_path_list):
         extracted_texts = {}
-        for curr_file_path in file_path_list:
-            file_name = os.path.split(curr_file_path)[-1]
-            file_extension = file_name.lower().split('.')[-1]
-            text = self.extract_text(curr_file_path, file_extension)
-            if text:
-                extracted_texts[file_name] = text
-        return extracted_texts
+        try:
+            for curr_file_path in file_path_list:
+                file_name = os.path.split(curr_file_path)[-1]
+                file_extension = file_name.lower().split('.')[-1]
+                text = self.extract_text(curr_file_path, file_extension)
+                if text:
+                    extracted_texts[file_name] = text
+            return extracted_texts
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            return extracted_texts
 
 
 
