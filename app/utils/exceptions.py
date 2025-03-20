@@ -30,9 +30,8 @@ from fastapi import Request, HTTPException, status
 from fastapi.exceptions import RequestValidationError, ResponseValidationError
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from app.utils.logger import LogHandler
-
-logger = LogHandler.get_logger()
+from app.utils.logger import setup_logger
+logger = setup_logger()
 
 
 class ErrorHandler:
