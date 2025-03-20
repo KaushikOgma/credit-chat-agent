@@ -1,5 +1,6 @@
 from typing import List
 from pydantic import BaseModel
+from fastapi import UploadFile
 
 class QAGenerateRequest(BaseModel):
     text: str
@@ -13,5 +14,5 @@ class QAEvaluationRequest(BaseModel):
     data: List[QAEvaluationSchema]
 
 
-class FolderPathRequest(BaseModel):
-    folder_path: str
+class FileUploadRequest(BaseModel):
+    files: List[UploadFile]

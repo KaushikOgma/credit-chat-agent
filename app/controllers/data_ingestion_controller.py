@@ -1,17 +1,17 @@
-from app.services.data_ingestor import process_folder
-from app.schemas.module_schema import FolderPathRequest
+from app.services.data_ingestor import DataIngestor
+from app.schemas.module_schema import FileUploadRequest
 from app.utils.config import settings
 from app.utils.logger import setup_logger
+
 logger = setup_logger()
 
-
-async def extract_data(req_data: FolderPathRequest):
-    serviceName = "data_ingestor"
+async def extract_data(req_data: FileUploadRequest):
+    service_name = "data_ingestor"
     try:
-        data = req_data.input_data
-        extractor = process_folder()
-        extracted_info = await extractor.extract_information(data)
+        files = req_data.files  
+        ingestor = DataIngestor()
+        extracted_info = await ingestor.ingest_files(files)
         return extracted_info
     except Exception as error:
-        logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": serviceName})
+        logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": service_name})
         return {"error": str(error)}

@@ -8,71 +8,88 @@ import pytesseract
 from PIL import Image
 from docx import Document
 import whisper
+from io import BytesIO
 from app.utils.config import settings
 from app.utils.logger import setup_logger
+
 logger = setup_logger()
 
 class DataIngestor:
     def __init__(self):
         self.service_name = "data_ingestor"
 
-    def extract_text(self, file_path, file_extension):
+    async def extract_text(self, file_name: str, file_content: bytes) -> str:
+        """Extracts text from various file formats."""
         try:
+            file_extension = file_name.split(".")[-1].lower()
+
             if file_extension == "pdf":
-                with fitz.open(file_path) as doc:
-                    return "\n".join([page.get_text() for page in doc])
+                pdf = fitz.open(stream=file_content, filetype="pdf")
+                return "\n".join([page.get_text() for page in pdf])
 
             elif file_extension in ["png", "jpg", "jpeg", "tiff", "bmp", "gif"]:
-                image = Image.open(file_path)
+                image = Image.open(BytesIO(file_content))
                 return pytesseract.image_to_string(image)
 
             elif file_extension == "docx":
-                doc = Document(file_path)
+                doc = Document(BytesIO(file_content))
                 return "\n".join([para.text for para in doc.paragraphs])
 
             elif file_extension in ["mp3", "wav", "m4a", "flac"]:
                 model = whisper.load_model("base")
-                result = model.transcribe(file_path)
+                audio_data = BytesIO(file_content)
+                result = model.transcribe(audio_data)
                 return result["text"]
 
             elif file_extension == "txt":
-                with open(file_path, "r", encoding="utf-8") as txt_file:
-                    return txt_file.read()
+                return file_content.decode("utf-8")
 
         except Exception as error:
-            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            print(f"Error processing {file_name}: {error}")
             return ""
 
-    def ingest_files(self, file_path_list):
+    async def ingest_files(self, files: list) -> dict:
+        """Processes multiple files and extracts text."""
         extracted_texts = {}
-        try:
-            for curr_file_path in file_path_list:
-                file_name = os.path.split(curr_file_path)[-1]
-                file_extension = file_name.lower().split('.')[-1]
-                text = self.extract_text(curr_file_path, file_extension)
-                if text:
-                    extracted_texts[file_name] = text
-            return extracted_texts
-        except Exception as error:
-            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
-            return extracted_texts
+        for file_name, file_content in files:
+            text = await self.extract_text(file_name, file_content)
+            if text:
+                extracted_texts[file_name] = text
+        return extracted_texts
+    
+    
+    
+    
+    
 
 
-
-
-async def start_ingetion():
-    # Initialize the fine-tuner
+async def start_ingestion():
+    """Runs the data ingestion process on files inside the uploads/input_data directory."""
     data_ingestor = DataIngestor()
 
-    
-    # create a directory called input_data under uploads directory
-    # and drop all testing files there
+    # Define target folder
+    target_folder = os.path.join(".", "uploads", "input_data")
 
-    target_folder = os.path.join(".","uploads","input_data")
-    target_files = list(os.listdir(target_folder))
-    extracted_text = data_ingestor.ingest_files(target_files)
-    with open(os.path.join(settings.LOCAL_UPLOAD_LOCATION,'extracted_data.json'), 'w') as f:
+    if not os.path.exists(target_folder):
+        print(f"Directory {target_folder} does not exist.")
+        return
+
+    # Get file list
+    target_files = os.listdir(target_folder)
+    if not target_files:
+        print("No files found in the input_data folder.")
+        return
+
+    # Process files
+    extracted_text = await data_ingestor.ingest_files(target_files)
+
+    # Save extracted data
+    output_file = os.path.join(settings.LOCAL_UPLOAD_LOCATION, 'extracted_data.json')
+    with open(output_file, 'w') as f:
         json.dump(extracted_text, f, indent=4)
 
+    print(f"Extraction completed. Results saved to {output_file}")
+
+
 if __name__ == "__main__":
-    asyncio.run(start_ingetion())
+    asyncio.run(start_ingestion())
