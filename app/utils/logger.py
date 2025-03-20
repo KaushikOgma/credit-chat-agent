@@ -38,7 +38,7 @@ class DBLogHandler(logging.Handler):
                 message = record.getMessage(),
                 type = record.levelname.upper(),
                 stackTrace = self.format(record) if record.exc_info else None,
-                moduleName = getattr(record, 'moduleName', int(settings.MODULE)),
+                moduleName = getattr(record, 'moduleName', str(settings.MODULE)),
                 serviceName = getattr(record, 'serviceName', None),
             )
             log_entry_data = log_entry.model_dump()

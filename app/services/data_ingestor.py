@@ -2,48 +2,90 @@ import asyncio
 import json
 import os
 import sys
+import torchaudio
+import numpy as np
+import tempfile
 sys.path.append(os.getcwd())
 import fitz
 import pytesseract
 from PIL import Image
 from docx import Document
+from fastapi import UploadFile
 import whisper
+from io import BytesIO
 from app.utils.config import settings
 from app.utils.logger import setup_logger
+
 logger = setup_logger()
+
 
 class DataIngestor:
     def __init__(self):
         self.service_name = "data_ingestor"
+        self.whisper_model = whisper.load_model("base") 
 
-    def extract_text(self, file_path, file_extension):
+    async def extract_text(self, file_name: str, file_content: bytes) -> str:
+        """Extracts text from various file formats."""
         try:
+            file_extension = file_name.split(".")[-1].lower()
+
             if file_extension == "pdf":
-                with fitz.open(file_path) as doc:
-                    return "\n".join([page.get_text() for page in doc])
+                pdf = fitz.open(stream=file_content, filetype="pdf")
+                return "\n".join([page.get_text() for page in pdf])
 
             elif file_extension in ["png", "jpg", "jpeg", "tiff", "bmp", "gif"]:
-                image = Image.open(file_path)
+                image = Image.open(BytesIO(file_content))
                 return pytesseract.image_to_string(image)
 
             elif file_extension == "docx":
-                doc = Document(file_path)
+                doc = Document(BytesIO(file_content))
                 return "\n".join([para.text for para in doc.paragraphs])
 
             elif file_extension in ["mp3", "wav", "m4a", "flac"]:
-                model = whisper.load_model("base")
-                result = model.transcribe(file_path)
-                return result["text"]
+                # Save file to a temporary location
+                with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as temp_audio:
+                    temp_audio.write(file_content)
+                    temp_audio_path = temp_audio.name
 
+                try:
+                    # Transcribe with Whisper
+                    result = self.whisper_model.transcribe(temp_audio_path)
+
+                    # Ensure result is a dictionary
+                    if isinstance(result, dict) and "text" in result:
+                        return result["text"]
+                    elif isinstance(result, list):
+                        return " ".join([segment["text"] for segment in result])  # Handle segmented output
+                    else:
+                        logger.error(f"Unexpected Whisper output format: {result}")
+                        return ""
+
+                finally:
+                    os.remove(temp_audio_path)
             elif file_extension == "txt":
-                with open(file_path, "r", encoding="utf-8") as txt_file:
-                    return txt_file.read()
+                return file_content.decode("utf-8")
 
         except Exception as error:
-            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            print(f"Error processing {file_name}: {error}")
             return ""
 
-    def ingest_files(self, file_path_list):
+    async def ingest_files(self, files: list[UploadFile]) -> dict:
+
+        extracted_texts = {}
+
+        for file in files:
+            try:
+                file_content = await file.read()  # Read the file content asynchronously
+                text = await self.extract_text(file.filename, file_content)
+
+                if text:
+                    extracted_texts[file.filename] = text
+            except Exception as e:
+                logger.exception(f"Failed to process {file.filename}: {e}")
+
+        return extracted_texts
+    
+    def ingest_file_from_path(self, file_path_list):
         extracted_texts = {}
         try:
             for curr_file_path in file_path_list:
@@ -59,7 +101,6 @@ class DataIngestor:
 
 
 
-
 async def start_ingetion():
     # Initialize the fine-tuner
     data_ingestor = DataIngestor()
@@ -70,7 +111,7 @@ async def start_ingetion():
 
     target_folder = os.path.join(".","uploads","input_data")
     target_files = list(os.listdir(target_folder))
-    extracted_text = data_ingestor.ingest_files(target_files)
+    extracted_text = data_ingestor.ingest_file_from_path(target_files)
     with open(os.path.join(settings.LOCAL_UPLOAD_LOCATION,'extracted_data.json'), 'w') as f:
         json.dump(extracted_text, f, indent=4)
 
