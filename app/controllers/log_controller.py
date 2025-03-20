@@ -1,7 +1,7 @@
 from typing import List
 import datetime
 from fastapi.responses import JSONResponse
-from schemas.log_schema import LogEntry
+from app.schemas.log_schema import LogEntry
 from pymongo.database import Database
 from app.utils.helpers.common_helper import generate_uuid
 from app.utils.helpers.date_helper import get_user_time, convert_timezone

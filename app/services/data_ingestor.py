@@ -2,11 +2,15 @@ import asyncio
 import json
 import os
 import sys
+import torchaudio
+import numpy as np
+import tempfile
 sys.path.append(os.getcwd())
 import fitz
 import pytesseract
 from PIL import Image
 from docx import Document
+from fastapi import UploadFile
 import whisper
 from io import BytesIO
 from app.utils.config import settings
@@ -14,10 +18,11 @@ from app.utils.logger import setup_logger
 
 logger = setup_logger()
 
+
 class DataIngestor:
     def __init__(self):
         self.service_name = "data_ingestor"
-        self.whisper_model = whisper.load_model("base")  # Load once for efficiency
+        self.whisper_model = whisper.load_model("base") 
 
     async def extract_text(self, file_name: str, file_content: bytes) -> str:
         """Extracts text from various file formats."""
@@ -37,26 +42,47 @@ class DataIngestor:
                 return "\n".join([para.text for para in doc.paragraphs])
 
             elif file_extension in ["mp3", "wav", "m4a", "flac"]:
-                audio_file = BytesIO(file_content)
-                result = self.whisper_model.transcribe(audio_file)
-                return result["text"]
+                # Save file to a temporary location
+                with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as temp_audio:
+                    temp_audio.write(file_content)
+                    temp_audio_path = temp_audio.name
 
+                try:
+                    # Transcribe with Whisper
+                    result = self.whisper_model.transcribe(temp_audio_path)
+
+                    # Ensure result is a dictionary
+                    if isinstance(result, dict) and "text" in result:
+                        return result["text"]
+                    elif isinstance(result, list):
+                        return " ".join([segment["text"] for segment in result])  # Handle segmented output
+                    else:
+                        logger.error(f"Unexpected Whisper output format: {result}")
+                        return ""
+
+                finally:
+                    os.remove(temp_audio_path)
             elif file_extension == "txt":
                 return file_content.decode("utf-8")
 
         except Exception as error:
-            logger.error(f"Error processing {file_name}: {error}")
+            print(f"Error processing {file_name}: {error}")
             return ""
 
-    async def ingest_files(self, files: list) -> dict:
-        """Processes multiple files and extracts text."""
+    async def ingest_files(self, files: list[UploadFile]) -> dict:
+
         extracted_texts = {}
+
         for file in files:
-            file_name = file.filename
-            file_content = await file.read()
-            text = await self.extract_text(file_name, file_content)
-            if text:
-                extracted_texts[file_name] = text
+            try:
+                file_content = await file.read()  # Read the file content asynchronously
+                text = await self.extract_text(file.filename, file_content)
+
+                if text:
+                    extracted_texts[file.filename] = text
+            except Exception as e:
+                logger.exception(f"Failed to process {file.filename}: {e}")
+
         return extracted_texts
     
     def ingest_file_from_path(self, file_path_list):

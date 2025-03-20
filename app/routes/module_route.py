@@ -1,15 +1,16 @@
-from fastapi import APIRouter, Request, Depends, status, Query
+from fastapi import APIRouter, Request, Depends, status, Query, File
 from typing import Union
 
 from fastapi.responses import JSONResponse
 from app.controllers import qa_controller
-from app.controllers.data_ingestor_controller import extract_data
+from app.controllers import data_ingestion_controller
 from app.schemas.module_schema import FileUploadRequest
 from app.controllers import qa_evaluation_controller
 from app.schemas.module_schema import QAGenerateRequest, QAEvaluationRequest
 from langchain.schema import Document as LCDocument
 from app.utils.logger import setup_logger
 from app.utils.config import settings
+
 router = APIRouter()
 logger = setup_logger()
 
@@ -69,7 +70,7 @@ async def evaluate_system_accuracy(
 @router.post("/extract", status_code=status.HTTP_200_OK)
 async def extract_text_from_files(
     request: Request,
-    req_data: FileUploadRequest
+    req_data: FileUploadRequest = File(...)
 ):
     """
     **Summary:**
@@ -87,7 +88,7 @@ async def extract_text_from_files(
     """
     service_name = "data_ingestor"
     try:
-        return await extract_data(req_data)
+        return await data_ingestion_controller.extract_data(req_data)
     except Exception as error:
         logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": service_name})
         return JSONResponse(content={"message": str(error)}, status_code=500)

@@ -16,10 +16,8 @@ from app.utils.exceptions import ErrorHandler
 from app.routes import router
 # from app.db.seeder import Seeder
 from app.utils.config import settings
-from app.utils.logger import LogHandler
-
-# Get the logger instance
-logger = LogHandler.get_logger()
+from app.utils.logger import setup_logger
+logger = setup_logger()
 
 
 @asynccontextmanager
