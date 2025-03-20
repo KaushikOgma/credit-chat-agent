@@ -14,7 +14,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from setuptools._distutils.util import strtobool
 from app.utils.exceptions import ErrorHandler
 from app.routes import router
-# from app.db.seeder import Seeder
 from app.utils.config import settings
 from app.utils.logger import setup_logger
 logger = setup_logger()

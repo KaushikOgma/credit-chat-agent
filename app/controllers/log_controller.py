@@ -1,12 +1,12 @@
 from typing import List
 import datetime
 from fastapi.responses import JSONResponse
-from app.schemas.log_schema import LogEntry
 from pymongo.database import Database
 from app.utils.helpers.common_helper import generate_uuid
 from app.utils.helpers.date_helper import get_user_time, convert_timezone
 from app.attribute_selector.log_attributes import LogProjections
 from app.utils.config import settings
+from app.utils.constants import DBCollections
 from app.utils.logger import setup_logger
 logger = setup_logger()
 
@@ -62,7 +62,7 @@ async def get_logs(db: Database,
             # sort the fields depending on sort params
             {"$sort": sort_params}
         ]
-        data = list(db.log.aggregate(pipeline))
+        data = list(db[DBCollections.LOG.value].aggregate(pipeline))
         return {"data": data, "message": "Data fetched successfully"}
     except Exception as error:
         logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": serviceName})
@@ -102,7 +102,7 @@ async def add_log(data, db):
         if len(log_filter) > 0:
             log_filter["moduleName"] = data["moduleName"]
 
-        existing_log = db.log.find_one(log_filter)
+        existing_log = db[DBCollections.LOG.value].find_one(log_filter)
         if len(log_filter) == 0 or not existing_log:
             data["logTrail"] = [log_entry]
             if data["type"].value == "INFO":
@@ -111,7 +111,7 @@ async def add_log(data, db):
                 data["status"] = "ERROR"
             del data["type"]
             del data["stackTrace"]
-            db.log.insert_one(data)
+            db[DBCollections.LOG.value].insert_one(data)
         else:
             existing_log["logTrail"].append(log_entry)
             if data["type"].value == "INFO":
@@ -122,7 +122,7 @@ async def add_log(data, db):
             existing_log["updatedAt"] = get_user_time()
             del data["type"]
             del data["stackTrace"]
-            db.log.update_one(
+            db[DBCollections.LOG.value].update_one(
                 {"_id": existing_log["_id"]},
                 {"$set": existing_log}
             )

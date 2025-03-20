@@ -11,6 +11,7 @@ import sys
 from app.schemas.log_schema import SaveLogSchema
 from app.db import get_db_instance
 from app.utils.config import settings
+from app.utils.constants import DBCollections
 from app.utils.helpers.date_helper import get_user_time
 from app.utils.helpers.common_helper import generate_uuid
 
@@ -61,7 +62,7 @@ class DBLogHandler(logging.Handler):
             if len(log_filter) > 0:
                 log_filter["moduleName"] = log_entry_data["moduleName"]
 
-            existing_log = db.log.find_one(log_filter)
+            existing_log = db[DBCollections.LOG.value].find_one(log_filter)
             if len(log_filter) == 0 or not existing_log:
                 log_entry_data["logTrail"] = [log_entry]
                 if log_entry_data["type"] == "INFO":
@@ -70,7 +71,7 @@ class DBLogHandler(logging.Handler):
                     log_entry_data["status"] = "ERROR"
                 del log_entry_data["type"]
                 del log_entry_data["stackTrace"]
-                db.log.insert_one(log_entry_data)
+                db[DBCollections.LOG.value].insert_one(log_entry_data)
             else:
                 existing_log["logTrail"].append(log_entry)
                 if log_entry_data["type"] == "INFO":
@@ -81,7 +82,7 @@ class DBLogHandler(logging.Handler):
                 existing_log["updatedAt"] = get_user_time()
                 del log_entry_data["type"]
                 del log_entry_data["stackTrace"]
-                db.log.update_one(
+                db[DBCollections.LOG.value].update_one(
                     {"_id": existing_log["_id"]},
                     {"$set": existing_log}
                 )
