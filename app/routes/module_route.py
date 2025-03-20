@@ -65,6 +65,7 @@ async def evaluate_system_accuracy(
         logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": serviceName})
         return JSONResponse(content={"message": str(error)}, status_code=500)
 
+
 @router.post("/extract", status_code=status.HTTP_200_OK)
 async def extract_text_from_files(
     request: Request,
