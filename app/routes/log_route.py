@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Request, Depends, status, Query
 from typing import List, Union
 from pymongo.database import Database
-from app.controllers import log_controller
+from app.controllers.log_controller import LogController
 from fastapi.responses import JSONResponse
 from starlette import status as starlette_status
 from app.schemas.log_schema import LogSchemasResponse, LogSortFields, SaveLogSchema
+from app.dependencies.log_dependencies import get_log_controller
 from fastapi.exceptions import HTTPException
 from app.db import get_db
 import datetime
@@ -17,11 +18,13 @@ router = APIRouter()
 async def get_logs(
     moduleName: str = Query(None, description="moduleName"),
     serviceName: str = Query(None, description="serviceName"),
+    userId: str = Query(None, description="userId"),
     type: str = Query(None, description="log type"),
     startDate: str =  Query(None, description=f"startDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
     endDate: str =  Query(None, description=f"endDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdA"),
     sortBy: List[LogSortFields] = Query([LogSortFields.createdAt_DESC], description=f"sortBy"),
-    db: Database = Depends(get_db)
+    log_controller: LogController = Depends(get_log_controller),
+    db_instance: Database = Depends(get_db)
 ):
     """**Summary:**
     fetch all logs.
@@ -32,7 +35,7 @@ async def get_logs(
     - `startDate` (str): The start date of the logs to be fetched in mentioned format. If not provided, all logs from the beginning of time are fetched.
     - `endDate` (str): The end date of the logs to be fetched in mentioned format. If not provided, all logs until the end of time are fetched.
     - `sortBy` (List[LogSortFields]): The fields to sort the logs by. For example, ["createdAt:ASC"] or ["createdAt:DESC"].
-    - `db` (Database): Dependency to get the database session.
+    - `db_instance` (Database): Dependency to get the database session.
 
     **Returns:**
         - `LogSchemasResponse`: List of logs.
@@ -71,7 +74,8 @@ async def get_logs(
             sort_params = {field: order for field, order in sort_params}
 
         # Call the controller to fetch the logs
-        return await log_controller.get_logs(db, moduleName, serviceName, startDate, endDate, type, sort_params)
+        async with db_instance as db:
+            return await log_controller.get_logs(db, moduleName, serviceName, userId, startDate, endDate, type, sort_params)
     except Exception as error:
         logger.exception(error)
         return JSONResponse(content={"message": str(error)}, status_code=500)
@@ -80,19 +84,14 @@ async def get_logs(
 @router.post("/add_log", status_code=starlette_status.HTTP_200_OK)
 async def add_log(
     body: SaveLogSchema,
-    db: Database = Depends(get_db)
+    log_controller: LogController = Depends(get_log_controller),
+    db_instance: Database = Depends(get_db)
 ):
-    """**Summary:**
-    This method is responsible for adding new log.
-
-    **Args:**
-    - `body` (SaveRequestSchema): request body for adding new request.
-    - `db` (Database): Dependency to get the database session.
-
-    """
     try:
         data = body.model_dump()
-        return await log_controller.add_log(data, db)
+
+        async with db_instance as db:
+            return await log_controller.add_log(data, db)
     except Exception as error:
         logger.exception(error)
         return JSONResponse(content={"message": str(error)}, status_code=500)

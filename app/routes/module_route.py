@@ -67,8 +67,8 @@ async def evaluate_system_accuracy(
         return JSONResponse(content={"message": str(error)}, status_code=500)
 
 
-@router.post("/extract", status_code=status.HTTP_200_OK)
-async def extract_text_from_files(
+@router.post("/import_data", status_code=status.HTTP_200_OK)
+async def import_data(
     request: Request,
     req_data: FileUploadRequest = File(...)
 ):
@@ -88,7 +88,7 @@ async def extract_text_from_files(
     """
     service_name = "data_ingestor"
     try:
-        return await data_ingestion_controller.extract_data(req_data)
+        return await data_ingestion_controller.import_data(req_data)
     except Exception as error:
         logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": service_name})
         return JSONResponse(content={"message": str(error)}, status_code=500)

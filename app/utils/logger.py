@@ -41,6 +41,7 @@ class DBLogHandler(logging.Handler):
                 stackTrace = self.format(record) if record.exc_info else None,
                 moduleName = getattr(record, 'moduleName', str(settings.MODULE)),
                 serviceName = getattr(record, 'serviceName', None),
+                userId = getattr(record, 'userId', None)
             )
             log_entry_data = log_entry.model_dump()
             if "id" in log_entry_data:
@@ -59,6 +60,9 @@ class DBLogHandler(logging.Handler):
             if "serviceName" in log_entry_data and log_entry_data["serviceName"] is not None:
                 log_entry_data["serviceName"] = str(log_entry_data["serviceName"])
                 log_filter["serviceName"] = log_entry_data["serviceName"]
+            if "userId" in log_entry_data and log_entry_data["userId"] is not None:
+                log_entry_data["userId"] = int(log_entry_data["userId"])
+                log_filter["userId"] = log_entry_data["userId"]
             if len(log_filter) > 0:
                 log_filter["moduleName"] = log_entry_data["moduleName"]
 

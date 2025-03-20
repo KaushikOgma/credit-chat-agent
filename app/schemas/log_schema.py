@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, UUID4
 from typing import List, Optional
 from datetime import datetime
 
@@ -29,22 +29,24 @@ class LogSortFields(str, Enum):
 
 
 class LogSchema(BaseModel):
-    id: Optional[int] = Field(None, alias="_id")
+    id: Optional[UUID4] = Field(None, alias="_id")
     message: str
     status: Optional[statusType] = statusType.ERROR.value
     logTrail: Optional[List[LogEntry]] = []
     moduleName: Optional[str] = None
     serviceName: Optional[str] = None
+    userId: Optional[str] = None
     createdAt:  Optional[datetime] = None
     updatedAt:  Optional[datetime] = None
     
 
 class SaveLogSchema(BaseModel):
-    id: Optional[int] = Field(None, alias="_id")
+    id: Optional[UUID4] = Field(None, alias="_id")
     message: str
     type: LogType = LogType.INFO
     stackTrace: Optional[str] = None
     moduleName: Optional[str]
+    userId: Optional[str] = None
     serviceName: Optional[str] = None
 
 
