@@ -72,6 +72,7 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL_NAME: str = Field(..., env="EMBEDDING_MODEL_NAME")
     BASE_MODEL: str = Field(..., env="BASE_MODEL")
     BASE_MODEL_FOR_FINETUNE: str = Field(..., env="BASE_MODEL_FOR_FINETUNE")
+    BASE_AUDIO_MODEL: str = Field(..., env="BASE_AUDIO_MODEL")
     BASE_MODEL_TOKEN_LIMIT: int = Field(..., env="BASE_MODEL_TOKEN_LIMIT")
     BASE_MODEL_TOKENS_PER_MESSAGE: int = Field(..., env="BASE_MODEL_TOKENS_PER_MESSAGE")
     PROMPT_FILE: str = Field(..., env="PROMPT_FILE")

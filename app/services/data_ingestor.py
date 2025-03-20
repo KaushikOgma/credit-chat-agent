@@ -2,7 +2,6 @@ import asyncio
 import json
 import os
 import sys
-import torchaudio
 import numpy as np
 import tempfile
 sys.path.append(os.getcwd())
@@ -11,7 +10,7 @@ import pytesseract
 from PIL import Image
 from docx import Document
 from fastapi import UploadFile
-import whisper
+from openai import OpenAI
 from io import BytesIO
 from app.utils.config import settings
 from app.utils.logger import setup_logger
@@ -22,7 +21,8 @@ logger = setup_logger()
 class DataIngestor:
     def __init__(self):
         self.service_name = "data_ingestor"
-        self.whisper_model = whisper.load_model("base") 
+        self.client = OpenAI(api_key=settings.OPENAI_API_KEY)
+        self.model = settings.BASE_AUDIO_MODEL 
 
     async def extract_text(self, file_name: str, file_content: bytes) -> str:
         """Extracts text from various file formats."""
@@ -42,26 +42,23 @@ class DataIngestor:
                 return "\n".join([para.text for para in doc.paragraphs])
 
             elif file_extension in ["mp3", "wav", "m4a", "flac"]:
-                # Save file to a temporary location
+                # Save file temporarily
                 with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as temp_audio:
                     temp_audio.write(file_content)
                     temp_audio_path = temp_audio.name
 
                 try:
-                    # Transcribe with Whisper
-                    result = self.whisper_model.transcribe(temp_audio_path)
-
-                    # Ensure result is a dictionary
-                    if isinstance(result, dict) and "text" in result:
-                        return result["text"]
-                    elif isinstance(result, list):
-                        return " ".join([segment["text"] for segment in result])  # Handle segmented output
-                    else:
-                        logger.error(f"Unexpected Whisper output format: {result}")
-                        return ""
+                    # Use OpenAI Whisper API
+                    with open(temp_audio_path, "rb") as audio_file:
+                        response = self.client.audio.transcriptions.create(
+                            model=self.model, 
+                            file=audio_file
+                        )
+                    return response.text  
 
                 finally:
                     os.remove(temp_audio_path)
+                    
             elif file_extension == "txt":
                 return file_content.decode("utf-8")
 
