@@ -10,6 +10,7 @@ class DBCollections(Enum):
     TRAIN_DATA = "train_data"
     TEST_DATA = "test_data"
     CHAT_HISTORY = "chat_history"
+    METADATA = "metadata"
 
 class RoutePrefix(Enum):
     """

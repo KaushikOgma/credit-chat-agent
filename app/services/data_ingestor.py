@@ -66,24 +66,26 @@ class DataIngestor:
                 return file_content.decode("utf-8")
 
         except Exception as error:
-            print(f"Error processing {file_name}: {error}")
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return ""
 
     async def ingest_files(self, files: list[UploadFile]) -> dict:
-
         extracted_texts = {}
+        try:
+            for file in files:
+                try:
+                    file_content = await file.read()  # Read the file content asynchronously
+                    text = await self.extract_text(file.filename, file_content)
 
-        for file in files:
-            try:
-                file_content = await file.read()  # Read the file content asynchronously
-                text = await self.extract_text(file.filename, file_content)
+                    if text:
+                        extracted_texts[file.filename] = text
+                except Exception as e:
+                    logger.exception(f"Failed to process {file.filename}: {e}")
 
-                if text:
-                    extracted_texts[file.filename] = text
-            except Exception as e:
-                logger.exception(f"Failed to process {file.filename}: {e}")
-
-        return extracted_texts
+            return extracted_texts
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            return extracted_texts
     
     def ingest_file_from_path(self, file_path_list):
         extracted_texts = {}
