@@ -5,6 +5,11 @@ This file contains constants used in the application.
 from enum import Enum
 
 
+class DBCollections(Enum):
+    LOG = "log"
+    TRAIN_DATA = "train_data"
+    TEST_DATA = "test_data"
+    CHAT_HISTORY = "chat_history"
 
 class RoutePrefix(Enum):
     """
