@@ -8,7 +8,7 @@ logger.exception(error, extra={"moduleName": "credit_genius_ai", "serviceName": 
 """
 import logging
 import sys
-from schemas.log_schema import SaveLogSchema
+from app.schemas.log_schema import SaveLogSchema
 from app.db import get_db_instance
 from app.utils.config import settings
 from app.utils.helpers.date_helper import get_user_time

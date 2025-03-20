@@ -12,9 +12,8 @@ import os
 import shutil
 from fastapi import UploadFile
 from app.utils.config import settings
-from app.utils.logger import LogHandler
-
-logger = LogHandler.get_logger()
+from app.utils.logger import setup_logger
+logger = setup_logger()
 
 
 def save_file(

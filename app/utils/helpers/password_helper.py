@@ -9,9 +9,8 @@ Usage:
 """
 
 import bcrypt
-from app.utils.logger import LogHandler
-
-logger = LogHandler.get_logger()
+from app.utils.logger import setup_logger
+logger = setup_logger()
 
 
 async def hash_password(plain_password: str) -> str:

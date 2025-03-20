@@ -12,9 +12,8 @@ from datetime import datetime, timedelta, timezone
 from jose import jwt
 from fastapi import HTTPException
 from app.utils.config import settings
-from app.utils.logger import LogHandler
-
-logger = LogHandler.get_logger()
+from app.utils.logger import setup_logger
+logger = setup_logger()
 
 
 def create_access_token(token_data: dict, expires_delta: timedelta = None):
