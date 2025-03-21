@@ -1,15 +1,7 @@
-# Speech Automation
+# Credit Chat Assistant
 
 ## Introduction
-This project is a real-time speech processing WebSocket API built using FastAPI. It allows clients to send audio files over a WebSocket connection, which are then processed to generate text transcriptions, correct the grammar, and return a synthesized audio response.
-
-The core services of the project include:
-
-Speech-to-Text: Converts audio files into text using OpenAI's Whisper API.
-Grammar Correction: Leverages Google's Generative AI to correct the grammar of the transcribed text.
-Text-to-Speech: Converts the corrected text back into speech using OpenAI's Text-to-Speech API.
-The project is designed to handle client-server communication over WebSockets, ensuring real-time interaction, and makes use of a clean, modular architecture that separates concerns into controllers, services, and routes. The application also integrates with external APIs like OpenAI and Google to provide state-of-the-art AI-driven speech and text processing functionalities.
-
+This project is a real-time speech processing WebSocket API built using FastAPI. It allows clients to send 
 
 ## Basic / Prerequisites Setup:
 - The [setupREADME.md](./setup/setupREADME.md) file contains the initial setup steps that needs to followed.
@@ -17,45 +9,88 @@ The project is designed to handle client-server communication over WebSockets, e
 ## Directory Structure
 
 ```bash
-OgmaConceptions_Speech_Automation/
-│
-├── app/
-│   ├── attribute_selectors/        
-│   ├── controllers/                
-│   ├── db/                        
-│   │   ├── seeder.py               
-│   │   ├── __init__.py             
-│   │   └── models/                 
-│   ├── dependencies/               
-│   ├── repositories/               
-│   ├── routes/                     
-│   │   ├── __init__.py           
-│   │   └── Chat_routes.py                      
-│   ├── schemas/
-│   │   ├── chat_schema.py                     
-│   ├── services/                   
-│   │   ├── grammar_correction.py  
-│   │   ├── speech_to_text.py      
-│   │   ├── text_to_speech.py      
-│   │   ├── websocket_service.py      
-│   └── utils/                      
-│       ├── config.py               
-│       ├── constants.py           
-│       ├── exceptions.py           
-│       ├── logger.py               
-│       ├── helpers/                
-│       │   ├── password_helper.py  
-│       │   ├── datetime_helper.py  
-│       │   ├── auth_helper.py     
-│       │   ├── file_helper.py      
-├── setup/                          
-│   ├── setupREADME.md              
-│   └── setup.sh                    
-│   ├── db_model_versions/          
-├── .env.example                                    
-├── main.py                         
-├── README.md                       
-└── requirements.txt                
+credit_chat_agent/
+.
+├── Dockerfile
+├── README.md
+├── app
+│   ├── attribute_selector
+│   │   ├── evaluation_attributes.py
+│   │   ├── finetune_attributes.py
+│   │   ├── log_attributes.py
+│   │   ├── metadata_attributes.py
+│   │   └── user_attributes.py
+│   ├── controllers
+│   │   ├── __init__.py
+│   │   ├── data_ingestion_controller.py
+│   │   ├── evaluation_controller.py
+│   │   ├── finetune_controller.py
+│   │   ├── log_controller.py
+│   │   ├── metadata_controller.py
+│   │   ├── qa_controller.py
+│   │   ├── qa_evaluation_controller.py
+│   │   └── user_controller.py
+│   ├── db
+│   │   ├── __init__.py
+│   │   └── seeder.py
+│   ├── dependencies
+│   │   ├── data_ingestion_dependencies.py
+│   │   ├── evaluation_dependencies.py
+│   │   ├── finetune_dependencies.py
+│   │   ├── log_dependencies.py
+│   │   ├── metadata_dependencies.py
+│   │   └── user_dependencies.py
+│   ├── repositories
+│   │   ├── evaluation_repositories.py
+│   │   ├── finetune_repositories.py
+│   │   ├── log_repositories.py
+│   │   ├── metadata_repositories.py
+│   │   └── user_repositories.py
+│   ├── routes
+│   │   ├── __init__.py
+│   │   ├── data_ingestion_route.py
+│   │   ├── evaluation_route.py
+│   │   ├── finetune_route.py
+│   │   ├── log_route.py
+│   │   ├── metadata_route.py
+│   │   ├── module_route.py
+│   │   └── user_route.py
+│   ├── schemas
+│   │   ├── __init__.py
+│   │   ├── data_ingestion_schema.py
+│   │   ├── evaluation_schema.py
+│   │   ├── finetune_schema.py
+│   │   ├── log_schema.py
+│   │   ├── metadata_schema.py
+│   │   ├── module_schema.py
+│   │   └── user_schema.py
+│   ├── services
+│   │   ├── data_ingestor.py
+│   │   ├── llm_finetune.py
+│   │   ├── pinecone_vectorizer.py
+│   │   ├── qa_evaluator.py
+│   │   └── qa_generator.py
+│   └── utils
+│       ├── __init__.py
+│       ├── config.py
+│       ├── constants.py
+│       ├── exceptions.py
+│       ├── helpers
+│       │   ├── auth_helper.py
+│       │   ├── common_helper.py
+│       │   ├── date_helper.py
+│       │   ├── file_helper.py
+│       │   ├── openai_token_counter.py
+│       │   ├── password_helper.py
+│       │   └── prompt_helper.py
+│       ├── logger.py
+│       └── prompts.yaml
+├── app.log
+├── docker-compose.yml
+├── docs
+│   └── pull_request_template.md
+├── main.py
+├── requirements.txt               
 ```
 
 
@@ -66,8 +101,6 @@ OgmaConceptions_Speech_Automation/
 
 
 ## Flow Chart:
-
-![alt text](image.png)
 
 ## Initiate Server Script:
 
