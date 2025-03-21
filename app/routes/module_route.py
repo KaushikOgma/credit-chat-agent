@@ -66,29 +66,3 @@ async def evaluate_system_accuracy(
         logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": serviceName})
         return JSONResponse(content={"message": str(error)}, status_code=500)
 
-
-@router.post("/import_data", status_code=status.HTTP_200_OK)
-async def import_data(
-    request: Request,
-    req_data: FileUploadRequest = File(...)
-):
-    """
-    **Summary:**
-    Extracts text from uploaded files.
-
-    This endpoint processes uploaded files (PDF, images, DOCX, audio, etc.) 
-    and extracts text using various OCR and NLP techniques.
-
-    **Args:**
-    - request (Request): The incoming request object.
-    - req_data (FileUploadRequest): The request schema containing uploaded files.
-
-    **Returns:**
-    Extracted text from the provided files.
-    """
-    service_name = "data_ingestor"
-    try:
-        return await data_ingestion_controller.import_data(req_data)
-    except Exception as error:
-        logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": service_name})
-        return JSONResponse(content={"message": str(error)}, status_code=500)

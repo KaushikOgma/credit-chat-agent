@@ -22,7 +22,8 @@ class DataIngestor:
     def __init__(self):
         self.service_name = "data_ingestor"
         self.client = OpenAI(api_key=settings.OPENAI_API_KEY)
-        self.model = settings.BASE_AUDIO_MODEL 
+        self.model = settings.BASE_AUDIO_MODEL
+
 
     async def extract_text(self, file_name: str, file_content: bytes) -> str:
         """Extracts text from various file formats."""
@@ -73,9 +74,10 @@ class DataIngestor:
                 try:
                     file_content = await file.read()  # Read the file content asynchronously
                     text = await self.extract_text(file.filename, file_content)
-
+                    content_type = file.content_type
+                    file_name = file.filename
                     if text:
-                        extracted_texts[file.filename] = text
+                        extracted_texts[file_name] = {"content_type":content_type, "content": text}
                 except Exception as e:
                     logger.exception(f"Failed to process {file.filename}: {e}")
 
@@ -92,7 +94,7 @@ class DataIngestor:
                 file_extension = file_name.lower().split('.')[-1]
                 text = self.extract_text(curr_file_path, file_extension)
                 if text:
-                    extracted_texts[file_name] = text
+                    extracted_texts[file_name] = {"content_type":file_extension, "content": text}
             return extracted_texts
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})

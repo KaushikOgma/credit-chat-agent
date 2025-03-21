@@ -1,7 +1,7 @@
 from app.utils.config import settings
 
 
-class UserProjections:
+class MetadataProjections:
     """ Projection configurations for user collection queries that support dynamic time zones. """
 
     @staticmethod
@@ -11,13 +11,10 @@ class UserProjections:
 
         return {
             "_id": 1,
-            "name": 1,
-            "email": 1,
-            "contactAddress": 1,
-            "contactNo": 1,
-            "isActive": 1,
-            "isAdmin": 1,
-            "userId": 1,
+            "fileName": 1,
+            "fileType": 1,
+            "isTrainData": 1,
+            "isProcessed": 1,
             "createdAt": {
                 "$dateToString": {
                     "format": settings.ACCEPTED_DATE_TIME_STRING,
@@ -42,16 +39,11 @@ class UserProjections:
 
         return {
             "_id": 1,
-            "name": 1,
-            "email": 1,
-            "password": 1,
-            "contactAddress": 1,
-            "contactNo": 1,
-            "isActive": 1,
-            "isAdmin": 1,
-            "config": 1,
-            "userId": 1,
-            "apiKey": 1,
+            "fileName": 1,
+            "fileType": 1,
+            "content": 1,
+            "isTrainData": 1,
+            "isProcessed": 1,
             "createdAt": {
                 "$dateToString": {
                     "format": settings.ACCEPTED_DATE_TIME_STRING,

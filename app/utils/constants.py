@@ -24,6 +24,8 @@ class RoutePrefix(Enum):
     MODULE = "/module"
     LOG = "/log"
     USER = "/user"
+    METADATA = "/metadata"
+    DATA_INGESTION = "/data_ingestion"
 
 
 class RouteTag(Enum):
@@ -37,4 +39,6 @@ class RouteTag(Enum):
 
     MODULE = "Modules"
     LOG = "Log"
-    USER = "user"
+    USER = "User"
+    METADATA = "Metadata"
+    DATA_INGESTION = "/Data Ingestion"

@@ -1,6 +1,6 @@
 from fastapi.responses import JSONResponse
 from app.utils.helpers.date_helper import get_user_time, convert_timezone
-from app.repositories.user_repositories import UserRepository
+from app.repositories.metadata_repositories import MetadataRepository
 from datetime import datetime
 from app.utils.config import settings
 from fastapi.exceptions import HTTPException
@@ -8,46 +8,31 @@ from app.utils.logger import setup_logger
 logger = setup_logger()
 
 
-class UserController:
+class MetadataController:
 
-    def __init__(self, user_repo: UserRepository):
-        self.user_repo = user_repo
-        self.service_name = "user_manage_service"
+    def __init__(self, metadata_repo: MetadataRepository):
+        self.metadata_repo = metadata_repo
+        self.service_name = "metadata_manage_service"
 
-    async def get_users(
+    async def get_metadatas(
         self,
         db,
-        userId: str,
         startDate: datetime,
         endDate: datetime,
-        name: str,
-        email: str,
+        fileName: str,
+        isTrainData: bool,
+        isProcessed: bool,
         sort_params: list,
     ) -> dict:
-        """
-        **Summary:** This method is responsible for fetching all users based on the provided criteria.
-        **Args:**
-        - `db` (Database): db session referance.
-        - `userId` (str): comma separated list of user Ids to filter by.
-        - `startDate` (datetime): start date of the time range for which data is to be retrieved.
-        - `endDate` (datetime): end date of the time range for which data is to be retrieved.
-        - `name` (str): filter the users by name.
-        - `email` (str): filter the users by email.
-        - `sort_params` (list): sorting parameters for the data.
-        **Returns:**
-        - A dictionary containing the list of users and a success message.
-        """
         try:
             filterData = {}
             input_timezone = None
-            if userId is not None:
-                filterData["_id"] = {
-                        '$in': [int(id) for id in userId.split(",")]
-                    }
-            if name is not None:
-                filterData["name"] = name
-            if email is not None:
-                filterData["email"] = email
+            if fileName is not None:
+                filterData["fileName"] = fileName
+            if isTrainData is not None:
+                filterData["isTrainData"] = isTrainData
+            if isProcessed is not None:
+                filterData["isProcessed"] = isProcessed
             if startDate is not None:
                 input_timezone = startDate.tzname().replace("UTC","")
                 filterData["createdAt"] = {
@@ -58,7 +43,7 @@ class UserController:
                     filterData["createdAt"]["$lte"] = convert_timezone(endDate, to_string=False, timeZone="UTC")
                 else:
                     filterData["createdAt"]["$lte"] = convert_timezone(endDate, to_string=False, timeZone="UTC")
-            data = await self.user_repo.get_users(db, filterData, sort_params, input_timezone)
+            data = await self.metadata_repo.get_metadatas(db, filterData, sort_params, input_timezone)
             return JSONResponse(
                         status_code=200, content={"data": data, "message": "Data fetched successfully"}
                     )
@@ -67,16 +52,15 @@ class UserController:
             raise error
     
 
-    async def get_user_detail(self, db, userId):
+    async def get_metadata_detail(self, db, id):
         """**Summary:**
         This method is responsible for fetching all users.
 
         **Args:**
         - `db` (Database): db session referance.
-        - `userId` (int): Id of the user for which need to retrive the details.
         """
         try:
-            data = await self.user_repo.get_user_details_by_id(db, userId)
+            data = await self.metadata_repo.get_metadata_details_by_id(db, id)
             return JSONResponse(
                 status_code=200, content={"data": data, "message": "Data fetched successfully"}
             )
@@ -85,16 +69,16 @@ class UserController:
             raise error
 
 
-    async def add_user(self, user_data, db):
+    async def add_metadata(self, data, db):
         """**Summary:**
         This method is responsible for adding a user with an API key.
 
         **Args:**
-        - `user_data` (Dict): user data to be inserted.
+        - `data` (Dict): metadata to be inserted.
         - `db` (Database): db session referance.
         """
         try:
-            inserted_id = await self.user_repo.add_user(db, user_data)
+            inserted_id = await self.metadata_repo.add_metadata(db, data)
             return JSONResponse(
                         status_code=200, content={"id":inserted_id, "message": "Data inserted successfully"}
                     )
@@ -103,13 +87,13 @@ class UserController:
             raise error
 
 
-    async def update_user(self, id, user_data, db):
+    async def update_metadata(self, id, data, db):
         """**summary**
         A method to update an existing user based on the provided user id and user data.
 
         **Args:**
         - `id` (int): The user id to update.
-        - `user_data` (Dict): The user data to update.
+        - `data` (Dict): The metadata to update.
         - `db` (Database): The database session reference.
 
         **Returns:**
@@ -120,7 +104,7 @@ class UserController:
             # print("id:: ",id)
             # print("user_data:: ",user_data)
             # Check if order exists or not
-            update_flag = await self.user_repo.update_user(db, id, user_data)
+            update_flag = await self.metadata_repo.update_Metadata(db, id, data)
 
             if update_flag:
                 return JSONResponse(
@@ -128,7 +112,7 @@ class UserController:
                 )
             else:
                 return JSONResponse(
-                    status_code=400, content={"message": "Invalid user id"}
+                    status_code=400, content={"message": "Invalid metadata id"}
                 )
         except Exception as error:
             logger.exception(error)

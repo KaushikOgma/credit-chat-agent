@@ -5,37 +5,31 @@ from app.utils.constants import DBCollections
 from app.utils.helpers.common_helper import generate_uuid
 from app.utils.helpers.password_helper import hash_password
 from app.utils.helpers.date_helper import get_user_time, convert_timezone
-from app.schemas.user_schema import UserSchemasResponse, UserSortFields, SaveUserSchema
+from app.schemas.metadata_schema import MetadataSchema
 from app.utils.helpers.auth_helper import generate_api_key
-from app.attribute_selector.user_attributes import UserProjections
+from app.attribute_selector.metadata_attributes import MetadataProjections
 from pymongo.database import Database
 from app.utils.logger import setup_logger
 logger = setup_logger()
 
 
-class UserRepository:
+class MetadataRepository:
 
     def __init__(self):
         # Get the logger instance
         self.logger = logger
-        self.serviceName = "user_manage_service"
+        self.serviceName = "metadata_manage_service"
 
 
-    async def add_user(self, db: Database, data: dict):
+    async def add_metadata(self, db: Database, data: dict):
         try:
             if "id" in data:
                 del data["id"]
-            data["password"] = await hash_password(data["password"])
-            newUserId = generate_uuid()
-            data["_id"] = newUserId
+            newMetadataId = generate_uuid()
+            data["_id"] = newMetadataId
             data["createdAt"] = get_user_time()
             data["updatedAt"] = get_user_time()
-
-            # Generate and add API key
-            api_key = generate_api_key()
-            data["apiKey"] = api_key
-
-            result = db[DBCollections.USER.value].insert_one(data)
+            result = db[DBCollections.METADATA.value].insert_one(data)
             # Get the inserted id to return to call copy config api from the ui after user creation
             inserted_id = result.inserted_id
             return inserted_id
@@ -43,18 +37,18 @@ class UserRepository:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
             raise error
 
-    async def update_user(self, db: Database, id: str, data: dict):
+    async def update_Metadata(self, db: Database, id: str, data: dict):
         try:
-            is_user_exists = (
-                db[DBCollections.USER.value].find_one({
+            is_metadata_exists = (
+                db[DBCollections.METADATA.value].find_one({
                     "_id": id
                 })
             )
-            if is_user_exists:
+            if is_metadata_exists:
                 if "id" in data:
                     del data["id"]
                 data["updatedAt"] = get_user_time()
-                db[DBCollections.USER.value].update_one({"_id": id}, {"$set": data})
+                db[DBCollections.METADATA.value].update_one({"_id": id}, {"$set": data})
                 return True
             else:
                 return False
@@ -64,9 +58,9 @@ class UserRepository:
 
 
 
-    async def get_user_details_by_id(self, db: Database, userId: str):
+    async def get_metadata_details_by_id(self, db: Database, userId: str):
         try:
-            data = dict(db[DBCollections.USER.value].find_one({"_id": userId}, UserProjections.get_all_attribute()))
+            data = dict(db[DBCollections.METADATA.value].find_one({"_id": userId}, MetadataProjections.get_all_attribute()))
             return data
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
@@ -74,14 +68,14 @@ class UserRepository:
         
 
 
-    async def get_users(self, db: Database, filterData: dict, sort_params: list, input_timezone = None):
+    async def get_metadatas(self, db: Database, filterData: dict, sort_params: list, input_timezone = None):
         try:
             pipeline = [
                 {"$match": filterData},
-                {"$project": UserProjections.get_silected_attribute(input_timezone)},
+                {"$project": MetadataProjections.get_silected_attribute(input_timezone)},
                 {"$sort": sort_params}
             ]
-            data = list(db[DBCollections.USER.value].aggregate(pipeline))
+            data = list(db[DBCollections.METADATA.value].aggregate(pipeline))
             return data
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
