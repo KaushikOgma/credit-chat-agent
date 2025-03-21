@@ -25,7 +25,7 @@ class OpenAIFineTuner:
         self.model = settings.BASE_MODEL_FOR_FINETUNE
         self.check_interval = 30  
         self.system_prompt = finetune_system_content_massage()
-        self.service_name = "openai_finetuner"
+        self.service_name = "finetune"
 
     def clean_question(self, question: str) -> str:
         """
@@ -105,7 +105,7 @@ class OpenAIFineTuner:
                 return model_id
             else:
                 logger.info(f"Fine-tuning Failed! Job ID: {fine_tune_id}", extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
-                return ""
+                return None
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return ""

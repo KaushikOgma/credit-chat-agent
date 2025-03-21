@@ -26,6 +26,8 @@ class RoutePrefix(Enum):
     USER = "/user"
     METADATA = "/metadata"
     DATA_INGESTION = "/data_ingestion"
+    FINETUNE = "/finetune"
+    EVALUATION = "/eval"
 
 
 class RouteTag(Enum):
@@ -41,4 +43,6 @@ class RouteTag(Enum):
     LOG = "Log"
     USER = "User"
     METADATA = "Metadata"
-    DATA_INGESTION = "/Data Ingestion"
+    DATA_INGESTION = "Data Ingestion"
+    FINETUNE = "Finetune"
+    EVALUATION = "Eval"

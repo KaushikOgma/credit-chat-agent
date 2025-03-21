@@ -1,5 +1,7 @@
 
 import traceback
+
+from bson import ObjectId
 from app.utils.config import settings
 from app.utils.constants import DBCollections
 from app.utils.helpers.common_helper import generate_uuid
@@ -23,15 +25,31 @@ class MetadataRepository:
 
     async def add_metadata(self, db: Database, data: dict):
         try:
-            if "id" in data:
-                del data["id"]
-            newMetadataId = generate_uuid()
-            data["_id"] = newMetadataId
-            data["createdAt"] = get_user_time()
-            data["updatedAt"] = get_user_time()
-            result = db[DBCollections.METADATA.value].insert_one(data)
-            # Get the inserted id to return to call copy config api from the ui after user creation
-            inserted_id = result.inserted_id
+            is_metadata_exists = (
+                db[DBCollections.METADATA.value].find_one({
+                    "fileName": data["fileName"]
+                })
+            )
+            if is_metadata_exists:
+                temp_data = data.copy()
+                if "id" in temp_data:
+                    del temp_data["id"]
+                if "createdAt" in temp_data:
+                    del temp_data["createdAt"]
+                temp_data["updatedAt"] = get_user_time()
+                db[DBCollections.METADATA.value].update_one({"_id": is_metadata_exists["_id"]}, {"$set": temp_data})
+                inserted_id = is_metadata_exists["_id"]
+            else:
+                print("in insert")
+                if "id" in data:
+                    del data["id"]
+                newMetadataId = generate_uuid()
+                data["_id"] = newMetadataId
+                data["createdAt"] = get_user_time()
+                data["updatedAt"] = get_user_time()
+                result = db[DBCollections.METADATA.value].insert_one(data)
+                # Get the inserted id to return to call copy config api from the ui after user creation
+                inserted_id = result.inserted_id
             return inserted_id
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
@@ -58,9 +76,9 @@ class MetadataRepository:
 
 
 
-    async def get_metadata_details_by_id(self, db: Database, userId: str):
+    async def get_metadata_details_by_id(self, db: Database, id: str):
         try:
-            data = dict(db[DBCollections.METADATA.value].find_one({"_id": userId}, MetadataProjections.get_all_attribute()))
+            data = dict(db[DBCollections.METADATA.value].find_one({"_id": id}, MetadataProjections.get_all_attribute()))
             return data
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})

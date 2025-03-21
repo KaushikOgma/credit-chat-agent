@@ -9,6 +9,8 @@ from app.routes import log_route
 from app.routes import user_route
 from app.routes import metadata_route
 from app.routes import data_ingestion_route
+from app.routes import finetune_route
+from app.routes import evaluation_route
 from app.utils.constants import RouteTag, RoutePrefix
 
 # Initialize all routes
@@ -29,4 +31,10 @@ router.include_router(
 )
 router.include_router(
     metadata_route.router, prefix=RoutePrefix.METADATA.value, tags=[RouteTag.METADATA.value]
+)
+router.include_router(
+    finetune_route.router, prefix=RoutePrefix.FINETUNE.value, tags=[RouteTag.FINETUNE.value]
+)
+router.include_router(
+    evaluation_route.router, prefix=RoutePrefix.EVALUATION.value, tags=[RouteTag.EVALUATION.value]
 )
