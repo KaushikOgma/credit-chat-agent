@@ -6,6 +6,7 @@ from enum import Enum
 
 
 class DBCollections(Enum):
+    USER = "user"
     LOG = "log"
     TRAIN_DATA = "train_data"
     TEST_DATA = "test_data"
@@ -22,6 +23,7 @@ class RoutePrefix(Enum):
 
     MODULE = "/module"
     LOG = "/log"
+    USER = "/user"
 
 
 class RouteTag(Enum):
@@ -35,3 +37,4 @@ class RouteTag(Enum):
 
     MODULE = "Modules"
     LOG = "Log"
+    USER = "user"

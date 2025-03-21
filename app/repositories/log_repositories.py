@@ -54,7 +54,9 @@ class LogRepository:
                     data["status"] = "ERROR"
                 del data["type"]
                 del data["stackTrace"]
-                db[DBCollections.LOG.value].insert_one(data)
+                result = db[DBCollections.LOG.value].insert_one(data)
+
+                log_id = result.inserted_id
             else:
                 existing_log["logTrail"].append(log_entry)
                 if data["type"].value == "INFO":
@@ -69,6 +71,8 @@ class LogRepository:
                     {"_id": existing_log["_id"]},
                     {"$set": existing_log}
                 )
+                log_id = existing_log["_id"]
+            return log_id
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
             raise error

@@ -45,7 +45,7 @@ OgmaConceptions_Speech_Automation/
 │       ├── helpers/                
 │       │   ├── password_helper.py  
 │       │   ├── datetime_helper.py  
-│       │   ├── token_helper.py     
+│       │   ├── auth_helper.py     
 │       │   ├── file_helper.py      
 ├── setup/                          
 │   ├── setupREADME.md              

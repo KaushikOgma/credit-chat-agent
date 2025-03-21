@@ -89,6 +89,7 @@ class Settings(BaseSettings):
     DB_PORT: str = Field(..., env="DB_PORT")
     DB_USER: str = Field(..., env="DB_USER")
     DB_PASSWORD: str = Field(..., env="DB_PASSWORD")
+    SEEDING: str = Field(..., env="SEEDING")
 
 
     @model_validator(mode="before")

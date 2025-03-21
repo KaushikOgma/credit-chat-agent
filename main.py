@@ -12,6 +12,7 @@ from fastapi.exceptions import (
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from setuptools._distutils.util import strtobool
+from app.db.seeder import Seeder
 from app.utils.exceptions import ErrorHandler
 from app.routes import router
 from app.utils.config import settings
@@ -32,6 +33,11 @@ async def lifespan(fastapi_app: FastAPI):
     """
     # Startup logic here
     setup_security_scheme(fastapi_app)
+    if bool(strtobool(settings.SEEDING)):
+        logger.info("Starting seed...")
+        seeder_obj = Seeder()
+        await seeder_obj.start_seeding()
+        logger.info("Seeding done...")
     yield  # This will allow the fastapi_app to run
 
     # Shutdown logic (if needed)

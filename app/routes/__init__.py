@@ -6,6 +6,7 @@ including all the routes in the application.
 from fastapi import APIRouter
 from app.routes import module_route
 from app.routes import log_route
+from app.routes import user_route
 from app.utils.constants import RouteTag, RoutePrefix
 
 # Initialize all routes
@@ -17,4 +18,7 @@ router.include_router(
 )
 router.include_router(
     log_route.router, prefix=RoutePrefix.LOG.value, tags=[RouteTag.LOG.value]
+)
+router.include_router(
+    user_route.router, prefix=RoutePrefix.USER.value, tags=[RouteTag.USER.value]
 )

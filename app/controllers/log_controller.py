@@ -15,6 +15,7 @@ class LogController:
 
     def __init__(self, log_repo: LogRepository):
         self.log_repo = log_repo
+        self.service_name = "logging_service"
 
     async def get_logs(self,
                         db: Database, 
@@ -65,9 +66,11 @@ class LogController:
                     filterData["createdAt"]["$lte"] = convert_timezone(endDate, to_string=False, timeZone="UTC")
             # Fetch orders from db
             data = await self.log_repo.get_log(db, filterData, sort_params, input_timezone)
-            return {"data": data, "message": "Data fetched successfully"}
+            return JSONResponse(
+                status_code=200, content={"data": data, "message": "Data fetched successfully"}
+            )
         except Exception as error:
-            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": serviceName})
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return JSONResponse(
                 status_code=500,
                 content={
@@ -83,10 +86,11 @@ class LogController:
         - `data` (dict): request body for adding new request.
         - db (Database): db session reference
         """
-        serviceName = None
         try:
-            await self.log_repo.add_log(db, data)
-            return {"message": "Data inserted successfully"}
+            log_id = await self.log_repo.add_log(db, data)
+            return JSONResponse(
+                status_code=200, content={"id": log_id,"message": "Data inserted successfully"}
+            )
         except Exception as error:
-            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": serviceName})
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
