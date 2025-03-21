@@ -10,6 +10,7 @@ Grammar Correction: Leverages Google's Generative AI to correct the grammar of t
 Text-to-Speech: Converts the corrected text back into speech using OpenAI's Text-to-Speech API.
 The project is designed to handle client-server communication over WebSockets, ensuring real-time interaction, and makes use of a clean, modular architecture that separates concerns into controllers, services, and routes. The application also integrates with external APIs like OpenAI and Google to provide state-of-the-art AI-driven speech and text processing functionalities.
 
+
 ## Basic / Prerequisites Setup:
 - The [setupREADME.md](./setup/setupREADME.md) file contains the initial setup steps that needs to followed.
 
