@@ -4,7 +4,14 @@ from pymongo.database import Database
 from app.controllers.finetune_controller import FinetuneController
 from fastapi.responses import JSONResponse
 from starlette import status as starlette_status
-from app.schemas.finetune_schema import FinetuneDataSortFields, TrainQARequestSchema, TrainQAResponseSchema, TrainQASchema
+from app.schemas.finetune_schema import (
+    FinetuneDataSortFields, 
+    TrainQARequestSchema, 
+    TrainQAResponseSchema, 
+    TrainQASchema,
+    SaveTrainQASchema,
+    UpdateTrainQASchema
+)
 from app.dependencies.finetune_dependencies import get_finetune_controller
 from fastapi.exceptions import HTTPException
 from app.db import get_db
@@ -65,7 +72,7 @@ async def get_train_data(
 
 @router.post("/add_train_data", status_code=status.HTTP_201_CREATED)
 async def add_metadata(
-    body: TrainQARequestSchema,
+    body: SaveTrainQASchema,
     finetune_controller: FinetuneController = Depends(get_finetune_controller),
     db_instance: Database = Depends(get_db)
 ):
@@ -88,7 +95,7 @@ async def add_metadata(
 @router.post("/update_train_data/{id}", status_code=status.HTTP_201_CREATED)
 async def update_train_data(
     id: str,
-    body: TrainQASchema,
+    body: UpdateTrainQASchema,
     finetune_controller: FinetuneController = Depends(get_finetune_controller),
     db_instance: Database = Depends(get_db)
 ):

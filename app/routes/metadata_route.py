@@ -4,7 +4,14 @@ from pymongo.database import Database
 from app.controllers.metadata_controller import MetadataController
 from fastapi.responses import JSONResponse
 from starlette import status as starlette_status
-from app.schemas.metadata_schema import MetadataSortFields, MetadataSchema, MetadataDetailSchemasResponse, MetadataSchemasResponse
+from app.schemas.metadata_schema import (
+    MetadataSortFields,
+    MetadataSchema, 
+    MetadataDetailSchemasResponse, 
+    MetadataSchemasResponse,
+    SaveMetadataSchema,
+    UpdateMetadataSchema
+)
 from app.dependencies.metadata_dependencies import get_metadata_controller
 from fastapi.exceptions import HTTPException
 from app.db import get_db
@@ -92,7 +99,7 @@ async def get_metadata_details(
 
 @router.post("/add_metadata", status_code=status.HTTP_201_CREATED)
 async def add_metadata(
-    body: MetadataSchema,
+    body: SaveMetadataSchema,
     metadata_controller: MetadataController = Depends(get_metadata_controller),
     db_instance: Database = Depends(get_db)
 ):
@@ -115,7 +122,7 @@ async def add_metadata(
 @router.post("/update_metadata/{id}", status_code=status.HTTP_201_CREATED)
 async def update_metadata(
     id: str,
-    body: MetadataSchema,
+    body: UpdateMetadataSchema,
     metadata_controller: MetadataController = Depends(get_metadata_controller),
     db_instance: Database = Depends(get_db)
 ):

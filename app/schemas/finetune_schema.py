@@ -12,6 +12,18 @@ class FinetuneDataSortFields(str, Enum):
 
 
 
+class SaveTrainQASchema(BaseModel):
+    question: str
+    answer: str
+    isActive: Optional[bool] = True
+
+
+class UpdateTrainQASchema(BaseModel):
+    question: str
+    answer: str
+    isActive: Optional[bool] = True
+
+
 class TrainQASchema(BaseModel):
     question: str
     answer: str

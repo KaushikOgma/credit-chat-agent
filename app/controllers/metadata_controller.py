@@ -1,4 +1,8 @@
 from fastapi.responses import JSONResponse
+from app.repositories.evaluation_repositories import EvaluationRepository
+from app.repositories.finetune_repositories import FinetuneRepository
+from app.services.data_ingestor import DataIngestor
+from app.services.qa_generator import QAGenerator
 from app.utils.helpers.date_helper import get_user_time, convert_timezone
 from app.repositories.metadata_repositories import MetadataRepository
 from datetime import datetime
@@ -10,8 +14,12 @@ logger = setup_logger()
 
 class MetadataController:
 
-    def __init__(self, metadata_repo: MetadataRepository):
+    def __init__(self, metadata_repo: MetadataRepository, finetune_repo: FinetuneRepository,eval_repo: EvaluationRepository, data_ingestor: DataIngestor, qa_generator: QAGenerator):
         self.metadata_repo = metadata_repo
+        self.finetune_repo = finetune_repo
+        self.eveval_repo = eval_repo
+        self.data_ingestor = data_ingestor
+        self.qa_generator = qa_generator
         self.service_name = "metadata_manage_service"
 
     async def get_metadatas(
@@ -78,6 +86,9 @@ class MetadataController:
         - `db` (Database): db session referance.
         """
         try:
+            # content = data["content"]
+
+            # data["isProcessed"] = True
             inserted_id = await self.metadata_repo.add_metadata(db, data)
             return JSONResponse(
                         status_code=200, content={"id":inserted_id, "message": "Data inserted successfully"}

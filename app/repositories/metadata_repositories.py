@@ -25,11 +25,14 @@ class MetadataRepository:
 
     async def add_metadata(self, db: Database, data: dict):
         try:
-            is_metadata_exists = (
-                db[DBCollections.METADATA.value].find_one({
-                    "fileName": data["fileName"]
-                })
-            )
+            if "fileName" in data and data["fileName"] is not None:
+                is_metadata_exists = (
+                    db[DBCollections.METADATA.value].find_one({
+                        "fileName": data["fileName"]
+                    })
+                )
+            else:
+                is_metadata_exists = None
             if is_metadata_exists:
                 temp_data = data.copy()
                 if "id" in temp_data:
@@ -40,7 +43,6 @@ class MetadataRepository:
                 db[DBCollections.METADATA.value].update_one({"_id": is_metadata_exists["_id"]}, {"$set": temp_data})
                 inserted_id = is_metadata_exists["_id"]
             else:
-                print("in insert")
                 if "id" in data:
                     del data["id"]
                 newMetadataId = generate_uuid()

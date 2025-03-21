@@ -12,6 +12,17 @@ class MetadataSortFields(str, Enum):
 
 
 
+class SaveMetadataSchema(BaseModel):
+    content: str
+    isTrainData: bool = True
+
+
+class UpdateMetadataSchema(BaseModel):
+    content: Optional[str] = None
+    isTrainData: Optional[bool] = True
+
+
+
 class MetadataSchema(BaseModel):
     id: Optional[UUID4] = Field(None, alias="_id")
     fileName: Optional[str] = None

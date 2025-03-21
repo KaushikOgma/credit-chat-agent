@@ -86,3 +86,12 @@ class FinetuneRepository:
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
             raise error
+        
+
+    async def delete_tarin_data(self, db: Database, filterData: dict):
+        try:
+            res = db[DBCollections.TRAIN_DATA.value].delete_many(filterData)
+            return res
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
+            raise error

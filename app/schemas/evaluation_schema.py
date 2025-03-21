@@ -12,6 +12,18 @@ class EvalDataSortFields(str, Enum):
 
 
 
+class SaveEvalQASchema(BaseModel):
+    question: str
+    answer: str
+    isActive: Optional[bool] = True
+
+
+class UpdateEvalQASchema(BaseModel):
+    question: str
+    answer: str
+    isActive: Optional[bool] = True
+
+
 class EvalQASchema(BaseModel):
     question: str
     answer: str

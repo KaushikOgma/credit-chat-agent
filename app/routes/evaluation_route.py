@@ -4,7 +4,14 @@ from pymongo.database import Database
 from app.controllers.evaluation_controller import EvaluationController
 from fastapi.responses import JSONResponse
 from starlette import status as starlette_status
-from app.schemas.evaluation_schema import EvalQARequestSchema, EvalQAResponseSchema, EvalDataSortFields, EvalQASchema
+from app.schemas.evaluation_schema import (
+    EvalQARequestSchema, 
+    EvalQAResponseSchema, 
+    EvalDataSortFields, 
+    EvalQASchema,
+    SaveEvalQASchema,
+    UpdateEvalQASchema
+)
 from app.dependencies.evaluation_dependencies import get_eval_controller
 from fastapi.exceptions import HTTPException
 from app.db import get_db
@@ -64,7 +71,7 @@ async def get_eval_data(
 
 @router.post("/add_eval_data", status_code=status.HTTP_201_CREATED)
 async def add_eval_data(
-    body: EvalQARequestSchema,
+    body: SaveEvalQASchema,
     eval_controller: EvaluationController = Depends(get_eval_controller),
     db_instance: Database = Depends(get_db)
 ):
@@ -87,7 +94,7 @@ async def add_eval_data(
 @router.post("/update_eval_data/{id}", status_code=status.HTTP_201_CREATED)
 async def update_eval_data(
     id: str,
-    body: EvalQASchema,
+    body: UpdateEvalQASchema,
     eval_controller: EvaluationController = Depends(get_eval_controller),
     db_instance: Database = Depends(get_db)
 ):
