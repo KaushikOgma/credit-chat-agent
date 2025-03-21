@@ -10,7 +10,6 @@ This project is a real-time speech processing WebSocket API built using FastAPI.
 
 ```bash
 credit_chat_agent/
-.
 ├── Dockerfile
 ├── README.md
 ├── app
@@ -27,8 +26,6 @@ credit_chat_agent/
 │   │   ├── finetune_controller.py
 │   │   ├── log_controller.py
 │   │   ├── metadata_controller.py
-│   │   ├── qa_controller.py
-│   │   ├── qa_evaluation_controller.py
 │   │   └── user_controller.py
 │   ├── db
 │   │   ├── __init__.py
@@ -40,6 +37,8 @@ credit_chat_agent/
 │   │   ├── log_dependencies.py
 │   │   ├── metadata_dependencies.py
 │   │   └── user_dependencies.py
+│   ├── middleware
+│   │   └── auth_middleware.py
 │   ├── repositories
 │   │   ├── evaluation_repositories.py
 │   │   ├── finetune_repositories.py
@@ -53,16 +52,15 @@ credit_chat_agent/
 │   │   ├── finetune_route.py
 │   │   ├── log_route.py
 │   │   ├── metadata_route.py
-│   │   ├── module_route.py
 │   │   └── user_route.py
 │   ├── schemas
 │   │   ├── __init__.py
+│   │   ├── auth_schema.py
 │   │   ├── data_ingestion_schema.py
 │   │   ├── evaluation_schema.py
 │   │   ├── finetune_schema.py
 │   │   ├── log_schema.py
 │   │   ├── metadata_schema.py
-│   │   ├── module_schema.py
 │   │   └── user_schema.py
 │   ├── services
 │   │   ├── data_ingestor.py
@@ -90,7 +88,8 @@ credit_chat_agent/
 ├── docs
 │   └── pull_request_template.md
 ├── main.py
-├── requirements.txt               
+├── requirements.txt
+└── uploads         
 ```
 
 
