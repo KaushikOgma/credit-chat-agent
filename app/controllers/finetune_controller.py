@@ -96,3 +96,39 @@ class FinetuneController:
         except Exception as error:
             logger.exception(error)
             raise error
+        
+
+    async def delete_train_data(
+        self,
+        db,
+        startDate: datetime,
+        endDate: datetime,
+        fileName: str,
+        isActive: bool,
+        isProcessed: bool,
+    ) -> dict:
+        try:
+            filterData = {}
+            if fileName is not None:
+                filterData["fileName"] = fileName
+            if isActive is not None:
+                filterData["isActive"] = isActive
+            if isProcessed is not None:
+                filterData["isProcessed"] = isProcessed
+            if startDate is not None:
+                filterData["createdAt"] = {
+                    '$gte': convert_timezone(startDate, to_string=False, timeZone="UTC"),
+                }
+                if endDate is None:
+                    endDate = startDate.replace(hour=23, minute=59, second=59)
+                    filterData["createdAt"]["$lte"] = convert_timezone(endDate, to_string=False, timeZone="UTC")
+                else:
+                    filterData["createdAt"]["$lte"] = convert_timezone(endDate, to_string=False, timeZone="UTC")
+            data = await self.finetune_repo.delete_tarin_data(db, filterData)
+            return JSONResponse(
+                        status_code=200, content={"message": "Data deleted successfully"}
+                    )
+        except Exception as error:
+            logger.exception(error)
+            raise error
+    

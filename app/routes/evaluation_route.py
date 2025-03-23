@@ -110,3 +110,43 @@ async def update_eval_data(
         logger.exception(error)
         # Return a JSON response with an error message
         return JSONResponse(content={"message": str(error)}, status_code=500)
+
+
+
+
+@router.delete("/delete_eval_data", response_model=EvalQAResponseSchema)
+async def delete_eval_data(
+    fileName: str = Query(None, description="fileName"),
+    isActive: bool = Query(None, description="isActive"),
+    startDate: str =  Query(None, description=f"startDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
+    endDate: str =  Query(None, description=f"endDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
+    eval_controller: EvaluationController = Depends(get_eval_controller),
+    db_instance: Database = Depends(get_db)
+):
+    
+    try:
+        if startDate is not None:
+            try:
+                if "+" not in startDate:
+                    startDate = startDate.replace(" ","+")
+                # Validate the date format
+                startDate = datetime.datetime.strptime(startDate, settings.ACCEPTED_DATE_TIME_STRING)
+                startDate = startDate.replace(hour=0, minute=0, second=0)
+            except ValueError as e:
+                raise HTTPException(status_code=400, detail=f"startDate must be in {settings.ACCEPTED_DATE_TIME_STRING} format")
+        if endDate is not None:
+            try:
+                if "+" not in endDate:
+                    endDate = endDate.replace(" ","+")
+                # Validate the date format
+                endDate = datetime.datetime.strptime(endDate, settings.ACCEPTED_DATE_TIME_STRING)
+                endDate = endDate.replace(hour=23, minute=59, second=59)
+            except ValueError:
+                raise HTTPException(status_code=400, detail=f"endDate must be in {settings.ACCEPTED_DATE_TIME_STRING} format")
+        async with db_instance as db:
+            return await eval_controller.delete_eval_data(db, startDate, endDate, fileName, isActive)
+    except Exception as error:
+        logger.exception(error)
+        return JSONResponse(content={"message": str(error)}, status_code=500)
+
+

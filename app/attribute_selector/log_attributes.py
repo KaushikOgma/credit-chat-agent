@@ -12,7 +12,24 @@ class LogProjections:
             "_id": 1,
             "message": 1,
             "status": 1,
-            "logTrail": 1,
+            "logTrail": {
+                "$map": {
+                    "input": "$logTrail",  # Iterate over logTrail array
+                    "as": "log",  # Alias for each element
+                    "in": {
+                        "message": "$$log.message",
+                        "type": "$$log.type",
+                        "stackTrace": "$$log.stackTrace",
+                        "timestamp": {
+                            "$dateToString": {
+                                "format": settings.ACCEPTED_DATE_TIME_STRING,
+                                "date": "$$log.timestamp",  # Correctly reference timestamp
+                                "timezone": tz
+                            }
+                        }
+                    }
+                }
+            },
             "moduleName": 1,
             "serviceName": 1,
             "createdAt": {

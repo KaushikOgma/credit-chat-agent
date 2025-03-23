@@ -100,3 +100,13 @@ class MetadataRepository:
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
             raise error
+        
+
+
+    async def delete_metadata(self, db: Database, filterData: dict):
+        try:
+            res = db[DBCollections.METADATA.value].delete_many(filterData)
+            return res
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
+            raise error
