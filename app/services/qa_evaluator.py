@@ -2,7 +2,9 @@ import asyncio
 import json
 import traceback
 from typing import List, Union
-
+import sys
+import os
+sys.path.append(os.getcwd())
 import numpy as np
 from tqdm import tqdm
 from app.services.pinecone_vectorizer import OpenAIEmbedding, VectorizerEngine

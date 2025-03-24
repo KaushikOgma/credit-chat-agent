@@ -4,6 +4,8 @@ import os
 import sys
 import numpy as np
 import tempfile
+
+from tqdm import tqdm
 sys.path.append(os.getcwd())
 import fitz
 import pytesseract
@@ -70,7 +72,7 @@ class DataIngestor:
     async def ingest_files(self, files: list[UploadFile]) -> dict:
         extracted_texts = {}
         try:
-            for file in files:
+            for file in tqdm(files, desc="File reading in progress"):
                 try:
                     file_content = await file.read()  # Read the file content asynchronously
                     text = await self.extract_text(file.filename, file_content)

@@ -103,6 +103,8 @@ class MetadataController:
                     train_data_entry = TrainQASchema(
                         question = pair["question"],
                         answer = pair["answer"],
+                        fileName = data["fileName"] if "fileName" in data else None,
+                        fileType = data["fileType"] if "fileType" in data else None,
                         metadataId = str(inserted_id),
                         isActive = True
                     )
@@ -115,6 +117,8 @@ class MetadataController:
                     eval_data_entry = EvalQASchema(
                         question = pair["question"],
                         answer = pair["answer"],
+                        fileName = data["fileName"] if "fileName" in data else None,
+                        fileType = data["fileType"] if "fileType" in data else None,
                         metadataId = str(inserted_id),
                         isProcessed = False,
                         isActive = True
@@ -156,6 +160,8 @@ class MetadataController:
                         train_data_entry = TrainQASchema(
                             question = pair["question"],
                             answer = pair["answer"],
+                            fileName = data["fileName"] if "fileName" in data else None,
+                            fileType = data["fileType"] if "fileType" in data else None,
                             metadataId = str(id),
                             isActive = True
                         )
@@ -170,6 +176,8 @@ class MetadataController:
                         eval_data_entry = EvalQASchema(
                             question = pair["question"],
                             answer = pair["answer"],
+                            fileName = data["fileName"] if "fileName" in data else None,
+                            fileType = data["fileType"] if "fileType" in data else None,
                             metadataId = str(id),
                             isProcessed = False,
                             isActive = True
@@ -226,6 +234,7 @@ class MetadataController:
                             startDate = None, 
                             endDate = None, 
                             fileName = elm["fileName"] if "fileName" in elm else None, 
+                            fileType = elm["fileType"] if "fileType" in elm else None, 
                             isActive = None
                         )
                     else:
@@ -234,11 +243,13 @@ class MetadataController:
                             startDate = None, 
                             endDate = None, 
                             fileName = elm["fileName"] if "fileName" in elm else None, 
+                            fileType = elm["fileType"] if "fileType" in elm else None, 
                             isProcessed = None,
                             isActive = None
                         )
                     filterMetadata = {
-                        "fileName": elm["fileName"] if "fileName" in elm else None
+                        "fileName": elm["fileName"] if "fileName" in elm else None,
+                        "fileType": elm["fileType"] if "fileType" in elm else None
                     }
                     await self.metadata_repo.delete_metadata(db, filterMetadata)
             else:
