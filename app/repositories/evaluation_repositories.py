@@ -119,3 +119,24 @@ class EvaluationRepository:
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
             raise error
+        
+
+    async def save_eval_result(self, db: Database, model_id: str, metrices: dict):
+        try:
+            is_model_data_exists = (
+                db[DBCollections.MODEL_DATA.value].find_one({
+                    "_id": model_id
+                })
+            )
+            if is_model_data_exists:
+                temp_data = {}
+                temp_data["metrices"] = metrices
+                temp_data["updatedAt"] = get_user_time()
+                db[DBCollections.TRAIN_DATA.value].update_one({"_id": is_model_data_exists["_id"]}, {"$set": temp_data})
+                return False
+            else:
+                return True
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
+            raise error
+        

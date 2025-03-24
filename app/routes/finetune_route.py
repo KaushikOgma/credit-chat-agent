@@ -81,8 +81,14 @@ async def add_metadata(
     
     try:
         # Convert the request body to a dictionary
-        data = [elm.model_dump() for elm in body]
-
+        data = [
+            {
+                **elm.model_dump(), 
+                "fileName": elm.fileName if hasattr(elm, "fileName") else None, 
+                "fileType": elm.fileType if hasattr(elm, "fileType") else None, 
+            } 
+            for elm in body
+        ]
         # Call the add_user method of the user controller
         async with db_instance as db:
             data = await finetune_controller.add_train_data(data, db)
@@ -107,7 +113,10 @@ async def update_train_data(
     try:
         # Convert the request body to a dictionary
         data = body.model_dump(exclude_unset=True)
-
+        if "fileName" not in data:
+            data["fileName"] = None
+        if "fileType" not in data:
+            data["fileType"] = None
         # Call the add_user method of the user controller
         async with db_instance as db:
             update_flag = await finetune_controller.update_train_data(id, data, db)
@@ -129,6 +138,46 @@ async def update_train_data(
 
 @router.delete("/delete_train_data", response_model=TrainQAResponseSchema)
 async def delete_train_data(
+    fileName: str = Query(None, description="fileName"),
+    isActive: bool = Query(None, description="isActive"),
+    startDate: str =  Query(None, description=f"startDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
+    endDate: str =  Query(None, description=f"endDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
+    finetune_controller: FinetuneController = Depends(get_finetune_controller),
+    db_instance: Database = Depends(get_db)
+):
+    
+    try:
+        if startDate is not None:
+            try:
+                if "+" not in startDate:
+                    startDate = startDate.replace(" ","+")
+                # Validate the date format
+                startDate = datetime.datetime.strptime(startDate, settings.ACCEPTED_DATE_TIME_STRING)
+                startDate = startDate.replace(hour=0, minute=0, second=0)
+            except ValueError as e:
+                raise HTTPException(status_code=400, detail=f"startDate must be in {settings.ACCEPTED_DATE_TIME_STRING} format")
+        if endDate is not None:
+            try:
+                if "+" not in endDate:
+                    endDate = endDate.replace(" ","+")
+                # Validate the date format
+                endDate = datetime.datetime.strptime(endDate, settings.ACCEPTED_DATE_TIME_STRING)
+                endDate = endDate.replace(hour=23, minute=59, second=59)
+            except ValueError:
+                raise HTTPException(status_code=400, detail=f"endDate must be in {settings.ACCEPTED_DATE_TIME_STRING} format")
+        async with db_instance as db:
+            await finetune_controller.delete_train_data(db, startDate, endDate, fileName, isActive)
+            return JSONResponse(
+                status_code=200, content={"message": "Data deleted successfully"}
+            )
+    except Exception as error:
+        logger.exception(error)
+        return JSONResponse(content={"message": str(error)}, status_code=500)
+
+
+
+@router.get("/initiate_training", status_code=status.HTTP_200_OK)
+async def initiate_training(
     fileName: str = Query(None, description="fileName"),
     isActive: bool = Query(None, description="isActive"),
     startDate: str =  Query(None, description=f"startDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),

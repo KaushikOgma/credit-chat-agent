@@ -8,6 +8,7 @@ from app.utils.helpers.password_helper import hash_password
 from app.utils.helpers.date_helper import get_user_time, convert_timezone
 from app.schemas.metadata_schema import MetadataSchema
 from app.utils.helpers.auth_helper import generate_api_key
+from app.schemas.finetune_schema import ModelDataSchema
 from app.attribute_selector.finetune_attributes import FinetuneProjections
 from pymongo.database import Database
 from app.utils.logger import setup_logger
@@ -120,3 +121,39 @@ class FinetuneRepository:
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
             raise error
+        
+
+
+    async def get_models(self, db: Database):
+        try:
+            data = list(db[DBCollections.MODEL_DATA.value].find({}, FinetuneProjections.get_model_attribute()))
+            return data
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
+            raise error
+        
+
+
+    async def save_model(self, db: Database, model_id: str):
+        try:
+            is_model_data_exists = (
+                db[DBCollections.MODEL_DATA.value].find_one({
+                    "model_id": model_id
+                })
+            )
+            if is_model_data_exists:
+                temp_data = {}
+                temp_data["updatedAt"] = get_user_time()
+                db[DBCollections.TRAIN_DATA.value].update_one({"_id": is_model_data_exists["_id"]}, {"$set": temp_data})
+                inserted_id = is_model_data_exists["_id"]
+            else:
+                newModelId = generate_uuid()
+                temp_data["_id"] = newModelId
+                temp_data["createdAt"] = get_user_time()
+                temp_data["updatedAt"] = get_user_time()
+                inserted_id = db[DBCollections.TRAIN_DATA.value].insert_one(temp_data)
+            return inserted_id
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
+            raise error
+        

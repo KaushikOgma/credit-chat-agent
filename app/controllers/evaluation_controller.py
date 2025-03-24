@@ -1,9 +1,13 @@
+import asyncio
+from fastapi import Depends
 from fastapi.responses import JSONResponse
+from app.db import get_db
 from app.utils.helpers.date_helper import get_user_time, convert_timezone
 from app.repositories.finetune_repositories import FinetuneRepository
 from app.repositories.evaluation_repositories import EvaluationRepository
 from app.services.qa_evaluator import QAEvaluator
 from datetime import datetime
+from pymongo.database import Database
 from app.utils.config import settings
 from fastapi.exceptions import HTTPException
 from app.utils.logger import setup_logger
@@ -119,12 +123,66 @@ class EvaluationController:
                     filterData["createdAt"]["$lte"] = convert_timezone(endDate, to_string=False, timeZone="UTC")
                 else:
                     filterData["createdAt"]["$lte"] = convert_timezone(endDate, to_string=False, timeZone="UTC")
-            data = await self.eval_repo.get_eval_data(db, filterData)
+            data = await self.eval_repo.get_eval_data(db, filterData, {"createdAt": -1})
             ids_list = [elm["_id"] for elm in data]
+            print("delete_eval_data_from_vector_db:: ",ids_list)
             has_deleted = await self.question_evaluator.delete_eval_data_from_vector_db(id_list=ids_list)
             if has_deleted:
                 data = await self.eval_repo.delete_eval_data(db, filterData)
             return True
+        except Exception as error:
+            logger.exception(error)
+            raise error
+        
+
+    async def initiate_evaluating(
+        self,
+        db,
+        startDate: datetime,
+        endDate: datetime,
+        fileName: str,
+        isActive: bool,
+        model_id: str,
+    ) -> dict:
+        try:
+            filterData = {}
+            if fileName is not None:
+                filterData["fileName"] = fileName
+            if isActive is not None:
+                filterData["isActive"] = isActive
+            if startDate is not None:
+                filterData["createdAt"] = {
+                    '$gte': convert_timezone(startDate, to_string=False, timeZone="UTC"),
+                }
+                if endDate is None:
+                    endDate = startDate.replace(hour=23, minute=59, second=59)
+                    filterData["createdAt"]["$lte"] = convert_timezone(endDate, to_string=False, timeZone="UTC")
+                else:
+                    filterData["createdAt"]["$lte"] = convert_timezone(endDate, to_string=False, timeZone="UTC")
+            asyncio.create_task(
+                self.start_evaluating(filterData, model_id)
+            )
+            return True
+        except Exception as error:
+            logger.exception(error)
+            raise error
+        
+
+        
+    async def start_evaluating(
+            self, 
+            filter_data, 
+            model_id,
+            db_instance: Database = Depends(get_db)
+        ):
+        try:       
+            async with db_instance as db:
+                qa_data = await self.eval_repo.get_eval_data(db, filter_data, {"createdAt": -1})
+                ids_list = [elm["_id"] for elm in qa_data]
+                qa_data = await self.eval_repo.get_eval_qa_pairs(db, ids_list)
+                result = await self.question_evaluator.evaluate_qa_pairs(qa_data)
+                if result:
+                    await self.eval_repo.save_eval_result(db, model_id, result["agg_scores"])
         except Exception as error:
             logger.exception(error)
             raise error

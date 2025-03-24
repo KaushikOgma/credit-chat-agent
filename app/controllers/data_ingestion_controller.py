@@ -40,7 +40,6 @@ class DataIngestionController:
             files = req_data.files  
             extracted_info = await self.data_ingestor.ingest_files(files)
             for file_name, file_details in tqdm(extracted_info.items(), desc="Processing Files"):
-
                 metadata_entry =  MetadataSchema(
                     fileName = file_name,
                     fileType = file_details["content_type"],
@@ -48,27 +47,10 @@ class DataIngestionController:
                     isTrainData = True,
                     isProcessed = False,
                 )
-                self.matadata_controller.add_metadata(
+                inserted_id = await self.matadata_controller.add_metadata(
                     data = metadata_entry.model_dump(),
                     db = db
                 )
-                qa_pairs = await self.qa_generator.generate_question_and_answer(file_details["content"])
-                for pair in tqdm(qa_pairs, desc="Processing Questions"):
-                    train_data_entry = TrainQASchema(
-                        question = pair["question"],
-                        answer = pair["answer"],
-                        fileName = file_name,
-                        isActive = True
-                    )
-                    inserted_ids = await self.finetune_repo.add_train_data(db, [train_data_entry.model_dump()])
-                meatdata_entry = MetadataSchema(
-                    fileName = file_name,
-                    fileType = file_details["content_type"],
-                    content = file_details["content"],
-                    isTrainData = True,
-                    isProcessed = True
-                )
-                inserted_id = await self.metadata_repo.add_metadata(db, meatdata_entry.model_dump())
                 processed_files[file_name] = inserted_id
             return processed_files
         except Exception as error:
@@ -82,26 +64,18 @@ class DataIngestionController:
             files = req_data.files  
             extracted_info = await self.data_ingestor.ingest_files(files)
             for file_name, file_details in tqdm(extracted_info.items(), desc="Processing Files"):
-                qa_pairs = await self.qa_generator.generate_question_and_answer(file_details["content"])
-                qa_pair_data = []
-                for pair in tqdm(qa_pairs, desc="Processing Questions"):
-                    eval_data_entry = EvalQASchema(
-                        question = pair["question"],
-                        answer = pair["answer"],
-                        fileName = file_name,
-                        isActive = True
-                    )
-                    qa_pair_data.append(eval_data_entry.model_dump())
 
-                result = await self.eveval_repo.add_eval_data(db, qa_pair_data)
-                meatdata_entry = MetadataSchema(
+                metadata_entry =  MetadataSchema(
                     fileName = file_name,
                     fileType = file_details["content_type"],
                     content = file_details["content"],
                     isTrainData = False,
-                    isProcessed = True
+                    isProcessed = False,
                 )
-                inserted_id = await self.metadata_repo.add_metadata(db, meatdata_entry.model_dump())
+                inserted_id = await self.matadata_controller.add_metadata(
+                    data = metadata_entry.model_dump(),
+                    db = db
+                )
                 processed_files[file_name] = inserted_id
             return processed_files
         except Exception as error:

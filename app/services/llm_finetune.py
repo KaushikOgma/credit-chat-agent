@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import List
 sys.path.append(os.getcwd())
 import asyncio
 import aiofiles
@@ -109,6 +110,31 @@ class OpenAIFineTuner:
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return ""
+        
+    async def start_finetune(self, qa_data: List[dict]):
+        model_id = None
+        try:
+            # Convert to JSONL format
+            jsonl_data = await self.convert_to_jsonl(qa_data)
+            
+            if not jsonl_data:
+                print("JSONL conversion failed.")
+                return model_id
+
+            # Upload JSONL data
+            file_id = await self.upload_jsonl_data(jsonl_data)
+
+            if not file_id:
+                print("File upload failed.")
+                return model_id
+
+            # Fine-tune the model
+            model_id = await self.fine_tune_model(file_id)
+
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            return model_id
+
 
 
 

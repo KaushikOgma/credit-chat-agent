@@ -35,6 +35,8 @@ class EvaluationProjections:
     @staticmethod
     def get_qa_attribute():
         return {
+            "_id": 0,
+            "question_id": "$_id",
             "question": 1,
             "answer": 1
         }

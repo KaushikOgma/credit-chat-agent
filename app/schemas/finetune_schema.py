@@ -24,6 +24,14 @@ class UpdateTrainQASchema(BaseModel):
     isActive: Optional[bool] = True
 
 
+class ModelDataSchema(BaseModel):
+    id: Optional[UUID4] = Field(None, alias="_id")
+    model_id: Optional[str] = None
+    metrices: Optional[dict] = None
+    createdAt:  Optional[datetime] = None
+    updatedAt:  Optional[datetime] = None
+
+
 class TrainQASchema(BaseModel):
     question: str
     answer: str

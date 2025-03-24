@@ -7,6 +7,7 @@ from app.repositories.finetune_repositories import FinetuneRepository
 from app.repositories.evaluation_repositories import EvaluationRepository
 from app.controllers.finetune_controller import FinetuneController
 from app.controllers.evaluation_controller import EvaluationController
+from app.services.llm_finetune import OpenAIFineTuner
 
 
 def get_metadata_controller():
@@ -22,8 +23,9 @@ def get_metadata_controller():
     data_ingestor = DataIngestor()
     qa_generator = QAGenerator()
     qa_evaluator = QAEvaluator()
-    finetune_controller = FinetuneController(finetune_repo)
-    eval_controller = EvaluationController(eval_repo)
+    opeai_finetuner = OpenAIFineTuner()
+    finetune_controller = FinetuneController(finetune_repo, opeai_finetuner)
+    eval_controller = EvaluationController(eval_repo, qa_evaluator)
     return MetadataController(metadata_repo, finetune_repo, eval_repo, finetune_controller, eval_controller, data_ingestor, qa_generator, qa_evaluator)
 
 

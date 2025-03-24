@@ -82,7 +82,14 @@ async def add_eval_data(
     
     try:
         # Convert the request body to a dictionary
-        data = [elm.model_dump() for elm in body]
+        data = [
+            {
+                **elm.model_dump(), 
+                "fileName": elm.fileName if hasattr(elm, "fileName") else None, 
+                "fileType": elm.fileType if hasattr(elm, "fileType") else None, 
+            } 
+            for elm in body
+        ]
 
         # Call the add_user method of the user controller
         async with db_instance as db:
@@ -108,6 +115,10 @@ async def update_eval_data(
     try:
         # Convert the request body to a dictionary
         data = body.model_dump(exclude_unset=True)
+        if "fileName" not in data:
+            data["fileName"] = None
+        if "fileType" not in data:
+            data["fileType"] = None
 
         # Call the add_user method of the user controller
         async with db_instance as db:

@@ -225,7 +225,7 @@ class MetadataController:
                             db,
                             startDate = None, 
                             endDate = None, 
-                            fileName = elm["fileName"], 
+                            fileName = elm["fileName"] if "fileName" in elm else None, 
                             isActive = None
                         )
                     else:
@@ -233,12 +233,12 @@ class MetadataController:
                             db,
                             startDate = None, 
                             endDate = None, 
-                            fileName = elm["fileName"], 
+                            fileName = elm["fileName"] if "fileName" in elm else None, 
                             isProcessed = None,
                             isActive = None
                         )
                     filterMetadata = {
-                        "fileName": elm["fileName"]
+                        "fileName": elm["fileName"] if "fileName" in elm else None
                     }
                     await self.metadata_repo.delete_metadata(db, filterMetadata)
             else:

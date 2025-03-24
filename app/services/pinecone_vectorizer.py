@@ -109,10 +109,6 @@ class VectorizerEngine:
             # DataFrame creation
             qa_pair_df = pd.DataFrame(qa_pairs)
 
-            # Add UUID column efficiently
-            qa_pair_df['question_id'] = pd.Series(pd.util.hash_pandas_object(qa_pair_df, index=False)).apply(lambda x: str(uuid.UUID(int=x)))
-
-
             # Create corpus and drop temporary column
             corpus = qa_pair_df["question"].tolist()
 

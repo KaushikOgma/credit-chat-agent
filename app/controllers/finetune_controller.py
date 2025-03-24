@@ -1,7 +1,12 @@
+import asyncio
+from fastapi import Depends
 from fastapi.responses import JSONResponse
+from app.db import get_db
 from app.utils.helpers.date_helper import get_user_time, convert_timezone
+from app.services.llm_finetune import OpenAIFineTuner
 from app.repositories.finetune_repositories import FinetuneRepository
 from datetime import datetime
+from pymongo.database import Database
 from app.utils.config import settings
 from fastapi.exceptions import HTTPException
 from app.utils.logger import setup_logger
@@ -10,8 +15,9 @@ logger = setup_logger()
 
 class FinetuneController:
 
-    def __init__(self, finetune_repo: FinetuneRepository):
+    def __init__(self, finetune_repo: FinetuneRepository, opeai_finetuner: OpenAIFineTuner):
         self.finetune_repo = finetune_repo
+        self.opeai_finetuner = opeai_finetuner
         self.service_name = "finetune"
 
     async def get_train_data(
@@ -112,3 +118,54 @@ class FinetuneController:
             logger.exception(error)
             raise error
     
+
+
+    async def initiate_training(
+        self,
+        db,
+        startDate: datetime,
+        endDate: datetime,
+        fileName: str,
+        isActive: bool
+    ) -> dict:
+        try:
+            filterData = {}
+            if fileName is not None:
+                filterData["fileName"] = fileName
+            if isActive is not None:
+                filterData["isActive"] = isActive
+            if startDate is not None:
+                filterData["createdAt"] = {
+                    '$gte': convert_timezone(startDate, to_string=False, timeZone="UTC"),
+                }
+                if endDate is None:
+                    endDate = startDate.replace(hour=23, minute=59, second=59)
+                    filterData["createdAt"]["$lte"] = convert_timezone(endDate, to_string=False, timeZone="UTC")
+                else:
+                    filterData["createdAt"]["$lte"] = convert_timezone(endDate, to_string=False, timeZone="UTC")
+            asyncio.create_task(
+                self.start_training(filterData)
+            )
+            return True
+        except Exception as error:
+            logger.exception(error)
+            raise error
+        
+
+        
+    async def start_training(
+            self, 
+            filter_data, 
+            db_instance: Database = Depends(get_db)
+        ):
+        try:       
+            async with db_instance as db:
+                qa_data = await self.finetune_repo.get_tarin_data(db, filter_data, {"createdAt": -1})
+                ids_list = [elm["_id"] for elm in qa_data]
+                qa_data = await self.finetune_repo.get_train_qa_pairs(db, ids_list)
+                model_id = await self.opeai_finetuner.start_finetune(qa_data)
+                if model_id:
+                    await self.finetune_repo.save_model(db, model_id)
+        except Exception as error:
+            logger.exception(error)
+            raise error

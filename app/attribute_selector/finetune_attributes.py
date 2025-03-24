@@ -37,6 +37,33 @@ class FinetuneProjections:
     @staticmethod
     def get_qa_attribute():
         return {
+            "_id": 0,
             "question": 1,
             "answer": 1
+        }
+    
+
+
+    @staticmethod
+    def get_model_attribute(timezone=None):
+        # Use the provided timezone or fall back to the default
+        tz = timezone if timezone else settings.APP_TIMEZONE
+        
+        return {
+            "model_id": 1,
+            "metrices": 1,
+            "createdAt": {
+                "$dateToString": {
+                    "format": settings.ACCEPTED_DATE_TIME_STRING,
+                    "date": "$createdAt",
+                    'timezone': tz
+                }
+            },
+            "updatedAt": {
+                "$dateToString": {
+                    "format": settings.ACCEPTED_DATE_TIME_STRING,
+                    "date": "$updatedAt",
+                    'timezone': tz
+                }
+            }
         }
