@@ -98,7 +98,7 @@ class OpenAIFineTuner:
 
                 if status in ["succeeded", "failed"]:
                     break
-                logger.info(f"Finge-tuning in progress... (Status: {status})", extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+                logger.info(f"Fine-tuning in progress... (Status: {status})", extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
                 await asyncio.sleep(self.check_interval)
             if status == "succeeded":
                 model_id = job_status.fine_tuned_model

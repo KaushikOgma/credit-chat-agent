@@ -171,11 +171,10 @@ class EvaluationController:
     async def start_evaluating(
             self, 
             filter_data, 
-            model_id,
-            db_instance: Database = Depends(get_db)
+            model_id
         ):
         try:       
-            async with db_instance as db:
+            async with get_db() as db:
                 qa_data = await self.eval_repo.get_eval_data(db, filter_data, {"createdAt": -1})
                 ids_list = [elm["_id"] for elm in qa_data]
                 qa_data = await self.eval_repo.get_eval_qa_pairs(db, ids_list)

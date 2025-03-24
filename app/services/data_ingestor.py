@@ -12,10 +12,12 @@ import pytesseract
 from PIL import Image
 from docx import Document
 from fastapi import UploadFile
+from pathlib import Path
 from openai import OpenAI
 from io import BytesIO
 from app.utils.config import settings
 from app.utils.logger import setup_logger
+from pydub import AudioSegment
 
 logger = setup_logger()
 
@@ -26,6 +28,31 @@ class DataIngestor:
         self.client = OpenAI(api_key=settings.OPENAI_API_KEY)
         self.model = settings.BASE_AUDIO_MODEL
 
+
+    async def transcribe_audio_in_chunks(self, file_path, chunk_size=24000000):
+        text = ""
+        try:
+            audio = AudioSegment.from_file(file_path)
+            chunk_length = (chunk_size / len(audio.raw_data)) * len(audio)
+            for i in range(0, len(audio), int(chunk_length)):
+                chunk = audio[i:i + int(chunk_length)]
+                temp_file = Path("temp_chunk.mp3")
+                chunk.export(temp_file, format="mp3")
+
+                try:
+                    with temp_file.open("rb") as audio_file:
+                        response = self.client.audio.transcriptions.create(
+                            model=self.model, 
+                            file=audio_file
+                        )
+                        text += response.text
+                finally:
+                    temp_file.unlink()
+            return text
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            return text
+        
 
     async def extract_text(self, file_name: str, file_content: bytes) -> str:
         """Extracts text from various file formats."""
@@ -49,25 +76,27 @@ class DataIngestor:
                 with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as temp_audio:
                     temp_audio.write(file_content)
                     temp_audio_path = temp_audio.name
-
+                file_size = Path(temp_audio_path).stat().st_size
                 try:
-                    # Use OpenAI Whisper API
-                    with open(temp_audio_path, "rb") as audio_file:
-                        response = self.client.audio.transcriptions.create(
-                            model=self.model, 
-                            file=audio_file
-                        )
-                    return response.text  
-
+                    if file_size < 24000000:
+                        # Use OpenAI Whisper API
+                        with open(temp_audio_path, "rb") as audio_file:
+                            response = self.client.audio.transcriptions.create(
+                                model=self.model, 
+                                file=audio_file
+                            )
+                        return response.text  
+                    else:
+                        return await self.transcribe_audio_in_chunks(temp_audio_path)
                 finally:
                     os.remove(temp_audio_path)
                     
             elif file_extension == "txt":
                 return file_content.decode("utf-8")
-
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return ""
+
 
     async def ingest_files(self, files: list[UploadFile]) -> dict:
         extracted_texts = {}

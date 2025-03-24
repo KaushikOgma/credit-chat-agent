@@ -162,11 +162,10 @@ class FinetuneController:
 
     async def start_training(
             self, 
-            filter_data, 
-            db_instance: Database = Depends(get_db)
+            filter_data
         ):
         try:       
-            async with db_instance as db:
+            async with get_db() as db:
                 qa_data = await self.finetune_repo.get_tarin_data(db, filter_data, {"createdAt": -1})
                 ids_list = [elm["_id"] for elm in qa_data]
                 qa_data = await self.finetune_repo.get_train_qa_pairs(db, ids_list)
