@@ -25,7 +25,10 @@ async def add_metadata(
     
     try:
         async with db_instance as db:
-            return await data_ingestion_controller.import_training_data(db, req_data)
+            processed_files = await data_ingestion_controller.import_training_data(db, req_data)
+            return JSONResponse(
+                        status_code=200, content={"data": processed_files, "message": "Data imported successfully"}
+                    )
     except Exception as error:
         # Log the error
         logger.exception(error)
@@ -44,7 +47,10 @@ async def add_metadata(
     
     try:
         async with db_instance as db:
-            return await data_ingestion_controller.import_evaluation_data(db, req_data)
+            processed_files = await data_ingestion_controller.import_evaluation_data(db, req_data)
+            return JSONResponse(
+                        status_code=200, content={"data": processed_files, "message": "Data imported successfully"}
+                    )
     except Exception as error:
         # Log the error
         logger.exception(error)

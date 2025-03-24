@@ -28,7 +28,7 @@ class TrainQASchema(BaseModel):
     question: str
     answer: str
     fileName: Optional[str] = None
-    isProcessed: Optional[bool] = False
+    metadataId: Optional[str] = None
     isActive: Optional[bool] = True
     createdAt:  Optional[datetime] = None
     updatedAt:  Optional[datetime] = None

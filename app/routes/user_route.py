@@ -72,7 +72,10 @@ async def get_users(
             # Convert the list of tuples into a dictionary
             sort_params = {field: order for field, order in sort_params}
         async with db_instance as db:
-            return await user_controller.get_users(db, userId, startDate, endDate, name, email, sort_params)
+            data = await user_controller.get_users(db, userId, startDate, endDate, name, email, sort_params)
+            return JSONResponse(
+                status_code=200, content={"data": data, "message": "Data fetched successfully"}
+            )
     except Exception as error:
         logger.exception(error)
         return JSONResponse(content={"message": str(error)}, status_code=500)
@@ -97,7 +100,10 @@ async def get_user_details(
     try:
         # Fetch the current user's details from the database
         async with db_instance as db:
-            return await user_controller.get_user_detail(db, user_id)
+            data = await user_controller.get_user_detail(db, user_id)
+            return JSONResponse(
+                status_code=200, content={"data": data, "message": "Data fetched successfully"}
+            )
     except Exception as error:
         # Log the error and return a JSON response with the error message
         logger.exception(error)
@@ -128,7 +134,10 @@ async def add_user(
 
         # Call the add_user method of the user controller
         async with db_instance as db:
-            return await user_controller.add_user(user_data, db)
+            data = await user_controller.add_user(user_data, db)
+            return JSONResponse(
+                        status_code=200, content={"data": data, "message": "Data added successfully"}
+                    )
     except Exception as error:
         # Log the error
         logger.exception(error)
@@ -162,7 +171,15 @@ async def update_user(
 
         # Call the add_user method of the user controller
         async with db_instance as db:
-            return await user_controller.update_user(id, user_data, db)
+            update_flag = await user_controller.update_user(id, user_data, db)
+            if update_flag:
+                return JSONResponse(
+                            status_code=200, content={"message": "Data updated successfully"}
+                        )
+            else:
+                return JSONResponse(
+                            status_code=400, content={"message": "Invalid request"}
+                        )
     except Exception as error:
         # Log the error
         logger.exception(error)

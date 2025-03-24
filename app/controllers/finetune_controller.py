@@ -21,7 +21,6 @@ class FinetuneController:
         endDate: datetime,
         fileName: str,
         isActive: bool,
-        isProcessed: bool,
         sort_params: list,
     ) -> dict:
         try:
@@ -31,8 +30,6 @@ class FinetuneController:
                 filterData["fileName"] = fileName
             if isActive is not None:
                 filterData["isActive"] = isActive
-            if isProcessed is not None:
-                filterData["isProcessed"] = isProcessed
             if startDate is not None:
                 input_timezone = startDate.tzname().replace("UTC","")
                 filterData["createdAt"] = {
@@ -44,9 +41,7 @@ class FinetuneController:
                 else:
                     filterData["createdAt"]["$lte"] = convert_timezone(endDate, to_string=False, timeZone="UTC")
             data = await self.finetune_repo.get_tarin_data(db, filterData, sort_params, input_timezone)
-            return JSONResponse(
-                        status_code=200, content={"data": data, "message": "Data fetched successfully"}
-                    )
+            return data
         except Exception as error:
             logger.exception(error)
             raise error
@@ -60,10 +55,8 @@ class FinetuneController:
         - `db` (Database): db session referance.
         """
         try:
-            inserted_id = await self.finetune_repo.add_train_data(db, data)
-            return JSONResponse(
-                        status_code=200, content={"id":inserted_id, "message": "Data inserted successfully"}
-                    )
+            inserted_ids = await self.finetune_repo.add_train_data(db, data)
+            return inserted_ids
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
@@ -84,15 +77,7 @@ class FinetuneController:
         """
         try:
             update_flag = await self.finetune_repo.update_tarin_data(db, id, data)
-
-            if update_flag:
-                return JSONResponse(
-                    status_code=200, content={"message": "Data updated successfully"}
-                )
-            else:
-                return JSONResponse(
-                    status_code=400, content={"message": "Invalid data id"}
-                )
+            return update_flag
         except Exception as error:
             logger.exception(error)
             raise error
@@ -104,8 +89,7 @@ class FinetuneController:
         startDate: datetime,
         endDate: datetime,
         fileName: str,
-        isActive: bool,
-        isProcessed: bool,
+        isActive: bool
     ) -> dict:
         try:
             filterData = {}
@@ -113,8 +97,6 @@ class FinetuneController:
                 filterData["fileName"] = fileName
             if isActive is not None:
                 filterData["isActive"] = isActive
-            if isProcessed is not None:
-                filterData["isProcessed"] = isProcessed
             if startDate is not None:
                 filterData["createdAt"] = {
                     '$gte': convert_timezone(startDate, to_string=False, timeZone="UTC"),
@@ -125,9 +107,7 @@ class FinetuneController:
                 else:
                     filterData["createdAt"]["$lte"] = convert_timezone(endDate, to_string=False, timeZone="UTC")
             data = await self.finetune_repo.delete_tarin_data(db, filterData)
-            return JSONResponse(
-                        status_code=200, content={"message": "Data deleted successfully"}
-                    )
+            return True
         except Exception as error:
             logger.exception(error)
             raise error

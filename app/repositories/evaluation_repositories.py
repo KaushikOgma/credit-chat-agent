@@ -24,6 +24,7 @@ class EvaluationRepository:
 
     async def add_eval_data(self, db: Database, data: List[dict]):
         try:
+            inserted_ids = []
             insert_data = []
             for indx, curr_data in enumerate(data):
                 is_eval_data_exists = (
@@ -38,6 +39,8 @@ class EvaluationRepository:
                     if "createdAt" in temp_data:
                         del temp_data["createdAt"]
                     temp_data["updatedAt"] = get_user_time()
+                    temp_data["isProcessed"] = False
+                    inserted_ids.append(is_eval_data_exists["_id"])
                     db[DBCollections.TEST_DATA.value].update_one({"_id": is_eval_data_exists["_id"]}, {"$set": temp_data})
                 else:
                     temp_data = curr_data.copy()
@@ -47,9 +50,12 @@ class EvaluationRepository:
                     temp_data["_id"] = newEvalId
                     temp_data["createdAt"] = get_user_time()
                     temp_data["updatedAt"] = get_user_time()
+                    temp_data["isProcessed"] = False
+                    inserted_ids.append(newEvalId)
                     insert_data.append(temp_data)
-            result = db[DBCollections.TEST_DATA.value].insert_many(data)
-            return result
+            if len(insert_data) > 0:
+                db[DBCollections.TEST_DATA.value].insert_many(insert_data)
+            return inserted_ids
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
             raise error
@@ -74,6 +80,15 @@ class EvaluationRepository:
             raise error
 
 
+    async def make_eval_data_processed(self, db: Database, eval_ids: list[str]):
+        try:
+            db[DBCollections.TEST_DATA.value].update_one({"_id": {"$in": eval_ids}}, {"$set": {"isProcessed": True}})
+            return True
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
+            raise error
+
+
     async def get_eval_data(self, db: Database, filterData: dict, sort_params: list, input_timezone = None):
         try:
             pipeline = [
@@ -82,6 +97,15 @@ class EvaluationRepository:
                 {"$sort": sort_params}
             ]
             data = list(db[DBCollections.TEST_DATA.value].aggregate(pipeline))
+            return data
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
+            raise error
+        
+
+    async def get_eval_qa_pairs(self, db: Database, qa_pair_ids: List[str]):
+        try:
+            data = list(db[DBCollections.TEST_DATA.value].find({"_id": {"$in": qa_pair_ids}}, EvaluationProjections.get_qa_attribute()))
             return data
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})

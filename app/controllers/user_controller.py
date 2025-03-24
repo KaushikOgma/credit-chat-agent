@@ -59,9 +59,7 @@ class UserController:
                 else:
                     filterData["createdAt"]["$lte"] = convert_timezone(endDate, to_string=False, timeZone="UTC")
             data = await self.user_repo.get_users(db, filterData, sort_params, input_timezone)
-            return JSONResponse(
-                        status_code=200, content={"data": data, "message": "Data fetched successfully"}
-                    )
+            return data
         except Exception as error:
             logger.exception(error)
             raise error
@@ -77,9 +75,7 @@ class UserController:
         """
         try:
             data = await self.user_repo.get_user_details_by_id(db, userId)
-            return JSONResponse(
-                status_code=200, content={"data": data, "message": "Data fetched successfully"}
-            )
+            return data
         except Exception as error:
             logger.exception(error)
             raise error
@@ -95,9 +91,7 @@ class UserController:
         """
         try:
             inserted_id = await self.user_repo.add_user(db, user_data)
-            return JSONResponse(
-                        status_code=200, content={"id":inserted_id, "message": "Data inserted successfully"}
-                    )
+            return inserted_id
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
@@ -117,19 +111,8 @@ class UserController:
         - If the user id is invalid, returns a JSONResponse with a 401 status code and a message indicating an invalid user id.
         """
         try:
-            # print("id:: ",id)
-            # print("user_data:: ",user_data)
-            # Check if order exists or not
             update_flag = await self.user_repo.update_user(db, id, user_data)
-
-            if update_flag:
-                return JSONResponse(
-                    status_code=200, content={"message": "Data updated successfully"}
-                )
-            else:
-                return JSONResponse(
-                    status_code=400, content={"message": "Invalid user id"}
-                )
+            return update_flag
         except Exception as error:
             logger.exception(error)
             raise error

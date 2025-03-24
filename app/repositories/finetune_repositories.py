@@ -24,6 +24,7 @@ class FinetuneRepository:
 
     async def add_train_data(self, db: Database, data: List[dict]):
         try:
+            inserted_ids = []
             insert_data = []
             for curr_data in data:
                 is_train_data_exists = (
@@ -38,6 +39,8 @@ class FinetuneRepository:
                     if "createdAt" in temp_data:
                         del temp_data["createdAt"]
                     temp_data["updatedAt"] = get_user_time()
+                    inserted_ids.append(is_train_data_exists["_id"])
+                    temp_data["isProcessed"] = False
                     db[DBCollections.TRAIN_DATA.value].update_one({"_id": is_train_data_exists["_id"]}, {"$set": temp_data})
                 else:
                     temp_data = curr_data.copy()
@@ -47,9 +50,12 @@ class FinetuneRepository:
                     temp_data["_id"] = newTraindataId
                     temp_data["createdAt"] = get_user_time()
                     temp_data["updatedAt"] = get_user_time()
+                    temp_data["isProcessed"] = False
+                    inserted_ids.append(newTraindataId)
                     insert_data.append(temp_data)
-            result = db[DBCollections.TRAIN_DATA.value].insert_many(insert_data)
-            return result
+            if len(insert_data) > 0:
+                db[DBCollections.TRAIN_DATA.value].insert_many(insert_data)
+            return inserted_ids
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
             raise error
@@ -74,6 +80,15 @@ class FinetuneRepository:
             raise error
 
 
+    async def make_train_data_processed(self, db: Database, train_ids: list[str]):
+        try:
+            db[DBCollections.TRAIN_DATA.value].update_one({"_id": {"$in": train_ids}}, {"$set": {"isProcessed": True}})
+            return True
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
+            raise error
+
+
     async def get_tarin_data(self, db: Database, filterData: dict, sort_params: list, input_timezone = None):
         try:
             pipeline = [
@@ -82,6 +97,16 @@ class FinetuneRepository:
                 {"$sort": sort_params}
             ]
             data = list(db[DBCollections.TRAIN_DATA.value].aggregate(pipeline))
+            return data
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
+            raise error
+        
+
+
+    async def get_train_qa_pairs(self, db: Database, qa_pair_ids: List[str]):
+        try:
+            data = list(db[DBCollections.TRAIN_DATA.value].find({"_id": {"$in": qa_pair_ids}}, FinetuneProjections.get_qa_attribute()))
             return data
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})

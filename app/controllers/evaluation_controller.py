@@ -2,6 +2,7 @@ from fastapi.responses import JSONResponse
 from app.utils.helpers.date_helper import get_user_time, convert_timezone
 from app.repositories.finetune_repositories import FinetuneRepository
 from app.repositories.evaluation_repositories import EvaluationRepository
+from app.services.qa_evaluator import QAEvaluator
 from datetime import datetime
 from app.utils.config import settings
 from fastapi.exceptions import HTTPException
@@ -11,8 +12,9 @@ logger = setup_logger()
 
 class EvaluationController:
 
-    def __init__(self, eval_repo: EvaluationRepository):
+    def __init__(self, eval_repo: EvaluationRepository, question_evaluator: QAEvaluator):
         self.eval_repo = eval_repo
+        self.question_evaluator = question_evaluator
         self.service_name = "evaluation"
 
     async def get_eval_data(
@@ -22,6 +24,7 @@ class EvaluationController:
         endDate: datetime,
         fileName: str,
         isActive: bool,
+        isProcessed: bool,
         sort_params: list,
     ) -> dict:
         try:
@@ -31,6 +34,8 @@ class EvaluationController:
                 filterData["fileName"] = fileName
             if isActive is not None:
                 filterData["isActive"] = isActive
+            if isProcessed is not None:
+                filterData["isProcessed"] = isProcessed
             if startDate is not None:
                 input_timezone = startDate.tzname().replace("UTC","")
                 filterData["createdAt"] = {
@@ -42,9 +47,7 @@ class EvaluationController:
                 else:
                     filterData["createdAt"]["$lte"] = convert_timezone(endDate, to_string=False, timeZone="UTC")
             data = await self.eval_repo.get_eval_data(db, filterData, sort_params, input_timezone)
-            return JSONResponse(
-                        status_code=200, content={"data": data, "message": "Data fetched successfully"}
-                    )
+            return data
         except Exception as error:
             logger.exception(error)
             raise error
@@ -58,10 +61,12 @@ class EvaluationController:
         - `db` (Database): db session referance.
         """
         try:
-            inserted_id = await self.eval_repo.add_eval_data(db, data)
-            return JSONResponse(
-                        status_code=200, content={"id":inserted_id, "message": "Data inserted successfully"}
-                    )
+            inserted_ids = await self.eval_repo.add_eval_data(db, data)
+            qa_pairs = await self.eval_repo.get_eval_qa_pairs(db, inserted_ids)
+            isProcessed = await self.question_evaluator.sync_vector_db(qa_pairs=qa_pairs)
+            if isProcessed:
+                await self.eval_repo.make_eval_data_processed(db, inserted_ids)
+            return inserted_ids
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
@@ -82,15 +87,7 @@ class EvaluationController:
         """
         try:
             update_flag = await self.eval_repo.update_eval_data(db, id, data)
-
-            if update_flag:
-                return JSONResponse(
-                    status_code=200, content={"message": "Data updated successfully"}
-                )
-            else:
-                return JSONResponse(
-                    status_code=400, content={"message": "Invalid data id"}
-                )
+            return update_flag
         except Exception as error:
             logger.exception(error)
             raise error
@@ -102,6 +99,7 @@ class EvaluationController:
         startDate: datetime,
         endDate: datetime,
         fileName: str,
+        isProcessed: bool,
         isActive: bool,
     ) -> dict:
         try:
@@ -110,6 +108,8 @@ class EvaluationController:
                 filterData["fileName"] = fileName
             if isActive is not None:
                 filterData["isActive"] = isActive
+            if isProcessed is not None:
+                filterData["isProcessed"] = isProcessed
             if startDate is not None:
                 filterData["createdAt"] = {
                     '$gte': convert_timezone(startDate, to_string=False, timeZone="UTC"),
@@ -119,10 +119,12 @@ class EvaluationController:
                     filterData["createdAt"]["$lte"] = convert_timezone(endDate, to_string=False, timeZone="UTC")
                 else:
                     filterData["createdAt"]["$lte"] = convert_timezone(endDate, to_string=False, timeZone="UTC")
-            data = await self.eval_repo.delete_eval_data(db, filterData)
-            return JSONResponse(
-                        status_code=200, content={"message": "Data deleted successfully"}
-                    )
+            data = await self.eval_repo.get_eval_data(db, filterData)
+            ids_list = [elm["_id"] for elm in data]
+            has_deleted = await self.question_evaluator.delete_eval_data_from_vector_db(id_list=ids_list)
+            if has_deleted:
+                data = await self.eval_repo.delete_eval_data(db, filterData)
+            return True
         except Exception as error:
             logger.exception(error)
             raise error

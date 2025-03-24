@@ -110,14 +110,14 @@ class VectorizerEngine:
             qa_pair_df = pd.DataFrame(qa_pairs)
 
             # Add UUID column efficiently
-            qa_pair_df['qestion_id'] = pd.Series(pd.util.hash_pandas_object(qa_pair_df, index=False)).apply(lambda x: str(uuid.UUID(int=x)))
+            qa_pair_df['question_id'] = pd.Series(pd.util.hash_pandas_object(qa_pair_df, index=False)).apply(lambda x: str(uuid.UUID(int=x)))
 
 
             # Create corpus and drop temporary column
             corpus = qa_pair_df["question"].tolist()
 
             # Collect food IDs and metadata
-            chunk_qa_pair_id_list = qa_pair_df["qestion_id"].tolist()
+            chunk_qa_pair_id_list = qa_pair_df["question_id"].tolist()
             metadata = qa_pair_df.to_dict(orient="records")
 
             # Build Document instances
@@ -383,12 +383,12 @@ class VectorizerEngine:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
 
-    async def delete_items(self, food_id_list: List[str]) -> bool:
+    async def delete_items(self, id_list: List[str]) -> bool:
         """
         Deletes the specified food items from the vector database.
 
         Args:
-            food_id_list (List[str]): A list of food IDs to be deleted.
+            id_list (List[str]): A list of food IDs to be deleted.
 
         Returns:
             bool: True if the food items are successfully deleted, False otherwise.
@@ -401,10 +401,10 @@ class VectorizerEngine:
             max_retries = 3
             initial_delay = 2  # Initial delay for retry logic (in seconds)
             chunk_size = 100
-            # Split food_id_list into chunks for parallel processing
+            # Split id_list into chunks for parallel processing
             id_chunks = [
-                food_id_list[i : i + chunk_size]
-                for i in range(0, len(food_id_list), chunk_size)
+                id_list[i : i + chunk_size]
+                for i in range(0, len(id_list), chunk_size)
             ]
             # Prepare async tasks for each chunk
             tasks = [

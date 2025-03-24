@@ -1,10 +1,13 @@
 from fastapi.responses import JSONResponse
 from tqdm import tqdm
+from app.controllers.evaluation_controller import EvaluationController
+from app.controllers.finetune_controller import FinetuneController
 from app.repositories.evaluation_repositories import EvaluationRepository
 from app.repositories.finetune_repositories import FinetuneRepository
 from app.schemas.evaluation_schema import EvalQASchema
 from app.schemas.finetune_schema import TrainQASchema
 from app.services.data_ingestor import DataIngestor
+from app.services.qa_evaluator import QAEvaluator
 from app.services.qa_generator import QAGenerator
 from app.utils.helpers.date_helper import get_user_time, convert_timezone
 from app.repositories.metadata_repositories import MetadataRepository
@@ -17,12 +20,15 @@ logger = setup_logger()
 
 class MetadataController:
 
-    def __init__(self, metadata_repo: MetadataRepository, finetune_repo: FinetuneRepository,eval_repo: EvaluationRepository, data_ingestor: DataIngestor, qa_generator: QAGenerator):
+    def __init__(self, metadata_repo: MetadataRepository, finetune_repo: FinetuneRepository,eval_repo: EvaluationRepository, finetune_controller: FinetuneController, eval_controller: EvaluationController, data_ingestor: DataIngestor, qa_generator: QAGenerator, qa_evaluator:QAEvaluator):
         self.metadata_repo = metadata_repo
         self.finetune_repo = finetune_repo
-        self.eveval_repo = eval_repo
+        self.eval_repo = eval_repo
         self.data_ingestor = data_ingestor
         self.qa_generator = qa_generator
+        self.qa_evaluator = qa_evaluator
+        self.finetune_controller = finetune_controller
+        self.eval_controller = eval_controller
         self.service_name = "metadata_manage_service"
 
     async def get_metadatas(
@@ -56,9 +62,7 @@ class MetadataController:
                 else:
                     filterData["createdAt"]["$lte"] = convert_timezone(endDate, to_string=False, timeZone="UTC")
             data = await self.metadata_repo.get_metadatas(db, filterData, sort_params, input_timezone)
-            return JSONResponse(
-                        status_code=200, content={"data": data, "message": "Data fetched successfully"}
-                    )
+            return data
         except Exception as error:
             logger.exception(error)
             raise error
@@ -73,9 +77,7 @@ class MetadataController:
         """
         try:
             data = await self.metadata_repo.get_metadata_details_by_id(db, id)
-            return JSONResponse(
-                status_code=200, content={"data": data, "message": "Data fetched successfully"}
-            )
+            return data
         except Exception as error:
             logger.exception(error)
             raise error
@@ -90,28 +92,38 @@ class MetadataController:
         - `db` (Database): db session referance.
         """
         try:
+            # add the data into metadata collection
+            inserted_id = await self.metadata_repo.add_metadata(db, data)
+            # generate qa pairs for the content
             qa_pairs = await self.qa_generator.generate_question_and_answer(data["content"])
-            for pair in tqdm(qa_pairs, desc="Processing Questions"):
-                if data["isTrainData"]:
+            if data["isTrainData"]:
+                train_data = []
+                # check if the data is train data then insert qa pairs into train data collection
+                for pair in tqdm(qa_pairs, desc="Processing Questions"):
                     train_data_entry = TrainQASchema(
                         question = pair["question"],
                         answer = pair["answer"],
-                        isProcessed = False,
+                        metadataId = str(inserted_id),
                         isActive = True
                     )
-                    result = await self.finetune_repo.add_train_data(db, [train_data_entry.model_dump()])
-                else:
+                    train_data.append(train_data_entry.model_dump())
+                await self.finetune_controller.add_train_data(train_data, db)
+            else:
+                eval_data = []
+                # check if the data is eval data then insert qa pairs into eval data collection
+                for pair in tqdm(qa_pairs, desc="Processing Questions"):
                     eval_data_entry = EvalQASchema(
                         question = pair["question"],
                         answer = pair["answer"],
+                        metadataId = str(inserted_id),
+                        isProcessed = False,
                         isActive = True
                     )
-                    result = await self.eveval_repo.add_eval_data(db, [eval_data_entry.model_dump()])
-            data["isProcessed"] = True
-            inserted_id = await self.metadata_repo.add_metadata(db, data)
-            return JSONResponse(
-                        status_code=200, content={"id":inserted_id, "message": "Data inserted successfully"}
-                    )
+                    eval_data.append(eval_data_entry.model_dump())
+                await self.eval_controller.add_eval_data(eval_data, db)
+            # update the meta as processed
+            await self.metadata_repo.make_metadata_processed(db, [inserted_id])
+            return inserted_id
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
@@ -131,37 +143,43 @@ class MetadataController:
         - If the user id is invalid, returns a JSONResponse with a 401 status code and a message indicating an invalid user id.
         """
         try:
-            # print("id:: ",id)
-            # print("user_data:: ",user_data)
-            # Check if order exists or not
+            metadata = await self.metadata_repo.get_metadata_details_by_id(db, id)
+            isTrainData = data["isTrainData"] if "isTrainData" in data else metadata["isTrainData"]
             if "content" in data and data["content"] is not None:
                 qa_pairs = await self.qa_generator.generate_question_and_answer(data["content"])
-                for pair in tqdm(qa_pairs, desc="Processing Questions"):
-                    if data["isTrainData"]:
+                if isTrainData:
+                    # delete existing qa pairse as the content is updated
+                    await self.finetune_repo.delete_tarin_data(db, {"metadataId": str(id)})
+                    train_data = []
+                    # check if the data is train data then insert qa pairs into train data collection
+                    for pair in tqdm(qa_pairs, desc="Processing Questions"):
                         train_data_entry = TrainQASchema(
                             question = pair["question"],
                             answer = pair["answer"],
-                            isProcessed = False,
+                            metadataId = str(id),
                             isActive = True
                         )
-                        result = await self.finetune_repo.add_train_data(db, [train_data_entry.model_dump()])
-                    else:
+                        train_data.append(train_data_entry.model_dump())
+                    await self.finetune_controller.add_train_data(train_data, db)
+                else:
+                    # delete existing qa pairse as the content is updated
+                    await self.eval_repo.delete_eval_data(db, {"metadataId": str(id)})
+                    eval_data = []
+                    # check if the data is eval data then insert qa pairs into eval data collection
+                    for pair in tqdm(qa_pairs, desc="Processing Questions"):
                         eval_data_entry = EvalQASchema(
                             question = pair["question"],
                             answer = pair["answer"],
+                            metadataId = str(id),
+                            isProcessed = False,
                             isActive = True
                         )
-                        result = await self.eveval_repo.add_eval_data(db, [eval_data_entry.model_dump()])
-                data["isProcessed"] = True
+                        eval_data.append(eval_data_entry.model_dump())
+                    await self.eval_controller.add_eval_data(eval_data, db)
             update_flag = await self.metadata_repo.update_Metadata(db, id, data)
-            if update_flag:
-                return JSONResponse(
-                    status_code=200, content={"message": "Data updated successfully"}
-                )
-            else:
-                return JSONResponse(
-                    status_code=400, content={"message": "Invalid metadata id"}
-                )
+            # update the meta as processed
+            await self.metadata_repo.make_metadata_processed(db, [id])
+            return update_flag
         except Exception as error:
             logger.exception(error)
             raise error
@@ -203,24 +221,29 @@ class MetadataController:
                 # Delete associated qa data related to the metadata
                 for elm in data:
                     if elm["isTrainData"]:
-                        filterTrainData = {
-                            "fileName": elm["fileName"]
-                        }
-                        await self.finetune_repo.delete_tarin_data(db, filterTrainData)
+                        await self.finetune_controller.delete_train_data(
+                            db,
+                            startDate = None, 
+                            endDate = None, 
+                            fileName = elm["fileName"], 
+                            isActive = None
+                        )
                     else:
-                        filterTrainData = {
-                            "fileName": elm["fileName"]
-                        }
-                        await self.eveval_repo.delete_eval_data(db, filterTrainData)
+                        await self.eval_controller.delete_eval_data(
+                            db,
+                            startDate = None, 
+                            endDate = None, 
+                            fileName = elm["fileName"], 
+                            isProcessed = None,
+                            isActive = None
+                        )
                     filterMetadata = {
                         "fileName": elm["fileName"]
                     }
                     await self.metadata_repo.delete_metadata(db, filterMetadata)
             else:
                 data = await self.metadata_repo.delete_metadata(db, filterData)
-            return JSONResponse(
-                        status_code=200, content={"message": "Data deleted successfully"}
-                    )
+            return True
         except Exception as error:
             logger.exception(error)
             raise error

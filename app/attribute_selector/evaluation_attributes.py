@@ -30,3 +30,11 @@ class EvaluationProjections:
                 }
             }
         }
+    
+
+    @staticmethod
+    def get_qa_attribute():
+        return {
+            "question": 1,
+            "answer": 1
+        }

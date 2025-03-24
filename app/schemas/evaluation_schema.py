@@ -28,7 +28,9 @@ class EvalQASchema(BaseModel):
     question: str
     answer: str
     fileName: Optional[str] = None
+    metadataId: Optional[str] = None
     isActive: Optional[bool] = True
+    isProcessed: Optional[bool] = False
     createdAt:  Optional[datetime] = None
     updatedAt:  Optional[datetime] = None
 

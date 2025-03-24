@@ -75,7 +75,10 @@ async def get_logs(
 
         # Call the controller to fetch the logs
         async with db_instance as db:
-            return await log_controller.get_logs(db, moduleName, serviceName, userId, startDate, endDate, type, sort_params)
+            data = await log_controller.get_logs(db, moduleName, serviceName, userId, startDate, endDate, type, sort_params)
+            return JSONResponse(
+                status_code=200, content={"data": data, "message": "Data fetched successfully"}
+            )
     except Exception as error:
         logger.exception(error)
         return JSONResponse(content={"message": str(error)}, status_code=500)
@@ -91,7 +94,10 @@ async def add_log(
         data = body.model_dump()
 
         async with db_instance as db:
-            return await log_controller.add_log(data, db)
+            data = await log_controller.add_log(data, db)
+            return JSONResponse(
+                        status_code=200, content={"data": data, "message": "Data added successfully"}
+                    )
     except Exception as error:
         logger.exception(error)
         return JSONResponse(content={"message": str(error)}, status_code=500)

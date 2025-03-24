@@ -77,6 +77,14 @@ class MetadataRepository:
             raise error
 
 
+    async def make_metadata_processed(self, db: Database, metadata_ids: list[str]):
+        try:
+            db[DBCollections.METADATA.value].update_one({"_id": {"$in": metadata_ids}}, {"$set": {"isProcessed": True}})
+            return True
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
+            raise error
+
 
     async def get_metadata_details_by_id(self, db: Database, id: str):
         try:

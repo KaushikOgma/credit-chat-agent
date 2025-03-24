@@ -127,6 +127,24 @@ class QAEvaluator:
             self.vectorizer.unload_vectorstore()
         
 
+    async def delete_eval_data_from_vector_db(self, id_list: List[str]) -> bool: 
+        """
+        Sync the vector DB with the latest data.
+        """
+        try:
+            # Load the vector store
+            self.vectorizer.load_vectorstore()
+            # Sync the vector DB with the latest QA pairs
+            await self.vectorizer.delete_items(id_list)
+            return True
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            return False
+        finally:
+            # Unload the vector store
+            self.vectorizer.unload_vectorstore()
+        
+
     async def evaluate_single_qa(self, question: str) -> float:
         """
         Evaluate a single QA by checking if the AI response is present in the vector DB.
@@ -203,26 +221,32 @@ async def start_evaluation():
     # Sample Q&A data for testing
     qa_pairs = [
         {
+            "question_id": "f3b82a10-26d2-4c8f-b4b8-b71f3d3a80a4",
             "question": "What exactly is credit?",
             "answer": "It's the system of borrowing money with the agreement to pay it back later, often with interest."
         },
         {
+            "question_id": "7e1e5a5a-6e6d-4a67-9d38-2d5f10b3a1b5",
             "question": "Why should I care about credit?",
             "answer": "Good credit can help you get loans with better interest rates and is essential for big purchases like a car or home."
         },
         {
+            "question_id": "c8b3b0cb-d28b-49a9-95d5-bd6a7c0e4b2d",
             "question": "What’s a credit score?",
             "answer": "A number that lenders use to determine how risky it is to lend you money, based on your credit history."
         },
         {
+            "question_id": "9d7a5cb5-d6b2-4a1c-8c58-f845db22cf84",
             "question": "How can I improve my credit score?",
             "answer": "Make payments on time, keep your credit card balances low, and manage your debts wisely."
         },
         {
+            "question_id": "0f4322b9-b7f2-4b1b-bbd9-92a5b5d1b7d5",
             "question": "Can someone my age have a credit score?",
             "answer": "Yes, once you turn 18 and start using credit products, like a credit card or loan, you begin to build a credit history."
         },
         {
+            "question_id": "b18a9e83-43bd-4b78-8f68-1e6c3c5d9b22",
             "question": "What’s on a credit report?",
             "answer": "Details of your credit accounts, payment history, debts, and sometimes employment history, used to calculate your score."
         }

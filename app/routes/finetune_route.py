@@ -26,7 +26,6 @@ router = APIRouter()
 async def get_train_data(
     fileName: str = Query(None, description="fileName"),
     isActive: bool = Query(None, description="isActive"),
-    isProcessed: bool = Query(None, description="isProcessed"),
     startDate: str =  Query(None, description=f"startDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
     endDate: str =  Query(None, description=f"endDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
     sortBy: List[FinetuneDataSortFields] = Query([FinetuneDataSortFields.createdAt_DESC], description=f"sortBy"),
@@ -63,7 +62,10 @@ async def get_train_data(
             # Convert the list of tuples into a dictionary
             sort_params = {field: order for field, order in sort_params}
         async with db_instance as db:
-            return await finetune_controller.get_train_data(db, startDate, endDate, fileName, isActive, isProcessed, sort_params)
+            data = await finetune_controller.get_train_data(db, startDate, endDate, fileName, isActive, sort_params)
+            return JSONResponse(
+                        status_code=200, content={"data": data, "message": "Data fetched successfully"}
+                    )
     except Exception as error:
         logger.exception(error)
         return JSONResponse(content={"message": str(error)}, status_code=500)
@@ -72,18 +74,21 @@ async def get_train_data(
 
 @router.post("/add_train_data", status_code=status.HTTP_201_CREATED)
 async def add_metadata(
-    body: SaveTrainQASchema,
+    body: List[SaveTrainQASchema],
     finetune_controller: FinetuneController = Depends(get_finetune_controller),
     db_instance: Database = Depends(get_db)
 ):
     
     try:
         # Convert the request body to a dictionary
-        data = body.model_dump()
+        data = [elm.model_dump() for elm in body]
 
         # Call the add_user method of the user controller
         async with db_instance as db:
-            return await finetune_controller.add_train_data(data, db)
+            data = await finetune_controller.add_train_data(data, db)
+            return JSONResponse(
+                status_code=200, content={"data": data, "message": "Data added successfully"}
+            )
     except Exception as error:
         # Log the error
         logger.exception(error)
@@ -105,7 +110,15 @@ async def update_train_data(
 
         # Call the add_user method of the user controller
         async with db_instance as db:
-            return await finetune_controller.update_train_data(id, data, db)
+            update_flag = await finetune_controller.update_train_data(id, data, db)
+            if update_flag:
+                return JSONResponse(
+                            status_code=200, content={"message": "Data updated successfully"}
+                        )
+            else:
+                return JSONResponse(
+                            status_code=400, content={"message": "Invalid request"}
+                        )
     except Exception as error:
         # Log the error
         logger.exception(error)
@@ -118,7 +131,6 @@ async def update_train_data(
 async def delete_train_data(
     fileName: str = Query(None, description="fileName"),
     isActive: bool = Query(None, description="isActive"),
-    isProcessed: bool = Query(None, description="isProcessed"),
     startDate: str =  Query(None, description=f"startDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
     endDate: str =  Query(None, description=f"endDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
     finetune_controller: FinetuneController = Depends(get_finetune_controller),
@@ -145,7 +157,10 @@ async def delete_train_data(
             except ValueError:
                 raise HTTPException(status_code=400, detail=f"endDate must be in {settings.ACCEPTED_DATE_TIME_STRING} format")
         async with db_instance as db:
-            return await finetune_controller.delete_train_data(db, startDate, endDate, fileName, isActive, isProcessed)
+            await finetune_controller.delete_train_data(db, startDate, endDate, fileName, isActive)
+            return JSONResponse(
+                status_code=200, content={"message": "Data deleted successfully"}
+            )
     except Exception as error:
         logger.exception(error)
         return JSONResponse(content={"message": str(error)}, status_code=500)

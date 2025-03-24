@@ -26,6 +26,7 @@ router = APIRouter()
 async def get_eval_data(
     fileName: str = Query(None, description="fileName"),
     isActive: bool = Query(None, description="isActive"),
+    isProcessed: bool = Query(None, description="isProcessed"),
     startDate: str =  Query(None, description=f"startDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
     endDate: str =  Query(None, description=f"endDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
     sortBy: List[EvalDataSortFields] = Query([EvalDataSortFields.createdAt_DESC], description=f"sortBy"),
@@ -62,7 +63,10 @@ async def get_eval_data(
             # Convert the list of tuples into a dictionary
             sort_params = {field: order for field, order in sort_params}
         async with db_instance as db:
-            return await eval_controller.get_eval_data(db, startDate, endDate, fileName, isActive, sort_params)
+            data = await eval_controller.get_eval_data(db, startDate, endDate, fileName, isActive, isProcessed, sort_params)
+            return JSONResponse(
+                        status_code=200, content={"data": data, "message": "Data fetched successfully"}
+                    )
     except Exception as error:
         logger.exception(error)
         return JSONResponse(content={"message": str(error)}, status_code=500)
@@ -71,18 +75,21 @@ async def get_eval_data(
 
 @router.post("/add_eval_data", status_code=status.HTTP_201_CREATED)
 async def add_eval_data(
-    body: SaveEvalQASchema,
+    body: List[SaveEvalQASchema],
     eval_controller: EvaluationController = Depends(get_eval_controller),
     db_instance: Database = Depends(get_db)
 ):
     
     try:
         # Convert the request body to a dictionary
-        data = body.model_dump()
+        data = [elm.model_dump() for elm in body]
 
         # Call the add_user method of the user controller
         async with db_instance as db:
-            return await eval_controller.add_eval_data(data, db)
+            data = await eval_controller.add_eval_data(data, db)
+            return JSONResponse(
+                        status_code=200, content={"data": data, "message": "Data added successfully"}
+                    )
     except Exception as error:
         # Log the error
         logger.exception(error)
@@ -104,7 +111,15 @@ async def update_eval_data(
 
         # Call the add_user method of the user controller
         async with db_instance as db:
-            return await eval_controller.update_eval_data(id, data, db)
+            update_flag = await eval_controller.update_eval_data(id, data, db)
+            if update_flag:
+                return JSONResponse(
+                            status_code=200, content={"message": "Data updated successfully"}
+                        )
+            else:
+                return JSONResponse(
+                            status_code=400, content={"message": "Invalid request"}
+                        )
     except Exception as error:
         # Log the error
         logger.exception(error)
@@ -118,6 +133,7 @@ async def update_eval_data(
 async def delete_eval_data(
     fileName: str = Query(None, description="fileName"),
     isActive: bool = Query(None, description="isActive"),
+    isProcessed: bool = Query(None, description="isProcessed"),
     startDate: str =  Query(None, description=f"startDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
     endDate: str =  Query(None, description=f"endDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
     eval_controller: EvaluationController = Depends(get_eval_controller),
@@ -144,7 +160,10 @@ async def delete_eval_data(
             except ValueError:
                 raise HTTPException(status_code=400, detail=f"endDate must be in {settings.ACCEPTED_DATE_TIME_STRING} format")
         async with db_instance as db:
-            return await eval_controller.delete_eval_data(db, startDate, endDate, fileName, isActive)
+            await eval_controller.delete_eval_data(db, startDate, endDate, fileName, isProcessed, isActive)
+            return JSONResponse(
+                        status_code=200, content={"message": "Data deleted successfully"}
+                    )
     except Exception as error:
         logger.exception(error)
         return JSONResponse(content={"message": str(error)}, status_code=500)

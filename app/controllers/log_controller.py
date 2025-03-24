@@ -66,10 +66,7 @@ class LogController:
                     filterData["createdAt"]["$lte"] = convert_timezone(endDate, to_string=False, timeZone="UTC")
             # Fetch orders from db
             data = await self.log_repo.get_log(db, filterData, sort_params, input_timezone)
-            print("data:: ",data)
-            return JSONResponse(
-                status_code=200, content={"data": data, "message": "Data fetched successfully"}
-            )
+            return data
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return JSONResponse(
@@ -89,9 +86,7 @@ class LogController:
         """
         try:
             log_id = await self.log_repo.add_log(db, data)
-            return JSONResponse(
-                status_code=200, content={"id": log_id,"message": "Data inserted successfully"}
-            )
+            return log_id
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
