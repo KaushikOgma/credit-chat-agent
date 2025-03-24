@@ -176,14 +176,13 @@ async def delete_train_data(
 
 
 
-@router.get("/initiate_training", status_code=status.HTTP_200_OK)
+@router.post("/initiate_training", status_code=status.HTTP_200_OK)
 async def initiate_training(
     fileName: str = Query(None, description="fileName"),
     isActive: bool = Query(None, description="isActive"),
     startDate: str =  Query(None, description=f"startDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
     endDate: str =  Query(None, description=f"endDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
     finetune_controller: FinetuneController = Depends(get_finetune_controller),
-    db_instance: Database = Depends(get_db)
 ):
     
     try:
@@ -205,10 +204,28 @@ async def initiate_training(
                 endDate = endDate.replace(hour=23, minute=59, second=59)
             except ValueError:
                 raise HTTPException(status_code=400, detail=f"endDate must be in {settings.ACCEPTED_DATE_TIME_STRING} format")
+        await finetune_controller.initiate_training(startDate, endDate, fileName, isActive)
+        return JSONResponse(
+            status_code=200, content={"message": "Data deleted successfully"}
+        )
+    except Exception as error:
+        logger.exception(error)
+        return JSONResponse(content={"message": str(error)}, status_code=500)
+
+
+
+
+@router.get("/get_model_list", status_code=status.HTTP_200_OK)
+async def initiate_training(
+    finetune_controller: FinetuneController = Depends(get_finetune_controller),
+    db_instance: Database = Depends(get_db)
+):
+    
+    try:
         async with db_instance as db:
-            await finetune_controller.delete_train_data(db, startDate, endDate, fileName, isActive)
+            data = await finetune_controller.get_model_list(db)
             return JSONResponse(
-                status_code=200, content={"message": "Data deleted successfully"}
+                status_code=200, content={"data": data, "message": "Data fetched successfully"}
             )
     except Exception as error:
         logger.exception(error)

@@ -137,7 +137,6 @@ class EvaluationController:
 
     async def initiate_evaluating(
         self,
-        db,
         startDate: datetime,
         endDate: datetime,
         fileName: str,

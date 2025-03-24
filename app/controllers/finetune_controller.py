@@ -119,10 +119,17 @@ class FinetuneController:
             raise error
     
 
+    async def get_model_list(self, db):
+        try:
+            data = await self.finetune_repo.get_models(db)
+            return data
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            raise error
+
 
     async def initiate_training(
         self,
-        db,
         startDate: datetime,
         endDate: datetime,
         fileName: str,
@@ -152,7 +159,7 @@ class FinetuneController:
             raise error
         
 
-        
+
     async def start_training(
             self, 
             filter_data, 
