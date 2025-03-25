@@ -184,10 +184,10 @@ async def delete_eval_data(
 
 @router.post("/initiate_evaluating", status_code=status.HTTP_200_OK)
 async def initiate_evaluating(
-    fileName: str = Query(None, description="fileName of the eval data file"),
-    isActive: bool = Query(None, description="isActive"),
-    startDate: str =  Query(None, description=f"startDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
-    endDate: str =  Query(None, description=f"endDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
+    fileName: str = Query(None, description="filter the testing data on fileName of the eval data file"),
+    isActive: bool = Query(None, description="filter the testing data if its isActive = true or false"),
+    startDate: str =  Query(None, description=f"filter the training data from starting date: startDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
+    endDate: str =  Query(None, description=f"filter the training data to end date: endDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
     modelDataId: str =  Query(..., description="Model Data Id which we need to evaluate"),
     eval_controller: EvaluationController = Depends(get_eval_controller),
 ):

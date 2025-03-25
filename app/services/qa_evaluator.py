@@ -8,7 +8,9 @@ sys.path.append(os.getcwd())
 import numpy as np
 from tqdm import tqdm
 from app.services.pinecone_vectorizer import OpenAIEmbedding, VectorizerEngine
+from app.utils.helpers.prompt_helper import chat_system_content_message
 from app.utils.config import settings
+from app.services.chat_service import ChatService
 import openai
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 from app.utils.logger import setup_logger
@@ -36,6 +38,8 @@ class QAEvaluator:
             namespace="questions"
         )
         self.similarity_threshold = 0.8
+        self.system_prompt = chat_system_content_message()
+        self.chat_service = ChatService()
         self.service_name = "qa_evaluator"
 
     async def get_precision_recall_f1(self, generated_sim_scores: List[float], true_sim_scores: List[float]) -> Union[dict, None]:
@@ -91,25 +95,6 @@ class QAEvaluator:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return score
 
-
-    async def get_ai_response(self, question: str, model_id: str) -> Union[str, None]:
-        try:
-            response = await asyncio.to_thread(
-                self.client.chat.completions.create,  # Correct method for OpenAI >= 1.0
-                model=model_id,
-                messages=[
-                    {"role": "system", "content": "You are a Credit Genius Assistant."},
-                    {"role": "user", "content": question}
-                ],
-                temperature=self.temperature,
-                max_tokens=self.max_tokens
-            )
-            return response.choices[0].message.content.strip()
-        except Exception as error:
-            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
-            return None
-    
-
     async def sync_vector_db(self, qa_pairs: List[dict]) -> bool: 
         """
         Sync the vector DB with the latest data.
@@ -160,7 +145,7 @@ class QAEvaluator:
             # Load the vector store
             self.vectorizer.load_vectorstore()
             # Get the AI response for the question
-            ai_response = await self.get_ai_response(question, model_id)
+            ai_response = await self.chat_service.get_response(question, model_id)
             if ai_response:
                 # Get the similarity score between the question actual answer and the AI response
                 generated_similarity_score, true_similarity_score = await self.vectorizer.get_qa_similarity_score(

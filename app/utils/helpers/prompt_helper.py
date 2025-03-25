@@ -70,3 +70,6 @@ def create_answer_generation_conversation_messages(question, text):
 
 def finetune_system_content_massage():
     return settings.FINETUNE_SYSTEM_PROMPT
+
+def chat_system_content_message():
+    return settings.CHAT_SYSTEM_PROMPT

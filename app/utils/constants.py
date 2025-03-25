@@ -29,6 +29,7 @@ class RoutePrefix(Enum):
     DATA_INGESTION = "/data_ingestion"
     FINETUNE = "/finetune"
     EVALUATION = "/eval"
+    CHAT = "/chat"
 
 
 class RouteTag(Enum):
@@ -47,3 +48,4 @@ class RouteTag(Enum):
     DATA_INGESTION = "Data Ingestion"
     FINETUNE = "Finetune"
     EVALUATION = "Eval"
+    CHAT = "Chat"

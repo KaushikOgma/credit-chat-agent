@@ -178,10 +178,10 @@ async def delete_train_data(
 
 @router.post("/initiate_training", status_code=status.HTTP_200_OK)
 async def initiate_training(
-    fileName: str = Query(None, description="fileName"),
-    isActive: bool = Query(None, description="isActive"),
-    startDate: str =  Query(None, description=f"startDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
-    endDate: str =  Query(None, description=f"endDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
+    fileName: str = Query(None, description="filter the training data on fileName"),
+    isActive: bool = Query(None, description="filter the training data if its isActive = true or false"),
+    startDate: str =  Query(None, description=f"filter the training data from starting date: startDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
+    endDate: str =  Query(None, description=f"filter the training data to ending date: endDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
     finetune_controller: FinetuneController = Depends(get_finetune_controller),
 ):
     

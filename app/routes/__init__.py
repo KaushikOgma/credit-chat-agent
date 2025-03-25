@@ -10,6 +10,7 @@ from app.routes import metadata_route
 from app.routes import data_ingestion_route
 from app.routes import finetune_route
 from app.routes import evaluation_route
+from app.routes import chat_route
 from app.utils.constants import RouteTag, RoutePrefix
 
 # Initialize all routes
@@ -32,4 +33,7 @@ router.include_router(
 )
 router.include_router(
     evaluation_route.router, prefix=RoutePrefix.EVALUATION.value, tags=[RouteTag.EVALUATION.value]
+)
+router.include_router(
+    chat_route.router, prefix=RoutePrefix.CHAT.value, tags=[RouteTag.CHAT.value]
 )
