@@ -85,15 +85,17 @@ class OpenAIFineTuner:
         """
         Initiates fine-tuning and monitors progress.
         """
+        job_id = None
+        model_id = None
         try:
             response = await self.client.fine_tuning.jobs.create(
                 training_file=file_id,
                 model=self.model
             )
-            fine_tune_id = response.id
-            logger.info(f"Fine-tuning started! Job ID: {fine_tune_id}", extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            job_id = response.id
+            logger.info(f"Fine-tuning started! Job ID: {job_id}", extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             while True:
-                job_status = await self.client.fine_tuning.jobs.retrieve(fine_tune_id)
+                job_status = await self.client.fine_tuning.jobs.retrieve(job_id)
                 status = job_status.status
 
                 if status in ["succeeded", "failed"]:
@@ -103,37 +105,69 @@ class OpenAIFineTuner:
             if status == "succeeded":
                 model_id = job_status.fine_tuned_model
                 logger.info(f"Fine-tuning completed! Model ID: {model_id}", extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
-                return model_id
+                return job_id, model_id
             else:
-                logger.info(f"Fine-tuning Failed! Job ID: {fine_tune_id}", extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
-                return None
+                logger.info(f"Fine-tuning Failed! Job ID: {job_id}", extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+                return job_id, model_id
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
-            return ""
+            return job_id, model_id
         
+
+    async def get_training_params(self, job_id: str):
+        params = None
+        try:
+            response = await self.client.fine_tuning.jobs.retrieve(fine_tuning_job_id=job_id)
+            params = response.model_dump()
+            # params = {
+            #     "fine_tuned_model": response.fine_tuned_model,
+            #     "base_model": response.model,
+            #     "training_file": response.training_file,
+            #     "trained_tokens": response.trained_tokens,
+            #     "fine_tuning_hyperparameters": {
+            #         "batch_size": response.hyperparameters.batch_size,
+            #         "learning_rate_multiplier": response.hyperparameters.learning_rate_multiplier,
+            #         "n_epochs": response.hyperparameters.n_epochs
+            #     },
+            #     "training_method": response.method.type,
+            #     "job_status": response.status,
+            #     "result_files": response.result_files
+            # }
+            return params
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            return params
+
+
     async def start_finetune(self, qa_data: List[dict]):
-        model_id = None
+        train_info = {
+            "file_id": None,
+            "job_id": None,
+            "model_id": None,
+            "params": None,
+        }
         try:
             # Convert to JSONL format
             jsonl_data = await self.convert_to_jsonl(qa_data)
-            
-            if not jsonl_data:
-                print("JSONL conversion failed.")
-                return model_id
-
-            # Upload JSONL data
-            file_id = await self.upload_jsonl_data(jsonl_data)
-
-            if not file_id:
-                print("File upload failed.")
-                return model_id
-
-            # Fine-tune the model
-            model_id = await self.fine_tune_model(file_id)
-
+            if jsonl_data:
+                # Upload JSONL data
+                file_id = await self.upload_jsonl_data(jsonl_data)
+                if file_id:
+                    train_info["file_id"] = file_id
+                    # Fine-tune the model
+                    job_id, model_id = await self.fine_tune_model(file_id)
+                    train_info["job_id"] = job_id
+                    train_info["model_id"] = model_id
+                    if model_id:
+                        train_info["params"] = await self.get_training_params(job_id)
+                else:
+                    logger.exception(f"JSONL file Upload failed.", extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            else:
+                logger.exception(f"JSONL conversion failed.", extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            return train_info
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
-            return model_id
+            return train_info
 
 
 
@@ -182,10 +216,10 @@ async def start_training():
         return
 
     # Fine-tune the model
-    model_id = await fine_tuner.fine_tune_model(file_id)
+    job_id, model_id = await fine_tuner.fine_tune_model(file_id)
 
     if model_id:
-        print(f"Fine-tuning completed! New Model ID: {model_id}")
+        print(f"Fine-tuning completed with Job ID: {job_id}, New Model ID: {model_id}")
     else:
         print("Fine-tuning failed.")
 

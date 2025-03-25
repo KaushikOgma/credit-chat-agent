@@ -125,7 +125,7 @@ class EvaluationController:
                     filterData["createdAt"]["$lte"] = convert_timezone(endDate, to_string=False, timeZone="UTC")
             data = await self.eval_repo.get_eval_data(db, filterData, {"createdAt": -1})
             ids_list = [elm["_id"] for elm in data]
-            print("delete_eval_data_from_vector_db:: ",ids_list)
+            print("delete_eval_data_from_vector_db:: ",len(ids_list))
             has_deleted = await self.question_evaluator.delete_eval_data_from_vector_db(id_list=ids_list)
             if has_deleted:
                 data = await self.eval_repo.delete_eval_data(db, filterData)
@@ -141,7 +141,7 @@ class EvaluationController:
         endDate: datetime,
         fileName: str,
         isActive: bool,
-        model_id: str,
+        model_data_id: str,
     ) -> dict:
         try:
             filterData = {}
@@ -159,7 +159,7 @@ class EvaluationController:
                 else:
                     filterData["createdAt"]["$lte"] = convert_timezone(endDate, to_string=False, timeZone="UTC")
             asyncio.create_task(
-                self.start_evaluating(filterData, model_id)
+                self.start_evaluating(filterData, model_data_id)
             )
             return True
         except Exception as error:
@@ -171,16 +171,20 @@ class EvaluationController:
     async def start_evaluating(
             self, 
             filter_data, 
-            model_id
+            model_data_id
         ):
         try:       
             async with get_db() as db:
                 qa_data = await self.eval_repo.get_eval_data(db, filter_data, {"createdAt": -1})
-                ids_list = [elm["_id"] for elm in qa_data]
-                qa_data = await self.eval_repo.get_eval_qa_pairs(db, ids_list)
-                result = await self.question_evaluator.evaluate_qa_pairs(qa_data)
-                if result:
-                    await self.eval_repo.save_eval_result(db, model_id, result["agg_scores"])
+                if len(qa_data) > 0:
+                    model_data = await self.eval_repo.get_model_details_by_id(db, id=model_data_id) 
+                    if model_data:
+                        model_id = model_data["model_id"]
+                        ids_list = [elm["_id"] for elm in qa_data]
+                        qa_data = await self.eval_repo.get_eval_qa_pairs(db, ids_list)
+                        result = await self.question_evaluator.evaluate_qa_pairs(qa_data, model_id)
+                        if result:
+                            await self.eval_repo.save_eval_result(db, model_data_id, result["agg_scores"])
         except Exception as error:
             logger.exception(error)
             raise error

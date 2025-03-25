@@ -206,7 +206,7 @@ async def initiate_training(
                 raise HTTPException(status_code=400, detail=f"endDate must be in {settings.ACCEPTED_DATE_TIME_STRING} format")
         await finetune_controller.initiate_training(startDate, endDate, fileName, isActive)
         return JSONResponse(
-            status_code=200, content={"message": "Data deleted successfully"}
+            status_code=200, content={"message": "Finetuning started successfully"}
         )
     except Exception as error:
         logger.exception(error)

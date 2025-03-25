@@ -167,11 +167,13 @@ class FinetuneController:
         try:       
             async with get_db() as db:
                 qa_data = await self.finetune_repo.get_tarin_data(db, filter_data, {"createdAt": -1})
-                ids_list = [elm["_id"] for elm in qa_data]
-                qa_data = await self.finetune_repo.get_train_qa_pairs(db, ids_list)
-                model_id = await self.opeai_finetuner.start_finetune(qa_data)
-                if model_id:
-                    await self.finetune_repo.save_model(db, model_id)
+                if len(qa_data) > 0:
+                    ids_list = [elm["_id"] for elm in qa_data]
+                    qa_data = await self.finetune_repo.get_train_qa_pairs(db, ids_list)
+                    train_info = await self.opeai_finetuner.start_finetune(qa_data)
+                    if train_info["model_id"] is not None:
+                        await self.finetune_repo.save_model(db, ids_list, train_info["file_id"], train_info["job_id"], train_info["model_id"], train_info["params"])
+                        await self.finetune_repo.make_train_data_processed(db, ids_list)
         except Exception as error:
             logger.exception(error)
             raise error

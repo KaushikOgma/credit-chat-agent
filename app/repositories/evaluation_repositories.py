@@ -1,6 +1,7 @@
 
 import traceback
 from typing import List
+from app.attribute_selector.finetune_attributes import FinetuneProjections
 from app.utils.config import settings
 from app.utils.constants import DBCollections
 from app.utils.helpers.common_helper import generate_uuid
@@ -60,6 +61,17 @@ class EvaluationRepository:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
             raise error
 
+
+    async def get_eval_data_details_by_id(self, db: Database, id: str):
+        try:
+            data = dict(db[DBCollections.TEST_DATA.value].find_one({"_id": id}, EvaluationProjections.get_all_attribute()))
+            return data
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
+            raise error
+        
+
+
     async def update_eval_data(self, db: Database, id: str, data: dict):
         try:
             is_train_ata_exists = (
@@ -82,7 +94,7 @@ class EvaluationRepository:
 
     async def make_eval_data_processed(self, db: Database, eval_ids: list[str]):
         try:
-            db[DBCollections.TEST_DATA.value].update_one({"_id": {"$in": eval_ids}}, {"$set": {"isProcessed": True}})
+            db[DBCollections.TEST_DATA.value].update_many({"_id": {"$in": eval_ids}}, {"$set": {"isProcessed": True}})
             return True
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
@@ -121,18 +133,18 @@ class EvaluationRepository:
             raise error
         
 
-    async def save_eval_result(self, db: Database, model_id: str, metrices: dict):
+    async def save_eval_result(self, db: Database, model_data_id: str, metrices: dict):
         try:
             is_model_data_exists = (
                 db[DBCollections.MODEL_DATA.value].find_one({
-                    "_id": model_id
+                    "_id": model_data_id
                 })
             )
             if is_model_data_exists:
                 temp_data = {}
                 temp_data["metrices"] = metrices
                 temp_data["updatedAt"] = get_user_time()
-                db[DBCollections.TRAIN_DATA.value].update_one({"_id": is_model_data_exists["_id"]}, {"$set": temp_data})
+                db[DBCollections.MODEL_DATA.value].update_one({"_id": is_model_data_exists["_id"]}, {"$set": temp_data})
                 return False
             else:
                 return True
@@ -140,3 +152,15 @@ class EvaluationRepository:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
             raise error
         
+
+
+
+    async def get_model_details_by_id(self, db: Database, id: str):
+        try:
+            data = dict(db[DBCollections.MODEL_DATA.value].find_one({"_id": id}, FinetuneProjections.get_model_attribute()))
+            return data
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
+            raise error
+        
+

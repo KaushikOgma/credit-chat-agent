@@ -25,7 +25,6 @@ class QAEvaluator:
         # Initialize the Vectorizer Engine
         self.temperature = 0.7
         self.max_tokens = 500
-        self.model_id = settings.FINETUNED_MODEL_NAME
         self.openai = openai
         self.openai.api_key = settings.OPENAI_API_KEY
         self.client = self.openai.Client()  # Create a client instance
@@ -93,11 +92,11 @@ class QAEvaluator:
             return score
 
 
-    async def get_ai_response(self, question) -> Union[str, None]:
+    async def get_ai_response(self, question: str, model_id: str) -> Union[str, None]:
         try:
             response = await asyncio.to_thread(
                 self.client.chat.completions.create,  # Correct method for OpenAI >= 1.0
-                model=self.model_id,
+                model=model_id,
                 messages=[
                     {"role": "system", "content": "You are a Credit Genius Assistant."},
                     {"role": "user", "content": question}
@@ -147,7 +146,7 @@ class QAEvaluator:
             self.vectorizer.unload_vectorstore()
         
 
-    async def evaluate_single_qa(self, question: str) -> float:
+    async def evaluate_single_qa(self, question: str, model_id: str) -> float:
         """
         Evaluate a single QA by checking if the AI response is present in the vector DB.
 
@@ -161,7 +160,7 @@ class QAEvaluator:
             # Load the vector store
             self.vectorizer.load_vectorstore()
             # Get the AI response for the question
-            ai_response = await self.get_ai_response(question)
+            ai_response = await self.get_ai_response(question, model_id)
             if ai_response:
                 # Get the similarity score between the question actual answer and the AI response
                 generated_similarity_score, true_similarity_score = await self.vectorizer.get_qa_similarity_score(
@@ -179,7 +178,7 @@ class QAEvaluator:
             self.vectorizer.unload_vectorstore()
     
 
-    async def evaluate_qa_pairs(self, qa_pairs: List[dict]) -> Union[dict, None]:
+    async def evaluate_qa_pairs(self, qa_pairs: List[dict], model_id: str) -> Union[dict, None]:
         """
         Evaluate a list of QA pairs by checking if the AI response is present in the vector DB.
 
@@ -199,11 +198,12 @@ class QAEvaluator:
             if is_synced:
                 for qa_pair in tqdm(qa_pairs, desc="Evaluating QA pairs"):
                     question = qa_pair['question'].strip()
-                    generated_answer, generated_score, true_score = await self.evaluate_single_qa(question)
+                    generated_answer, generated_score, true_score = await self.evaluate_single_qa(question, model_id)
                     generated_score_list.append(generated_score)
                     true_score_list.append(true_score)
                     generated_answers[question] = {"answer": generated_answer, "similarity_score": generated_score}
                 agg_scores = await self.get_precision_recall_f1(generated_score_list,true_score_list)
+                agg_scores["eval_sample_count"] = len(qa_pairs)
             return {
                 "generated_answers": generated_answers,
                 "agg_scores": agg_scores
@@ -219,7 +219,7 @@ class QAEvaluator:
 async def start_evaluation():
     # Initialize the fine-tuner
     qa_evaluator = QAEvaluator()
-
+    model_id = "ft:gpt-4o-2024-08-06:the-great-american-credit-secret-llc::BABaftly"
     # Sample Q&A data for testing
     qa_pairs = [
         {
@@ -253,7 +253,7 @@ async def start_evaluation():
             "answer": "Details of your credit accounts, payment history, debts, and sometimes employment history, used to calculate your score."
         }
     ]
-    score = await qa_evaluator.evaluate_qa_pairs(qa_pairs)
+    score = await qa_evaluator.evaluate_qa_pairs(qa_pairs, model_id)
 
 if __name__ == "__main__":
     asyncio.run(start_evaluation())

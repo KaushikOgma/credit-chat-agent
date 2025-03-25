@@ -234,7 +234,6 @@ class MetadataController:
                             startDate = None, 
                             endDate = None, 
                             fileName = elm["fileName"] if "fileName" in elm else None, 
-                            fileType = elm["fileType"] if "fileType" in elm else None, 
                             isActive = None
                         )
                     else:
@@ -243,7 +242,6 @@ class MetadataController:
                             startDate = None, 
                             endDate = None, 
                             fileName = elm["fileName"] if "fileName" in elm else None, 
-                            fileType = elm["fileType"] if "fileType" in elm else None, 
                             isProcessed = None,
                             isActive = None
                         )

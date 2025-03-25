@@ -48,9 +48,12 @@ class FinetuneProjections:
     def get_model_attribute(timezone=None):
         # Use the provided timezone or fall back to the default
         tz = timezone if timezone else settings.APP_TIMEZONE
-        
+
         return {
+            "file_id": 1,
+            "job_id": 1,
             "model_id": 1,
+            "params": 1,
             "metrices": 1,
             "createdAt": {
                 "$dateToString": {

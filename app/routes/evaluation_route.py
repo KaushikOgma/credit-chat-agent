@@ -188,7 +188,7 @@ async def initiate_evaluating(
     isActive: bool = Query(None, description="isActive"),
     startDate: str =  Query(None, description=f"startDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
     endDate: str =  Query(None, description=f"endDate in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
-    modelId: str =  Query(..., description="Model Id which we need to evaluate"),
+    modelDataId: str =  Query(..., description="Model Data Id which we need to evaluate"),
     eval_controller: EvaluationController = Depends(get_eval_controller),
 ):
     
@@ -211,9 +211,9 @@ async def initiate_evaluating(
                 endDate = endDate.replace(hour=23, minute=59, second=59)
             except ValueError:
                 raise HTTPException(status_code=400, detail=f"endDate must be in {settings.ACCEPTED_DATE_TIME_STRING} format")
-        await eval_controller.initiate_evaluating(startDate, endDate, fileName, isActive, modelId)
+        await eval_controller.initiate_evaluating(startDate, endDate, fileName, isActive, modelDataId)
         return JSONResponse(
-            status_code=200, content={"message": "Data deleted successfully"}
+            status_code=200, content={"message": "Evaluation started successfully"}
         )
     except Exception as error:
         logger.exception(error)

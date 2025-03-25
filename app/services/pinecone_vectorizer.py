@@ -115,7 +115,7 @@ class VectorizerEngine:
             # Collect food IDs and metadata
             chunk_qa_pair_id_list = qa_pair_df["question_id"].tolist()
             metadata = qa_pair_df.to_dict(orient="records")
-
+            
             # Build Document instances
             chunk_documents = []
             for text_item, meta in zip(corpus, metadata):
