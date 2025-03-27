@@ -2,7 +2,6 @@ from fastapi import APIRouter, File, Request, Depends, status, Query
 from typing import List, Union
 from pymongo.database import Database
 from app.controllers.chat_controller import ChatController
-from app.middleware.auth_middleware import get_current_user
 from fastapi.responses import JSONResponse
 from starlette import status as starlette_status
 from app.schemas.chat_schema import ChatRequest, ChatResponse
@@ -22,7 +21,6 @@ async def test_chat(
     req_data: ChatRequest,
     model_data_id: str = Query(..., description="Model Id with which you want to test the chat"),
     chat_controller: ChatController = Depends(get_chat_controller),
-    curr_user = Depends(get_current_user),
     db_instance: Database = Depends(get_db)
 ):
     
