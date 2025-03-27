@@ -8,12 +8,10 @@ import os
 sys.path.append(os.getcwd())
 import numpy as np
 from tqdm import tqdm
-from concurrent.futures import ThreadPoolExecutor
 from app.services.pinecone_vectorizer import OpenAIEmbedding, VectorizerEngine
 from app.utils.helpers.prompt_helper import credit_report_process_conversation_messages
 from langchain_openai import ChatOpenAI
 from app.utils.config import settings
-from app.services.chat_service import ChatService
 import openai
 from tenacity import (
     retry,
@@ -160,6 +158,7 @@ class CreditReportProcessor:
             dimension=settings.VECTOR_DIMENSION,
             namespace="credit_reports"
         )
+        self.report_processor = ArrayReportProcessor()
         self.similarity_threshold = 0.8
         self.service_name = "credit_report_processor"
 
@@ -213,60 +212,66 @@ class CreditReportProcessor:
             return None
         
 
-    async def get_response(self, credit_report_json: dict, category: str) -> Union[str, None]:
+    async def get_response(self, credit_report_json: dict, category: str, user_id: str) -> Union[str, None]:
         try:
             messages = credit_report_process_conversation_messages(credit_report_json, category)
             response_content = await self.run_model(messages)
             response_content = await self.parse_json_from_text(response_content)
+            if "topics" in response_content:
+                response_content["topics"] = f"TOPICS: {"; ".join(elm.lower() for elm in response_content["topics"])}"
+            response_content["user_id"] = user_id
             return response_content
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return None
         
 
-    async def get_processed_report(self, credit_report_json: dict):
+    async def get_processed_report(self, credit_report_json: dict, user_id: str):
         try:
             enhanced_report = {}
 
-            async def process_category(category, category_data):
+            async def process_category(category, category_data, user_id):
                 """Helper function to process a single category."""
-                processed_chunks = await self.get_response(category_data, category)
+                processed_chunks = await self.get_response(category_data, category, user_id)
                 return category, processed_chunks
-
             # Run multiple get_response calls concurrently using asyncio.create_task
-            tasks = [asyncio.create_task(process_category(category, data)) for category, data in credit_report_json.items()]
+            tasks = [asyncio.create_task(process_category(category, data, user_id)) for category, data in credit_report_json.items()]
             results = await asyncio.gather(*tasks)
 
             # Collect results
             for category, processed_chunks in results:
                 enhanced_report[category] = processed_chunks
-
             return enhanced_report
-
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return None
 
 
+    async def process_report(self, credit_report_json: dict, user_id: str):
+        mongo_data = None
+        vector_data = None
+        try:
+            categorized_resp = await self.report_processor.collect_categories(credit_report_json)
+            enhanced_resp = await self.get_processed_report({**categorized_resp}, user_id)
+            mongo_data = {"report": categorized_resp, "userId": user_id}
+            vector_data = [{**data, "category": category}for category, data in enhanced_resp.items()]
+            return mongo_data, vector_data
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            return mongo_data, vector_data
+
 async def start_processing():
     # Initialize the fine-tuner
+    user_id = "32b397c1-d160-44bc-9940-3d16542d8718"
     credit_report_processor = CreditReportProcessor()
-    report_processor = ArrayReportProcessor()
     credit_report_json_path = os.path.join(".", settings.LOCAL_UPLOAD_LOCATION ,"array_data.json")
     processed_credit_report_json_path = os.path.join(".", settings.LOCAL_UPLOAD_LOCATION ,"processed_array_data.json")
     credit_report_json = {}
     with open(credit_report_json_path, "r") as f:
         credit_report_json = json.load(f)
-    # resp = await credit_report_processor.get_processed_report(credit_report_json, user_id)
-    categorize_resp = await report_processor.collect_categories(credit_report_json)
-    categorize_resp_org = {**categorize_resp}
-    # print("categorize_resp:: \n",json.dumps(categorize_resp, indent=3))
-    enhanced_resp = await credit_report_processor.get_processed_report(categorize_resp)
-    for cat, data in enhanced_resp.items():
-        enhanced_resp[cat] = {**enhanced_resp[cat], "raw_data": categorize_resp_org[cat]}
-    print("enhanced_resp:: \n",json.dumps(enhanced_resp, indent=3))
+    mongo_data, vector_data = await credit_report_processor.process_report(credit_report_json, user_id)
     with open(processed_credit_report_json_path, "w") as f:
-        json.dump(enhanced_resp, f, indent=3)
+        json.dump(vector_data, f, indent=3)
 
 
 if __name__ == "__main__":

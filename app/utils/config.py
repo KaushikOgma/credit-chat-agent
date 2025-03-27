@@ -93,6 +93,10 @@ class Settings(BaseSettings):
     DB_PASSWORD: str = Field(..., env="DB_PASSWORD")
     SEEDING: str = Field(..., env="SEEDING")
 
+    # Array Configuration
+    ARRAY_APP_KEY: str = Field(..., env="ARRAY_APP_KEY")
+    ARRAY_SERVER_TOKEN: str = Field(..., env="ARRAY_SERVER_TOKEN")
+    ARRAY_BASE_URL: str = Field(..., env="ARRAY_BASE_URL")
 
     @model_validator(mode="before")
     def load_yaml_values(cls, values):
