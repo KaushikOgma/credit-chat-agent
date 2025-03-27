@@ -1,7 +1,7 @@
+import json
 import os
 from langchain.schema import HumanMessage, SystemMessage
 from app.utils.config import settings
-
 
 
 def create_text_cleaning_conversation_messages(text):
@@ -73,3 +73,9 @@ def finetune_system_content_massage():
 
 def chat_system_content_message():
     return settings.CHAT_SYSTEM_PROMPT
+
+def credit_report_process_conversation_messages(credit_report_chunk_json: dict, category: str):
+    context_message = SystemMessage(content=settings.CREDIT_REPORT_PROCESS_SYSTEM_MESSAGE)
+    
+    input_text_message = HumanMessage(content=f"{category}: {json.dumps(credit_report_chunk_json, indent=2)}")
+    return [context_message, input_text_message]

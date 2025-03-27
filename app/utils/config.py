@@ -68,8 +68,8 @@ class Settings(BaseSettings):
 
     # Model Configuration
     OPENAI_API_KEY: str = Field(..., env="OPENAI_API_KEY")
-    EMBEDDING_MODEL_NAME: str = Field(..., env="EMBEDDING_MODEL_NAME")
     BASE_MODEL: str = Field(..., env="BASE_MODEL")
+    ADVANCE_MODEL: str = Field(..., env="ADVANCE_MODEL")
     BASE_MODEL_FOR_FINETUNE: str = Field(..., env="BASE_MODEL_FOR_FINETUNE")
     BASE_AUDIO_MODEL: str = Field(..., env="BASE_AUDIO_MODEL")
     BASE_MODEL_TOKEN_LIMIT: int = Field(..., env="BASE_MODEL_TOKEN_LIMIT")
@@ -82,6 +82,8 @@ class Settings(BaseSettings):
     # DB Configuration
     PINECONE_API_KEY: str = Field(..., env="PINECONE_API_KEY")
     VECTOR_DB_NAME: str = Field(..., env="VECTOR_DB_NAME")
+    VECTOR_DIMENSION: str = Field(..., env="VECTOR_DIMENSION")
+    EMBEDDING_MODEL_NAME: str = Field(..., env="EMBEDDING_MODEL_NAME")
 
     DB_NAME: str = Field(..., env="DB_NAME")
     DB_PROTOCOL: str = Field(..., env="DB_PROTOCOL")

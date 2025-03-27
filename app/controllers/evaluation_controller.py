@@ -3,7 +3,7 @@ from fastapi import Depends
 from fastapi.responses import JSONResponse
 from app.db import get_db
 from app.utils.helpers.date_helper import get_user_time, convert_timezone
-from app.repositories.finetune_repositories import FinetuneRepository
+from app.repositories.model_data_repositories import ModelDataRepository
 from app.repositories.evaluation_repositories import EvaluationRepository
 from app.services.qa_evaluator import QAEvaluator
 from datetime import datetime
@@ -16,9 +16,10 @@ logger = setup_logger()
 
 class EvaluationController:
 
-    def __init__(self, eval_repo: EvaluationRepository, question_evaluator: QAEvaluator):
+    def __init__(self, eval_repo: EvaluationRepository, model_data_repo: ModelDataRepository, question_evaluator: QAEvaluator):
         self.eval_repo = eval_repo
         self.question_evaluator = question_evaluator
+        self.model_data_repo = model_data_repo
         self.service_name = "evaluation"
 
     async def get_eval_data(
@@ -177,14 +178,14 @@ class EvaluationController:
             async with get_db() as db:
                 qa_data = await self.eval_repo.get_eval_data(db, filter_data, {"createdAt": -1})
                 if len(qa_data) > 0:
-                    model_data = await self.eval_repo.get_model_details_by_id(db, id=model_data_id) 
+                    model_data = await self.model_data_repo.get_model_details_by_id(db, id=model_data_id) 
                     if model_data:
                         model_id = model_data["model_id"]
                         ids_list = [elm["_id"] for elm in qa_data]
                         qa_data = await self.eval_repo.get_eval_qa_pairs(db, ids_list)
                         result = await self.question_evaluator.evaluate_qa_pairs(qa_data, model_id)
                         if result:
-                            await self.eval_repo.save_eval_result(db, model_data_id, result["agg_scores"])
+                            await self.model_data_repo.save_eval_result(db, model_data_id, result["agg_scores"])
         except Exception as error:
             logger.exception(error)
             raise error

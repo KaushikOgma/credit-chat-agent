@@ -11,6 +11,7 @@ from app.schemas.auth_schema import credential_exception, invalid_credential_res
 from typing import Optional
 from pymongo.database import Database
 from app.utils.config import settings
+from app.utils.constants import DBCollections
 from app.utils.helpers.date_helper import get_user_time
 from app.utils.logger import setup_logger
 
@@ -32,7 +33,7 @@ async def get_current_user(db: Database = Depends(get_db), api_key: Optional[str
         if api_key is None:
             raise credential_exception
         else:
-            user_data = db.user.find_one({
+            user_data = db[DBCollections.USER.value].find_one({
                 "apiKey": api_key
             })
             if not user_data:

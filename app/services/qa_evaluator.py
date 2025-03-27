@@ -29,12 +29,11 @@ class QAEvaluator:
         self.max_tokens = 500
         self.openai = openai
         self.openai.api_key = settings.OPENAI_API_KEY
-        self.client = self.openai.Client()  # Create a client instance
         self.vectorizer = VectorizerEngine(
             encoder=self.encoder,
             vector_db_name=settings.VECTOR_DB_NAME,
             batch_size=10,
-            dimension=768,
+            dimension=settings.VECTOR_DIMENSION,
             namespace="questions"
         )
         self.similarity_threshold = 0.8

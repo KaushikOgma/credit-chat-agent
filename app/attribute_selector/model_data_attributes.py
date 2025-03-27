@@ -1,6 +1,6 @@
 from app.utils.config import settings
 
-class FinetuneProjections:
+class ModelDataProjections:
     """ Projection configurations for user collection queries that support dynamic time zones. """
 
 
@@ -10,12 +10,11 @@ class FinetuneProjections:
         tz = timezone if timezone else settings.APP_TIMEZONE
 
         return {
-            "_id": 1,
-            "fileName": 1,
-            "question": 1,
-            "answer": 1,
-            "isActive": 1,
-            "isProcessed": 1,
+            "file_id": 1,
+            "job_id": 1,
+            "model_id": 1,
+            "params": 1,
+            "metrices": 1,
             "createdAt": {
                 "$dateToString": {
                     "format": settings.ACCEPTED_DATE_TIME_STRING,
@@ -31,14 +30,3 @@ class FinetuneProjections:
                 }
             }
         }
-    
-
-
-    @staticmethod
-    def get_qa_attribute():
-        return {
-            "_id": 0,
-            "question": 1,
-            "answer": 1
-        }
-    

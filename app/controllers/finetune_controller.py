@@ -2,6 +2,7 @@ import asyncio
 from fastapi import Depends
 from fastapi.responses import JSONResponse
 from app.db import get_db
+from app.repositories.model_data_repositories import ModelDataRepository
 from app.utils.helpers.date_helper import get_user_time, convert_timezone
 from app.services.llm_finetune import OpenAIFineTuner
 from app.repositories.finetune_repositories import FinetuneRepository
@@ -15,8 +16,9 @@ logger = setup_logger()
 
 class FinetuneController:
 
-    def __init__(self, finetune_repo: FinetuneRepository, opeai_finetuner: OpenAIFineTuner):
+    def __init__(self, finetune_repo: FinetuneRepository, model_data_repo: ModelDataRepository, opeai_finetuner: OpenAIFineTuner):
         self.finetune_repo = finetune_repo
+        self.model_data_repo = model_data_repo
         self.opeai_finetuner = opeai_finetuner
         self.service_name = "finetune"
 
@@ -121,7 +123,7 @@ class FinetuneController:
 
     async def get_model_list(self, db):
         try:
-            data = await self.finetune_repo.get_models(db)
+            data = await self.model_data_repo.get_models(db)
             return data
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
@@ -172,7 +174,7 @@ class FinetuneController:
                     qa_data = await self.finetune_repo.get_train_qa_pairs(db, ids_list)
                     train_info = await self.opeai_finetuner.start_finetune(qa_data)
                     if train_info["model_id"] is not None:
-                        await self.finetune_repo.save_model(db, ids_list, train_info["file_id"], train_info["job_id"], train_info["model_id"], train_info["params"])
+                        await self.model_data_repo.save_model(db, ids_list, train_info["file_id"], train_info["job_id"], train_info["model_id"], train_info["params"])
                         await self.finetune_repo.make_train_data_processed(db, ids_list)
         except Exception as error:
             logger.exception(error)

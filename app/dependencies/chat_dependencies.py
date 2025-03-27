@@ -1,6 +1,6 @@
 from app.services.chat_service import ChatService
 from app.controllers.chat_controller import ChatController
-from app.repositories.evaluation_repositories import EvaluationRepository
+from app.repositories.model_data_repositories import ModelDataRepository
 
 def get_chat_controller():
     """
@@ -9,9 +9,9 @@ def get_chat_controller():
     Returns:
         DataIngestionController: An instance of DataIngestionController.
     """
-    eval_repo = EvaluationRepository()
+    model_data_repo = ModelDataRepository()
     chat_service = ChatService()
-    return ChatController(chat_service, eval_repo)
+    return ChatController(chat_service, model_data_repo)
 
 # Export the required function
 __all__ = [

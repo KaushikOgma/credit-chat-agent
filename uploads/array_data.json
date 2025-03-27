@@ -1,0 +1,3208 @@
+{
+  "CREDIT_RESPONSE": {
+    "@MISMOVersionID": "2.4",
+    "@CreditResponseID": "CRRep0001",
+    "@CreditReportIdentifier": "6-1kQx9IV0dcBETJR1DWMv",
+    "@CreditReportFirstIssuedDate": "2021-03-03T19:22:19.696Z",
+    "@CreditReportMergeTypeIndicator": "ListAndStack",
+    "@CreditRatingCodeType": "Equifax",
+    "_DATA_INFORMATION": {
+      "DATA_VERSION": [
+        {
+          "@_Name": "Credmo",
+          "@_Number": "1.3"
+        },
+        {
+          "@_Name": "TransUnion",
+          "@_Number": "4"
+        }
+      ]
+    },
+    "CREDIT_BUREAU": null,
+    "CREDIT_REPOSITORY_INCLUDED": {
+      "@_EquifaxIndicator": "N",
+      "@_ExperianIndicator": "N",
+      "@_TransUnionIndicator": "Y"
+    },
+    "CREDIT_FROZEN_STATUS": {
+      "@_EquifaxIndicator": "",
+      "@_ExperianIndicator": "",
+      "@_TransUnionIndicator": "false"
+    },
+    "REQUESTING_PARTY": null,
+    "CREDIT_REQUEST_DATA": {
+      "@BorrowerID": "Borrower01",
+      "CREDIT_REPOSITORY_INCLUDED": {
+        "@_EquifaxIndicator": "N",
+        "@_ExperianIndicator": "N",
+        "@_TransUnionIndicator": "N"
+      }
+    },
+    "BORROWER": {
+      "@BorrowerID": "Borrower01",
+      "@_BirthDate": "1939-09-20",
+      "@_FirstName": "DONALD",
+      "@_MiddleName": "L",
+      "@_LastName": "BLAIR",
+      "@_SSN": "666285344",
+      "@_UnparsedName": "DONALD L BLAIR ",
+      "@_PrintPositionType": "Borrower",
+      "_RESIDENCE": [
+        {
+          "@_StreetAddress": "3627 W POPLAR ST",
+          "@_City": "SAN ANTONIO",
+          "@_State": "TX",
+          "@_PostalCode": "782286435",
+          "@BorrowerResidencyType": "Current"
+        },
+        {
+          "@_StreetAddress": "3345 HOGARTH ST",
+          "@_City": "DETROIT",
+          "@_State": "MI",
+          "@_PostalCode": "48206",
+          "@BorrowerResidencyType": "Prior"
+        }
+      ]
+    },
+    "CREDIT_LIABILITY": [
+      {
+        "@CreditLiabilityID": "TRADE001",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@CreditTradeReferenceID": "Primary",
+        "@_AccountIdentifier": "SX1X9X0X",
+        "@_AccountOpenedDate": "2017-08-08",
+        "@_AccountOwnershipType": "JointContractualLiability",
+        "@_AccountReportedDate": "2018-04-05",
+        "@_AccountStatusType": "Open",
+        "@_AccountType": "Installment",
+        "@_DerogatoryDataIndicator": "Y",
+        "@_HighBalanceAmount": "12991",
+        "@_HighCreditAmount": "12991",
+        "@_LastActivityDate": "2018-02-01",
+        "@_MonthlyPaymentAmount": "491",
+        "@_MonthsReviewedCount": "6",
+        "@_PastDueAmount": "682",
+        "@_TermsMonthsCount": "36",
+        "@_TermsDescription": "36M$491",
+        "@_TermsSourceType": "Provided",
+        "@_UnpaidBalanceAmount": "11232",
+        "@CreditBusinessType": "Finance",
+        "@CreditLoanType": "Automobile",
+        "@CreditLoanTypeCode": "AU",
+        "@_OriginalBalanceAmount": "000012991",
+        "@IsMortgageIndicator": "N",
+        "@IsClosedIndicator": "N",
+        "@LastPaymentDate": "2018-02-01",
+        "_CREDITOR": {
+          "@_Name": "TNT FINANCL"
+        },
+        "_CURRENT_RATING": {
+          "@_Code": "2",
+          "@_Type": "Late30Days"
+        },
+        "_HIGHEST_ADVERSE_RATING": {
+          "@_Code": "2",
+          "@_Type": "Late30Days"
+        },
+        "_LATE_COUNT": {
+          "@_30Days": "01",
+          "@_60Days": "00",
+          "@_90Days": "00"
+        },
+        "_MOST_RECENT_ADVERSE_RATING": {
+          "@_Code": "2",
+          "@_Date": "2018-02-01",
+          "@_Type": "Late30Days"
+        },
+        "_PAYMENT_PATTERN": {
+          "@_Data": "C1CCCC",
+          "@_StartDate": "2018-03-05"
+        },
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "01X91001"
+        }
+      },
+      {
+        "@CreditLiabilityID": "TRADE002",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@CreditTradeReferenceID": "Primary",
+        "@_AccountClosedDate": "2018-02-01",
+        "@_AccountIdentifier": "1X3X7X4X7X6X8X8X8",
+        "@_AccountOpenedDate": "2017-08-19",
+        "@_AccountOwnershipType": "Individual",
+        "@_AccountReportedDate": "2018-03-31",
+        "@_AccountStatusType": "Closed",
+        "@_AccountType": "Open",
+        "@_DerogatoryDataIndicator": "Y",
+        "@_HighBalanceAmount": "4382",
+        "@_LastActivityDate": "2018-02-01",
+        "@_OriginalCreditorName": "07 NELNET ACADEMIC LOAN",
+        "@_UnpaidBalanceAmount": "5458",
+        "@CreditBusinessType": "CollectionServices",
+        "@_OriginalBalanceAmount": "000004382",
+        "@IsMortgageIndicator": "N",
+        "@IsClosedIndicator": "Y",
+        "@IsCollectionIndicator": "Y",
+        "@DateClosedIndicator": "F",
+        "@CollectionDate": "2017-08",
+        "_CREDITOR": {
+          "@_Name": "GLHEC"
+        },
+        "_CURRENT_RATING": {
+          "@_Code": "9",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "_HIGHEST_ADVERSE_RATING": {
+          "@_Code": "9",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "_MOST_RECENT_ADVERSE_RATING": {
+          "@_Code": "9",
+          "@_Date": "2018-02-01",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "CREDIT_COMMENT": {
+          "@_SourceType": "TransUnion",
+          "@_Type": "BureauRemarks",
+          "@_Code": "CLA",
+          "_Text": "PLACED FOR COLLECTION"
+        },
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "02BKW001"
+        }
+      },
+      {
+        "@CreditLiabilityID": "TRADE003",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@CreditTradeReferenceID": "Primary",
+        "@_AccountClosedDate": "2018-02-01",
+        "@_AccountIdentifier": "1X3X7X4X7X6X8X8X8",
+        "@_AccountOpenedDate": "2017-08-19",
+        "@_AccountOwnershipType": "Individual",
+        "@_AccountReportedDate": "2018-03-31",
+        "@_AccountStatusType": "Closed",
+        "@_AccountType": "Open",
+        "@_DerogatoryDataIndicator": "Y",
+        "@_HighBalanceAmount": "3760",
+        "@_LastActivityDate": "2018-02-01",
+        "@_OriginalCreditorName": "07 NELNET ACADEMIC LOAN",
+        "@_UnpaidBalanceAmount": "3895",
+        "@CreditBusinessType": "CollectionServices",
+        "@_OriginalBalanceAmount": "000003760",
+        "@IsMortgageIndicator": "N",
+        "@IsClosedIndicator": "Y",
+        "@IsCollectionIndicator": "Y",
+        "@DateClosedIndicator": "F",
+        "@CollectionDate": "2017-08",
+        "_CREDITOR": {
+          "@_Name": "GLHEC"
+        },
+        "_CURRENT_RATING": {
+          "@_Code": "9",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "_HIGHEST_ADVERSE_RATING": {
+          "@_Code": "9",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "_MOST_RECENT_ADVERSE_RATING": {
+          "@_Code": "9",
+          "@_Date": "2018-02-01",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "CREDIT_COMMENT": {
+          "@_SourceType": "TransUnion",
+          "@_Type": "BureauRemarks",
+          "@_Code": "CLA",
+          "_Text": "PLACED FOR COLLECTION"
+        },
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "02BKW001"
+        }
+      },
+      {
+        "@CreditLiabilityID": "TRADE004",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@CreditTradeReferenceID": "Primary",
+        "@_AccountIdentifier": "9X0X0X0X3X8X2X9",
+        "@_AccountOpenedDate": "2015-01-17",
+        "@_AccountOwnershipType": "Individual",
+        "@_AccountReportedDate": "2018-04-16",
+        "@_AccountStatusType": "Open",
+        "@_AccountType": "Installment",
+        "@_DerogatoryDataIndicator": "Y",
+        "@_HighBalanceAmount": "2753",
+        "@_HighCreditAmount": "2753",
+        "@_LastActivityDate": "2018-03-16",
+        "@_MonthlyPaymentAmount": "19",
+        "@_MonthsReviewedCount": "25",
+        "@_PastDueAmount": "100",
+        "@_TermsMonthsCount": "120",
+        "@_TermsDescription": "120M$19",
+        "@_TermsSourceType": "Provided",
+        "@_UnpaidBalanceAmount": "2950",
+        "@CreditBusinessType": "Employment",
+        "@CreditLoanType": "Educational",
+        "@CreditLoanTypeCode": "ST",
+        "@_OriginalBalanceAmount": "000002753",
+        "@IsMortgageIndicator": "N",
+        "@IsClosedIndicator": "N",
+        "_CREDITOR": {
+          "@_Name": "DEPTEDNELNET"
+        },
+        "_CURRENT_RATING": {
+          "@_Code": "5",
+          "@_Type": "LateOver120Days"
+        },
+        "_HIGHEST_ADVERSE_RATING": {
+          "@_Code": "5",
+          "@_Date": "2018-02-01",
+          "@_Type": "LateOver120Days"
+        },
+        "_LATE_COUNT": {
+          "@_30Days": "00",
+          "@_60Days": "00",
+          "@_90Days": "04"
+        },
+        "_MOST_RECENT_ADVERSE_RATING": {
+          "@_Code": "5",
+          "@_Date": "2018-04-16",
+          "@_Type": "LateOver120Days"
+        },
+        "_PAYMENT_PATTERN": {
+          "@_Data": "43CCCCCCC3CCCC3CCCCCCCCCC",
+          "@_StartDate": "2018-03-16"
+        },
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "02CNN001"
+        }
+      },
+      {
+        "@CreditLiabilityID": "TRADE005",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@CreditTradeReferenceID": "Primary",
+        "@_AccountIdentifier": "7X4X",
+        "@_AccountOpenedDate": "2014-05-03",
+        "@_AccountOwnershipType": "Individual",
+        "@_AccountReportedDate": "2018-04-16",
+        "@_AccountStatusType": "Open",
+        "@_AccountType": "Installment",
+        "@_DerogatoryDataIndicator": "Y",
+        "@_HighBalanceAmount": "2009",
+        "@_HighCreditAmount": "2009",
+        "@_LastActivityDate": "2018-03-16",
+        "@_MonthlyPaymentAmount": "18",
+        "@_MonthsReviewedCount": "46",
+        "@_PastDueAmount": "89",
+        "@_TermsMonthsCount": "120",
+        "@_TermsDescription": "120M$18",
+        "@_TermsSourceType": "Provided",
+        "@_UnpaidBalanceAmount": "2495",
+        "@CreditBusinessType": "Employment",
+        "@CreditLoanType": "Educational",
+        "@CreditLoanTypeCode": "ST",
+        "@_OriginalBalanceAmount": "000002009",
+        "@IsMortgageIndicator": "N",
+        "@IsClosedIndicator": "N",
+        "_CREDITOR": {
+          "@_Name": "NELNET LNS"
+        },
+        "_CURRENT_RATING": {
+          "@_Code": "5",
+          "@_Type": "LateOver120Days"
+        },
+        "_HIGHEST_ADVERSE_RATING": {
+          "@_Code": "5",
+          "@_Date": "2018-02-01",
+          "@_Type": "LateOver120Days"
+        },
+        "_LATE_COUNT": {
+          "@_30Days": "00",
+          "@_60Days": "00",
+          "@_90Days": "04"
+        },
+        "_MOST_RECENT_ADVERSE_RATING": {
+          "@_Code": "5",
+          "@_Date": "2018-04-16",
+          "@_Type": "LateOver120Days"
+        },
+        "_PAYMENT_PATTERN": {
+          "@_Data": "43CCCCXCC3CCCC3CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+          "@_StartDate": "2018-03-16"
+        },
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "08834002"
+        }
+      },
+      {
+        "@CreditLiabilityID": "TRADE006",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@CreditTradeReferenceID": "Primary",
+        "@_AccountIdentifier": "7X4X",
+        "@_AccountOpenedDate": "2014-05-03",
+        "@_AccountOwnershipType": "Individual",
+        "@_AccountReportedDate": "2018-04-16",
+        "@_AccountStatusType": "Open",
+        "@_AccountType": "Installment",
+        "@_DerogatoryDataIndicator": "Y",
+        "@_HighBalanceAmount": "1750",
+        "@_HighCreditAmount": "1750",
+        "@_LastActivityDate": "2018-03-16",
+        "@_MonthlyPaymentAmount": "13",
+        "@_MonthsReviewedCount": "46",
+        "@_PastDueAmount": "67",
+        "@_TermsMonthsCount": "120",
+        "@_TermsDescription": "120M$13",
+        "@_TermsSourceType": "Provided",
+        "@_UnpaidBalanceAmount": "1892",
+        "@CreditBusinessType": "Employment",
+        "@CreditLoanType": "Educational",
+        "@CreditLoanTypeCode": "ST",
+        "@_OriginalBalanceAmount": "000001750",
+        "@IsMortgageIndicator": "N",
+        "@IsClosedIndicator": "N",
+        "_CREDITOR": {
+          "@_Name": "NELNET LNS"
+        },
+        "_CURRENT_RATING": {
+          "@_Code": "5",
+          "@_Type": "LateOver120Days"
+        },
+        "_HIGHEST_ADVERSE_RATING": {
+          "@_Code": "5",
+          "@_Date": "2018-02-01",
+          "@_Type": "LateOver120Days"
+        },
+        "_LATE_COUNT": {
+          "@_30Days": "00",
+          "@_60Days": "00",
+          "@_90Days": "04"
+        },
+        "_MOST_RECENT_ADVERSE_RATING": {
+          "@_Code": "5",
+          "@_Date": "2018-04-16",
+          "@_Type": "LateOver120Days"
+        },
+        "_PAYMENT_PATTERN": {
+          "@_Data": "43CCCCXCC3CCCC3CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+          "@_StartDate": "2018-03-16"
+        },
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "08834002"
+        }
+      },
+      {
+        "@CreditLiabilityID": "TRADE007",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@CreditTradeReferenceID": "Primary",
+        "@_AccountIdentifier": "9X0X0X0X6X4X3X9",
+        "@_AccountOpenedDate": "2015-05-16",
+        "@_AccountOwnershipType": "Individual",
+        "@_AccountReportedDate": "2018-04-16",
+        "@_AccountStatusType": "Open",
+        "@_AccountType": "Installment",
+        "@_DerogatoryDataIndicator": "Y",
+        "@_HighBalanceAmount": "747",
+        "@_HighCreditAmount": "747",
+        "@_LastActivityDate": "2018-03-16",
+        "@_MonthlyPaymentAmount": "5",
+        "@_MonthsReviewedCount": "25",
+        "@_PastDueAmount": "27",
+        "@_TermsMonthsCount": "120",
+        "@_TermsDescription": "120M$5",
+        "@_TermsSourceType": "Provided",
+        "@_UnpaidBalanceAmount": "800",
+        "@CreditBusinessType": "Employment",
+        "@CreditLoanType": "Educational",
+        "@CreditLoanTypeCode": "ST",
+        "@_OriginalBalanceAmount": "000000747",
+        "@IsMortgageIndicator": "N",
+        "@IsClosedIndicator": "N",
+        "_CREDITOR": {
+          "@_Name": "DEPTEDNELNET"
+        },
+        "_CURRENT_RATING": {
+          "@_Code": "5",
+          "@_Type": "LateOver120Days"
+        },
+        "_HIGHEST_ADVERSE_RATING": {
+          "@_Code": "5",
+          "@_Date": "2018-02-01",
+          "@_Type": "LateOver120Days"
+        },
+        "_LATE_COUNT": {
+          "@_30Days": "00",
+          "@_60Days": "00",
+          "@_90Days": "04"
+        },
+        "_MOST_RECENT_ADVERSE_RATING": {
+          "@_Code": "5",
+          "@_Date": "2018-04-16",
+          "@_Type": "LateOver120Days"
+        },
+        "_PAYMENT_PATTERN": {
+          "@_Data": "43CCCCCCC3CCCC3CCCCCCCCCC",
+          "@_StartDate": "2018-03-16"
+        },
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "02CNN001"
+        }
+      },
+      {
+        "@CreditLiabilityID": "TRADE008",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@CreditTradeReferenceID": "Primary",
+        "@_AccountIdentifier": "9X0X0X0X6X4X4X9",
+        "@_AccountOpenedDate": "2015-05-16",
+        "@_AccountOwnershipType": "Individual",
+        "@_AccountReportedDate": "2018-04-16",
+        "@_AccountStatusType": "Open",
+        "@_AccountType": "Installment",
+        "@_DerogatoryDataIndicator": "Y",
+        "@_HighBalanceAmount": "578",
+        "@_HighCreditAmount": "578",
+        "@_LastActivityDate": "2018-03-16",
+        "@_MonthlyPaymentAmount": "4",
+        "@_MonthsReviewedCount": "25",
+        "@_PastDueAmount": "24",
+        "@_TermsMonthsCount": "120",
+        "@_TermsDescription": "120M$4",
+        "@_TermsSourceType": "Provided",
+        "@_UnpaidBalanceAmount": "674",
+        "@CreditBusinessType": "Employment",
+        "@CreditLoanType": "Educational",
+        "@CreditLoanTypeCode": "ST",
+        "@_OriginalBalanceAmount": "000000578",
+        "@IsMortgageIndicator": "N",
+        "@IsClosedIndicator": "N",
+        "_CREDITOR": {
+          "@_Name": "DEPTEDNELNET"
+        },
+        "_CURRENT_RATING": {
+          "@_Code": "5",
+          "@_Type": "LateOver120Days"
+        },
+        "_HIGHEST_ADVERSE_RATING": {
+          "@_Code": "5",
+          "@_Date": "2018-02-01",
+          "@_Type": "LateOver120Days"
+        },
+        "_LATE_COUNT": {
+          "@_30Days": "00",
+          "@_60Days": "00",
+          "@_90Days": "04"
+        },
+        "_MOST_RECENT_ADVERSE_RATING": {
+          "@_Code": "5",
+          "@_Date": "2018-04-16",
+          "@_Type": "LateOver120Days"
+        },
+        "_PAYMENT_PATTERN": {
+          "@_Data": "43CCCCCCC3CCCC3CCCCCCCCCC",
+          "@_StartDate": "2018-03-16"
+        },
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "02CNN001"
+        }
+      },
+      {
+        "@CreditLiabilityID": "TRADE009",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@CreditTradeReferenceID": "Primary",
+        "@_AccountIdentifier": "9X2X4X2X",
+        "@_AccountOpenedDate": "2016-01-08",
+        "@_AccountOwnershipType": "Individual",
+        "@_AccountReportedDate": "2016-07-31",
+        "@_AccountStatusType": "Open",
+        "@_AccountType": "Open",
+        "@_DerogatoryDataIndicator": "Y",
+        "@_HighBalanceAmount": "621",
+        "@_LastActivityDate": "2016-07-31",
+        "@_MonthlyPaymentAmount": "621",
+        "@_OriginalCreditorName": "OREGON DEPT OF REVENUE",
+        "@_TermsDescription": "M$621",
+        "@_TermsSourceType": "Calculated",
+        "@_UnpaidBalanceAmount": "621",
+        "@CreditBusinessType": "CollectionServices",
+        "@_OriginalBalanceAmount": "000000621",
+        "@IsMortgageIndicator": "N",
+        "@IsClosedIndicator": "N",
+        "@IsCollectionIndicator": "Y",
+        "@CollectionDate": "2016-01",
+        "_CREDITOR": {
+          "@_Name": "NTL CRDT SYS"
+        },
+        "_CURRENT_RATING": {
+          "@_Code": "9",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "_HIGHEST_ADVERSE_RATING": {
+          "@_Code": "9",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "_MOST_RECENT_ADVERSE_RATING": {
+          "@_Code": "9",
+          "@_Date": "2016-07-31",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "CREDIT_COMMENT": {
+          "@_SourceType": "TransUnion",
+          "@_Type": "BureauRemarks",
+          "@_Code": "CLA",
+          "_Text": "PLACED FOR COLLECTION"
+        },
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "036BG001"
+        }
+      },
+      {
+        "@CreditLiabilityID": "TRADE010",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@CreditTradeReferenceID": "Primary",
+        "@_AccountIdentifier": "5X0X1X0",
+        "@_AccountOpenedDate": "2013-04-30",
+        "@_AccountOwnershipType": "Individual",
+        "@_AccountReportedDate": "2018-01-09",
+        "@_AccountStatusType": "Open",
+        "@_AccountType": "Open",
+        "@_DerogatoryDataIndicator": "Y",
+        "@_HighBalanceAmount": "431",
+        "@_LastActivityDate": "2018-01-09",
+        "@_MonthlyPaymentAmount": "610",
+        "@_OriginalCreditorName": "10 PORTLAND GENERAL ELECTRIC",
+        "@_TermsDescription": "M$610",
+        "@_TermsSourceType": "Calculated",
+        "@_UnpaidBalanceAmount": "610",
+        "@CreditBusinessType": "CollectionServices",
+        "@_OriginalBalanceAmount": "000000431",
+        "@IsMortgageIndicator": "N",
+        "@IsClosedIndicator": "N",
+        "@IsCollectionIndicator": "Y",
+        "@CollectionDate": "2013-04",
+        "_CREDITOR": {
+          "@_Name": "BONN COLL"
+        },
+        "_CURRENT_RATING": {
+          "@_Code": "9",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "_HIGHEST_ADVERSE_RATING": {
+          "@_Code": "9",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "_MOST_RECENT_ADVERSE_RATING": {
+          "@_Code": "9",
+          "@_Date": "2018-01-09",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "CREDIT_COMMENT": {
+          "@_SourceType": "TransUnion",
+          "@_Type": "BureauRemarks",
+          "@_Code": "AID",
+          "_Text": "ACCOUNT INFORMATION DISPUTED BY CONSUMER"
+        },
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "0952R001"
+        }
+      },
+      {
+        "@CreditLiabilityID": "TRADE011",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@CreditTradeReferenceID": "Primary",
+        "@_AccountIdentifier": "1X4X2X1X",
+        "@_AccountOpenedDate": "2017-03-20",
+        "@_AccountOwnershipType": "Individual",
+        "@_AccountReportedDate": "2017-08-08",
+        "@_AccountStatusType": "Open",
+        "@_AccountType": "Open",
+        "@_DerogatoryDataIndicator": "Y",
+        "@_HighBalanceAmount": "550",
+        "@_LastActivityDate": "2017-08-08",
+        "@_MonthlyPaymentAmount": "550",
+        "@_OriginalCreditorName": "11 COMCAST",
+        "@_TermsDescription": "M$550",
+        "@_TermsSourceType": "Calculated",
+        "@_UnpaidBalanceAmount": "550",
+        "@CreditBusinessType": "CollectionServices",
+        "@_OriginalBalanceAmount": "000000550",
+        "@IsMortgageIndicator": "N",
+        "@IsClosedIndicator": "N",
+        "@IsCollectionIndicator": "Y",
+        "@CollectionDate": "2017-03",
+        "_CREDITOR": {
+          "@_Name": "CBA"
+        },
+        "_CURRENT_RATING": {
+          "@_Code": "9",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "_HIGHEST_ADVERSE_RATING": {
+          "@_Code": "9",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "_MOST_RECENT_ADVERSE_RATING": {
+          "@_Code": "9",
+          "@_Date": "2017-08-08",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "CREDIT_COMMENT": {
+          "@_SourceType": "TransUnion",
+          "@_Type": "BureauRemarks",
+          "@_Code": "CLA",
+          "_Text": "PLACED FOR COLLECTION"
+        },
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "0720M001"
+        }
+      },
+      {
+        "@CreditLiabilityID": "TRADE012",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@CreditTradeReferenceID": "Primary",
+        "@_AccountIdentifier": "1X5X2X",
+        "@_AccountOpenedDate": "2015-09-02",
+        "@_AccountOwnershipType": "Individual",
+        "@_AccountReportedDate": "2017-11-08",
+        "@_AccountStatusType": "Open",
+        "@_AccountType": "Open",
+        "@_DerogatoryDataIndicator": "Y",
+        "@_HighBalanceAmount": "360",
+        "@_LastActivityDate": "2017-11-08",
+        "@_MonthlyPaymentAmount": "360",
+        "@_OriginalCreditorName": "GUARANTY BEST BANK",
+        "@_TermsDescription": "M$360",
+        "@_TermsSourceType": "Calculated",
+        "@_UnpaidBalanceAmount": "360",
+        "@CreditBusinessType": "CollectionServices",
+        "@_OriginalBalanceAmount": "000000360",
+        "@IsMortgageIndicator": "N",
+        "@IsClosedIndicator": "N",
+        "@IsCollectionIndicator": "Y",
+        "@CollectionDate": "2015-09",
+        "_CREDITOR": {
+          "@_Name": "BOULDER CRED"
+        },
+        "_CURRENT_RATING": {
+          "@_Code": "9",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "_HIGHEST_ADVERSE_RATING": {
+          "@_Code": "9",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "_MOST_RECENT_ADVERSE_RATING": {
+          "@_Code": "9",
+          "@_Date": "2017-11-08",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "CREDIT_COMMENT": {
+          "@_SourceType": "TransUnion",
+          "@_Type": "BureauRemarks",
+          "@_Code": "AID",
+          "_Text": "ACCOUNT INFORMATION DISPUTED BY CONSUMER"
+        },
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "01ZZ8001"
+        }
+      },
+      {
+        "@CreditLiabilityID": "TRADE013",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@CreditTradeReferenceID": "Primary",
+        "@_AccountClosedDate": "2017-08-11",
+        "@_AccountIdentifier": "627645967355",
+        "@_AccountOpenedDate": "2016-11-16",
+        "@_AccountOwnershipType": "Individual",
+        "@_AccountReportedDate": "2018-04-11",
+        "@_AccountStatusType": "Closed",
+        "@_AccountType": "Revolving",
+        "@_ChargeOffDate": "2017-08-11",
+        "@_DerogatoryDataIndicator": "Y",
+        "@_CreditLimitAmount": "150",
+        "@_HighBalanceAmount": "249",
+        "@_HighCreditAmount": "249",
+        "@_LastActivityDate": "2017-08-11",
+        "@_PastDueAmount": "249",
+        "@_UnpaidBalanceAmount": "249",
+        "@CreditBusinessType": "Banking",
+        "@CreditLoanType": "ChargeAccount",
+        "@CreditLoanTypeCode": "CH",
+        "@_OriginalBalanceAmount": "000000249",
+        "@IsMortgageIndicator": "N",
+        "@IsClosedIndicator": "Y",
+        "@IsChargeoffIndicator": "Y",
+        "@DateClosedIndicator": "F",
+        "_CREDITOR": {
+          "@_Name": "METABNK/FHUT"
+        },
+        "_CURRENT_RATING": {
+          "@_Code": "9",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "_HIGHEST_ADVERSE_RATING": {
+          "@_Code": "9",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "_MOST_RECENT_ADVERSE_RATING": {
+          "@_Code": "9",
+          "@_Date": "2017-08-11",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "CREDIT_COMMENT": {
+          "@_SourceType": "TransUnion",
+          "@_Type": "BureauRemarks",
+          "@_Code": "PRL",
+          "_Text": "PROFIT AND LOSS WRITEOFF"
+        },
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "02CVQ001"
+        }
+      },
+      {
+        "@CreditLiabilityID": "TRADE014",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@CreditTradeReferenceID": "Primary",
+        "@_AccountIdentifier": "2X0X8X2",
+        "@_AccountOpenedDate": "2017-12-27",
+        "@_AccountOwnershipType": "Individual",
+        "@_AccountReportedDate": "2018-04-04",
+        "@_AccountStatusType": "Open",
+        "@_AccountType": "Open",
+        "@_DerogatoryDataIndicator": "Y",
+        "@_HighBalanceAmount": "74",
+        "@_LastActivityDate": "2018-04-04",
+        "@_MonthlyPaymentAmount": "74",
+        "@_OriginalCreditorName": "MEDICAL",
+        "@_TermsDescription": "M$74",
+        "@_TermsSourceType": "Calculated",
+        "@_UnpaidBalanceAmount": "74",
+        "@CreditBusinessType": "CollectionServices",
+        "@_OriginalBalanceAmount": "000000074",
+        "@IsMortgageIndicator": "N",
+        "@IsClosedIndicator": "N",
+        "@IsCollectionIndicator": "Y",
+        "@CollectionDate": "2017-12",
+        "_CREDITOR": {
+          "@_Name": "CBM COLLECTN"
+        },
+        "_CURRENT_RATING": {
+          "@_Code": "9",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "_HIGHEST_ADVERSE_RATING": {
+          "@_Code": "9",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "_MOST_RECENT_ADVERSE_RATING": {
+          "@_Code": "9",
+          "@_Date": "2018-04-04",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "CREDIT_COMMENT": {
+          "@_SourceType": "TransUnion",
+          "@_Type": "BureauRemarks",
+          "@_Code": "CLA",
+          "_Text": "PLACED FOR COLLECTION"
+        },
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "03533002"
+        }
+      },
+      {
+        "@CreditLiabilityID": "TRADE015",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@CreditTradeReferenceID": "Primary",
+        "@_AccountClosedDate": "2016-08-31",
+        "@_AccountIdentifier": "3X7X4X7X5X",
+        "@_AccountOpenedDate": "2015-01-17",
+        "@_AccountOwnershipType": "Individual",
+        "@_AccountReportedDate": "2016-08-31",
+        "@_AccountStatusType": "Transferred",
+        "@_AccountType": "Installment",
+        "@_CollateralDescription": "07 NELNET",
+        "@_DerogatoryDataIndicator": "N",
+        "@_HighBalanceAmount": "2753",
+        "@_HighCreditAmount": "2753",
+        "@_LastActivityDate": "2016-08-31",
+        "@_MonthlyPaymentAmount": "0",
+        "@_PastDueAmount": "0",
+        "@_UnpaidBalanceAmount": "0",
+        "@CreditBusinessType": "Employment",
+        "@CreditLoanType": "Educational",
+        "@CreditLoanTypeCode": "ST",
+        "@_OriginalBalanceAmount": "000002753",
+        "@IsMortgageIndicator": "N",
+        "@IsClosedIndicator": "Y",
+        "@DateClosedIndicator": "C",
+        "_CREDITOR": {
+          "@_Name": "ACS/DEPTOFED"
+        },
+        "_CURRENT_RATING": {
+          "@_Code": "1",
+          "@_Type": "AsAgreed"
+        },
+        "CREDIT_COMMENT": {
+          "@_SourceType": "TransUnion",
+          "@_Type": "BureauRemarks",
+          "@_Code": "ACT",
+          "_Text": "ACCOUNT CLOSED DUE TO TRANSFER"
+        },
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "01FSM315"
+        }
+      },
+      {
+        "@CreditLiabilityID": "TRADE016",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@CreditTradeReferenceID": "Primary",
+        "@_AccountClosedDate": "2017-09-30",
+        "@_AccountIdentifier": "7X4X6X5X8XDX0X0X",
+        "@_AccountOpenedDate": "2013-11-19",
+        "@_AccountOwnershipType": "Individual",
+        "@_AccountReportedDate": "2017-09-30",
+        "@_AccountStatusType": "Closed",
+        "@_AccountType": "Installment",
+        "@_ChargeOffDate": "2017-09-30",
+        "@_DerogatoryDataIndicator": "Y",
+        "@_HighBalanceAmount": "3500",
+        "@_HighCreditAmount": "3500",
+        "@_LastActivityDate": "2017-09-19",
+        "@_MonthlyPaymentAmount": "0",
+        "@_MonthsReviewedCount": "44",
+        "@_PastDueAmount": "0",
+        "@_TermsMonthsCount": "119",
+        "@_TermsDescription": "119M",
+        "@_TermsSourceType": "Provided",
+        "@_UnpaidBalanceAmount": "0",
+        "@CreditBusinessType": "Employment",
+        "@CreditLoanType": "Educational",
+        "@CreditLoanTypeCode": "ST",
+        "@_OriginalBalanceAmount": "000003500",
+        "@IsMortgageIndicator": "N",
+        "@IsClosedIndicator": "Y",
+        "@IsChargeoffIndicator": "Y",
+        "@DateClosedIndicator": "C",
+        "@LastPaymentDate": "2017-09-19",
+        "_CREDITOR": {
+          "@_Name": "EDFINANCIAL"
+        },
+        "_CURRENT_RATING": {
+          "@_Code": "5",
+          "@_Type": "LateOver120Days"
+        },
+        "_HIGHEST_ADVERSE_RATING": {
+          "@_Code": "9",
+          "@_Date": "2016-12-01",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "_LATE_COUNT": {
+          "@_30Days": "00",
+          "@_60Days": "00",
+          "@_90Days": "09"
+        },
+        "_MOST_RECENT_ADVERSE_RATING": {
+          "@_Code": "5",
+          "@_Date": "2017-09-30",
+          "@_Type": "LateOver120Days"
+        },
+        "_PAYMENT_PATTERN": {
+          "@_Data": "444444443CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+          "@_StartDate": "2017-08-30"
+        },
+        "CREDIT_COMMENT": {
+          "@_SourceType": "TransUnion",
+          "@_Type": "BureauRemarks",
+          "@_Code": "SLP",
+          "_Text": "STUDENT LOAN PERM ASSIGN GOVERNMENT"
+        },
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "039ED271"
+        }
+      },
+      {
+        "@CreditLiabilityID": "TRADE017",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@CreditTradeReferenceID": "Primary",
+        "@_AccountClosedDate": "2017-09-30",
+        "@_AccountIdentifier": "7X4X6X5X8XDX0X0X",
+        "@_AccountOpenedDate": "2013-11-26",
+        "@_AccountOwnershipType": "Individual",
+        "@_AccountReportedDate": "2017-09-30",
+        "@_AccountStatusType": "Closed",
+        "@_AccountType": "Installment",
+        "@_ChargeOffDate": "2017-09-30",
+        "@_DerogatoryDataIndicator": "Y",
+        "@_HighBalanceAmount": "3467",
+        "@_HighCreditAmount": "3467",
+        "@_LastActivityDate": "2017-09-19",
+        "@_MonthlyPaymentAmount": "0",
+        "@_MonthsReviewedCount": "44",
+        "@_PastDueAmount": "0",
+        "@_TermsMonthsCount": "119",
+        "@_TermsDescription": "119M",
+        "@_TermsSourceType": "Provided",
+        "@_UnpaidBalanceAmount": "0",
+        "@CreditBusinessType": "Employment",
+        "@CreditLoanType": "Educational",
+        "@CreditLoanTypeCode": "ST",
+        "@_OriginalBalanceAmount": "000003467",
+        "@IsMortgageIndicator": "N",
+        "@IsClosedIndicator": "Y",
+        "@IsChargeoffIndicator": "Y",
+        "@DateClosedIndicator": "C",
+        "@LastPaymentDate": "2017-09-19",
+        "_CREDITOR": {
+          "@_Name": "EDFINANCIAL"
+        },
+        "_CURRENT_RATING": {
+          "@_Code": "5",
+          "@_Type": "LateOver120Days"
+        },
+        "_HIGHEST_ADVERSE_RATING": {
+          "@_Code": "9",
+          "@_Date": "2016-12-01",
+          "@_Type": "CollectionOrChargeOff"
+        },
+        "_LATE_COUNT": {
+          "@_30Days": "00",
+          "@_60Days": "00",
+          "@_90Days": "09"
+        },
+        "_MOST_RECENT_ADVERSE_RATING": {
+          "@_Code": "5",
+          "@_Date": "2017-09-30",
+          "@_Type": "LateOver120Days"
+        },
+        "_PAYMENT_PATTERN": {
+          "@_Data": "444444443CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+          "@_StartDate": "2017-08-30"
+        },
+        "CREDIT_COMMENT": {
+          "@_SourceType": "TransUnion",
+          "@_Type": "BureauRemarks",
+          "@_Code": "SLP",
+          "_Text": "STUDENT LOAN PERM ASSIGN GOVERNMENT"
+        },
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "039ED271"
+        }
+      },
+      {
+        "@CreditLiabilityID": "TRADE018",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@CreditTradeReferenceID": "Primary",
+        "@_AccountClosedDate": "2015-10-13",
+        "@_AccountIdentifier": "3X2X9",
+        "@_AccountOpenedDate": "2015-05-16",
+        "@_AccountOwnershipType": "Individual",
+        "@_AccountReportedDate": "2015-10-13",
+        "@_AccountStatusType": "Transferred",
+        "@_AccountType": "Installment",
+        "@_DerogatoryDataIndicator": "N",
+        "@_HighBalanceAmount": "747",
+        "@_HighCreditAmount": "747",
+        "@_LastActivityDate": "2015-10-13",
+        "@_MonthlyPaymentAmount": "0",
+        "@_MonthsReviewedCount": "4",
+        "@_PastDueAmount": "0",
+        "@_TermsMonthsCount": "120",
+        "@_TermsDescription": "120M",
+        "@_TermsSourceType": "Provided",
+        "@_UnpaidBalanceAmount": "0",
+        "@CreditBusinessType": "Employment",
+        "@CreditLoanType": "Educational",
+        "@CreditLoanTypeCode": "ST",
+        "@_OriginalBalanceAmount": "000000747",
+        "@IsMortgageIndicator": "N",
+        "@IsClosedIndicator": "Y",
+        "@DateClosedIndicator": "C",
+        "_CREDITOR": {
+          "@_Name": "NELNET LNS"
+        },
+        "_CURRENT_RATING": {
+          "@_Code": "1",
+          "@_Type": "AsAgreed"
+        },
+        "_LATE_COUNT": {
+          "@_30Days": "00",
+          "@_60Days": "00",
+          "@_90Days": "00"
+        },
+        "_PAYMENT_PATTERN": {
+          "@_Data": "CCCC",
+          "@_StartDate": "2015-09-13"
+        },
+        "CREDIT_COMMENT": {
+          "@_SourceType": "TransUnion",
+          "@_Type": "BureauRemarks",
+          "@_Code": "TRF",
+          "_Text": "TRANSFER"
+        },
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "08834002"
+        }
+      },
+      {
+        "@CreditLiabilityID": "TRADE019",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@CreditTradeReferenceID": "Primary",
+        "@_AccountClosedDate": "2015-10-13",
+        "@_AccountIdentifier": "3X3X9",
+        "@_AccountOpenedDate": "2015-05-16",
+        "@_AccountOwnershipType": "Individual",
+        "@_AccountReportedDate": "2015-10-13",
+        "@_AccountStatusType": "Transferred",
+        "@_AccountType": "Installment",
+        "@_DerogatoryDataIndicator": "N",
+        "@_HighBalanceAmount": "578",
+        "@_HighCreditAmount": "578",
+        "@_LastActivityDate": "2015-10-13",
+        "@_MonthlyPaymentAmount": "0",
+        "@_MonthsReviewedCount": "4",
+        "@_PastDueAmount": "0",
+        "@_TermsMonthsCount": "120",
+        "@_TermsDescription": "120M",
+        "@_TermsSourceType": "Provided",
+        "@_UnpaidBalanceAmount": "0",
+        "@CreditBusinessType": "Employment",
+        "@CreditLoanType": "Educational",
+        "@CreditLoanTypeCode": "ST",
+        "@_OriginalBalanceAmount": "000000578",
+        "@IsMortgageIndicator": "N",
+        "@IsClosedIndicator": "Y",
+        "@DateClosedIndicator": "C",
+        "_CREDITOR": {
+          "@_Name": "NELNET LNS"
+        },
+        "_CURRENT_RATING": {
+          "@_Code": "1",
+          "@_Type": "AsAgreed"
+        },
+        "_LATE_COUNT": {
+          "@_30Days": "00",
+          "@_60Days": "00",
+          "@_90Days": "00"
+        },
+        "_PAYMENT_PATTERN": {
+          "@_Data": "CCCC",
+          "@_StartDate": "2015-09-13"
+        },
+        "CREDIT_COMMENT": {
+          "@_SourceType": "TransUnion",
+          "@_Type": "BureauRemarks",
+          "@_Code": "TRF",
+          "_Text": "TRANSFER"
+        },
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "08834002"
+        }
+      },
+      {
+        "@CreditLiabilityID": "TRADE020",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@CreditTradeReferenceID": "Primary",
+        "@_AccountClosedDate": "2015-08-13",
+        "@_AccountIdentifier": "5X4X9",
+        "@_AccountOpenedDate": "2015-01-17",
+        "@_AccountOwnershipType": "Individual",
+        "@_AccountReportedDate": "2015-08-13",
+        "@_AccountStatusType": "Transferred",
+        "@_AccountType": "Installment",
+        "@_DerogatoryDataIndicator": "N",
+        "@_HighBalanceAmount": "2753",
+        "@_HighCreditAmount": "2753",
+        "@_LastActivityDate": "2015-08-13",
+        "@_MonthlyPaymentAmount": "0",
+        "@_MonthsReviewedCount": "5",
+        "@_PastDueAmount": "0",
+        "@_TermsMonthsCount": "120",
+        "@_TermsDescription": "120M",
+        "@_TermsSourceType": "Provided",
+        "@_UnpaidBalanceAmount": "0",
+        "@CreditBusinessType": "Employment",
+        "@CreditLoanType": "Educational",
+        "@CreditLoanTypeCode": "ST",
+        "@_OriginalBalanceAmount": "000002753",
+        "@IsMortgageIndicator": "N",
+        "@IsClosedIndicator": "Y",
+        "@DateClosedIndicator": "C",
+        "_CREDITOR": {
+          "@_Name": "NELNET LNS"
+        },
+        "_CURRENT_RATING": {
+          "@_Code": "1",
+          "@_Type": "AsAgreed"
+        },
+        "_LATE_COUNT": {
+          "@_30Days": "00",
+          "@_60Days": "00",
+          "@_90Days": "00"
+        },
+        "_PAYMENT_PATTERN": {
+          "@_Data": "CCCCC",
+          "@_StartDate": "2015-07-13"
+        },
+        "CREDIT_COMMENT": {
+          "@_SourceType": "TransUnion",
+          "@_Type": "BureauRemarks",
+          "@_Code": "TRF",
+          "_Text": "TRANSFER"
+        },
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "08834002"
+        }
+      }
+    ],
+    "CREDIT_INQUIRY": [
+      {
+        "@CreditInquiryID": "INQUIRY001",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@_Name": "INTEGRITY SO",
+        "@_Date": "2018-03-26",
+        "@CreditBusinessType": "CollectionServices",
+        "@_PurposeType": "HARD",
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "03735740"
+        }
+      },
+      {
+        "@CreditInquiryID": "INQUIRY002",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@_Name": "SYNCB/WALMRT",
+        "@_Date": "2018-01-10",
+        "@CreditBusinessType": "OilAndNationalCreditCards",
+        "@_PurposeType": "HARD",
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "01212732"
+        }
+      },
+      {
+        "@CreditInquiryID": "INQUIRY003",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@_Name": "DCS",
+        "@_Date": "2017-09-02",
+        "@CreditBusinessType": "CollectionServices",
+        "@_PurposeType": "HARD",
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "02200138"
+        }
+      },
+      {
+        "@CreditInquiryID": "INQUIRY004",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@_Name": "TNT FINANC",
+        "@_Date": "2017-08-20",
+        "@CreditBusinessType": "Automotive",
+        "@_PurposeType": "HARD",
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "00092343"
+        }
+      },
+      {
+        "@CreditInquiryID": "INQUIRY005",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@_Name": "T-MOBILE",
+        "@_Date": "2017-08-11",
+        "@CreditBusinessType": "UtilitiesAndFuel",
+        "@_PurposeType": "HARD",
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "03747126"
+        }
+      },
+      {
+        "@CreditInquiryID": "INQUIRY006",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@_Name": "CAP ONE",
+        "@_Date": "2017-08-03",
+        "@CreditBusinessType": "Banking",
+        "@_PurposeType": "HARD",
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "02699824"
+        }
+      },
+      {
+        "@CreditInquiryID": "INQUIRY007",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@_Name": "CAP ONE",
+        "@_Date": "2017-06-10",
+        "@CreditBusinessType": "Banking",
+        "@_PurposeType": "HARD",
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "02699824"
+        }
+      },
+      {
+        "@CreditInquiryID": "INQUIRY008",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@_Name": "CAVALIER PH",
+        "@_Date": "2016-12-02",
+        "@CreditBusinessType": "UtilitiesAndFuel",
+        "@_PurposeType": "HARD",
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "06193945"
+        }
+      },
+      {
+        "@CreditInquiryID": "INQUIRY009",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@_Name": "METABNK/FHUT",
+        "@_Date": "2016-11-20",
+        "@CreditBusinessType": "DepartmentAndMailOrder",
+        "@_PurposeType": "HARD",
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "03764143"
+        }
+      },
+      {
+        "@CreditInquiryID": "INQUIRY010",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@_Name": "METABNK/FHUT",
+        "@_Date": "2016-08-19",
+        "@CreditBusinessType": "DepartmentAndMailOrder",
+        "@_PurposeType": "HARD",
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "03764143"
+        }
+      },
+      {
+        "@CreditInquiryID": "INQUIRY011",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@_Name": "FBD/THINK CA",
+        "@_Date": "2016-07-09",
+        "@CreditBusinessType": "Banking",
+        "@_PurposeType": "HARD",
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "05011227"
+        }
+      },
+      {
+        "@CreditInquiryID": "INQUIRY012",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@_Name": "CAP ONE",
+        "@_Date": "2016-07-03",
+        "@CreditBusinessType": "Banking",
+        "@_PurposeType": "HARD",
+        "CREDIT_REPOSITORY": {
+          "@_SourceType": "TransUnion",
+          "@_SubscriberCode": "02699824"
+        }
+      }
+    ],
+    "CREDIT_FILE": {
+      "@CreditFileID": "TA01",
+      "@BorrowerID": "Borrower01",
+      "@CreditScoreID": "SCORE001",
+      "@CreditRepositorySourceType": "TransUnion",
+      "@_InfileDate": "2018-05-18",
+      "@_ResultStatusType": "FileReturned",
+      "_ALERT_MESSAGE": {
+        "@_CategoryType": "FACTARiskScoreValue",
+        "@_Type": "Other",
+        "@_TypeOtherDescription": "Facta Fifth Reason Code",
+        "@_Code": "I",
+        "_Text": "THE NUMBER OF INQUIRIES HAS ADVERSELY AFFECTED THE CREDIT SCORE"
+      },
+      "_BORROWER": {
+        "@_UnparsedName": "DONALD L BLAIR",
+        "@_BirthDate": "1939-09-20",
+        "@_FirstName": "DONALD",
+        "@_MiddleName": "L",
+        "@_LastName": "BLAIR",
+        "@_SSN": "666285344",
+        "_RESIDENCE": [
+          {
+            "@BorrowerResidencyType": "Current",
+            "@_StreetAddress": "3627 W POPLAR ST",
+            "@_City": "SAN ANTONIO",
+            "@_State": "TX",
+            "@_PostalCode": "782286435",
+            "@BorrowerResidencyDurationYears": "1",
+            "@BorrowerResidencyDurationMonths": "9",
+            "@_DateReported": "2016-08-01"
+          },
+          {
+            "@BorrowerResidencyType": "Prior",
+            "@_StreetAddress": "3345 HOGARTH ST",
+            "@_City": "DETROIT",
+            "@_State": "MI",
+            "@_PostalCode": "48206",
+            "@BorrowerResidencyDurationYears": "1",
+            "@BorrowerResidencyDurationMonths": "4",
+            "@_DateReported": "2017-01-17"
+          },
+          {
+            "@BorrowerResidencyType": "Prior",
+            "@_StreetAddress": "1707 WAVERLY ST",
+            "@_City": "DETROIT",
+            "@_State": "MI",
+            "@_PostalCode": "48238"
+          }
+        ]
+      }
+    },
+    "CREDIT_SCORE": [
+      {
+        "@CreditScoreID": "SCORE001",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@_Date": "2018-05-18",
+        "@CreditReportIdentifier": "6-1kQx9IV0dcBETJR1DWMv",
+        "@_FACTAInquiriesIndicator": "Y",
+        "@_ModelNameType": "Other",
+        "@_ModelNameTypeOtherDescription": "TransUnionVantageScore3.0",
+        "@_Value": "802",
+        "@CreditRepositorySourceType": "TransUnion",
+        "_FACTOR": [
+          {
+            "@_Code": "12",
+            "@_Text": "The date that you opened your oldest account is too recent"
+          },
+          {
+            "@_Code": "72",
+            "@_Text": "Too many installment accounts with a delinquent or derogatory payment status"
+          },
+          {
+            "@_Code": "8",
+            "@_Text": "You have either very few loans or too many loans with recent delinquencies"
+          },
+          {
+            "@_Code": "63",
+            "@_Text": "Lack of sufficient relevant real estate account information"
+          },
+          {
+            "@_Code": "I",
+            "@_Text": "Inquiries did impact the credit score"
+          }
+        ]
+      },
+      {
+        "@CreditScoreID": "SCORE002",
+        "@BorrowerID": "Borrower01",
+        "@CreditFileID": "TA01",
+        "@_Date": "2018-05-18",
+        "@CreditReportIdentifier": "6-1kQx9IV0dcBETJR1DWMv",
+        "@_ModelNameType": "Other",
+        "@_ModelNameTypeOtherDescription": "TransUnionVantageScore3.0",
+        "@_Value": "553",
+        "@CreditRepositorySourceType": "TransUnion",
+        "_FACTOR": [
+          {
+            "@_Code": "98",
+            "@_Text": "There is a bankruptcy on your credit report"
+          },
+          {
+            "@_Code": "47",
+            "@_Text": "No open bankcard or revolving accounts in your credit file"
+          },
+          {
+            "@_Code": "14",
+            "@_Text": "Lack of sufficient credit history"
+          },
+          {
+            "@_Code": "12",
+            "@_Text": "The date that you opened your oldest account is too recent"
+          }
+        ]
+      }
+    ],
+    "CREDIT_SUMMARY": {
+      "@BorrowerID": "Borrower01",
+      "@_Name": "Attributes",
+      "_DATA_SET": [
+        {
+          "@_Name": "Number of tradelines",
+          "@_Value": "20"
+        },
+        {
+          "@_Name": "Average age of open tradelines",
+          "@_Value": "33"
+        },
+        {
+          "@_Name": "Number of hard inquiries",
+          "@_Value": "12"
+        },
+        {
+          "@_Name": "Number of payments",
+          "@_Value": "272"
+        },
+        {
+          "@_Name": "Revolving utilization on open credit cards",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "Total occurrences of minor delinqs",
+          "@_Value": "44"
+        },
+        {
+          "@_Name": "Total number of major derogatory tradelines",
+          "@_Value": "10"
+        },
+        {
+          "@_Name": "AT01S:Number of trades",
+          "@_Value": "20"
+        },
+        {
+          "@_Name": "AT02S:Number of open trades",
+          "@_Value": "11"
+        },
+        {
+          "@_Name": "AT06S:Number of trades opened in past 6 months",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "AT09S:Number of trades opened in past 24 months",
+          "@_Value": "6"
+        },
+        {
+          "@_Name": "AT20S:Months since oldest trade opened",
+          "@_Value": "61"
+        },
+        {
+          "@_Name": "AT28A:Total credit line of open trades verified in past 12 months",
+          "@_Value": "22243"
+        },
+        {
+          "@_Name": "AT28B:Total credit line of open trades verified in past 12 months (excl mort and home equity)",
+          "@_Value": "22243"
+        },
+        {
+          "@_Name": "AT33A:Total balance of open trades verified in past 12 months",
+          "@_Value": "21637"
+        },
+        {
+          "@_Name": "AT33B:Total balance of open trades verified in past 12 months (excl mort and home equity)",
+          "@_Value": "21637"
+        },
+        {
+          "@_Name": "AT34A:Utilization for open trades verified in past 12 months",
+          "@_Value": "97"
+        },
+        {
+          "@_Name": "AT34B:Utilization for open trades verified in past 12 months (excl mort and home equity)",
+          "@_Value": "97"
+        },
+        {
+          "@_Name": "AT36S:Months since most recent delinquency",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "AT57S:Total past due amount of open trades verified in past 12 months",
+          "@_Value": "989"
+        },
+        {
+          "@_Name": "AT103S:Percentage of satisfactory open trades to all open trades",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "AT104S:Percentage of all trades opened in past 24 months to all trades",
+          "@_Value": "30"
+        },
+        {
+          "@_Name": "ATAP01:Total scheduled monthly payment for all trades verified in past 12 months",
+          "@_Value": "2144"
+        },
+        {
+          "@_Name": "AU28S:Total credit line of open auto trades verified in past 12 months",
+          "@_Value": "12991"
+        },
+        {
+          "@_Name": "AU33S:Total balance of open auto trades verified in past 12 months",
+          "@_Value": "11232"
+        },
+        {
+          "@_Name": "AU34S:Utilization for open auto trades verified in past 12 months",
+          "@_Value": "86"
+        },
+        {
+          "@_Name": "AU57S:Total past due amount of open auto trades verified in past 12 months",
+          "@_Value": "682"
+        },
+        {
+          "@_Name": "BC02S:Number of open credit card trades",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "BC06S:Number of credit card trades opened in past 6 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "BC102S:Average credit line of open credit card trades verified in past 12 months",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "BC12S:Number of open credit card trades verified in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "BC20S:Months since oldest credit card trade opened",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "BC28S:Total credit line of open credit card trades verified in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "BC30S:Percentage of open credit card trades > 50% of credit line verified in past 12 months",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "BC31S:Percentage of open credit card trades > 75% of credit line verified in past 12 months",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "BC33S:Total balance of open credit card trades verified in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "BC34S:Utilization for open credit card trades verified in past 12 months",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "BC57S:Total past due amount of open credit card trades verified in past 12 months",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "CO04S:Months since most recent charged-off trade was first reported",
+          "@_Value": "8"
+        },
+        {
+          "@_Name": "FC04S:Months since most recent foreclosure trade was first reported",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "G020S:Number of trades with maximum delinquency of 30 days past due in past 24 months",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "G051S:Percentage of trades ever delinquent",
+          "@_Value": "80"
+        },
+        {
+          "@_Name": "G093S:Number of public records",
+          "@_Value": "-4"
+        },
+        {
+          "@_Name": "G094S:Number of public record bankruptcies",
+          "@_Value": "-4"
+        },
+        {
+          "@_Name": "G095S:Months since most recent public record",
+          "@_Value": "-4"
+        },
+        {
+          "@_Name": "G103S:Months since most recent credit inquiry",
+          "@_Value": "2"
+        },
+        {
+          "@_Name": "G202A:Total open to buy of open trades verified in past 12 months (excl installs and morts)",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "G215B:Number of non-medical third party collections with balance > $0",
+          "@_Value": "6"
+        },
+        {
+          "@_Name": "G217S:Total past due amount of all trades verified in past 12 months",
+          "@_Value": "1238"
+        },
+        {
+          "@_Name": "G218B:Number of trades verified in the past 12 months that are currently 30+ DPD",
+          "@_Value": "8"
+        },
+        {
+          "@_Name": "G224A:Number of 90 days past due or worse items ever (excluding medical colls)",
+          "@_Value": "14"
+        },
+        {
+          "@_Name": "G238S:Number of credit inquiries in past 12 months (excl coll inqs)",
+          "@_Value": "7"
+        },
+        {
+          "@_Name": "G244S:Number of inquiries (includes duplicates) in past 12 months",
+          "@_Value": "7"
+        },
+        {
+          "@_Name": "G250A:Number of 30 DPD or worse items ever (excluding medical colls)",
+          "@_Value": "15"
+        },
+        {
+          "@_Name": "G250B:Number of 30 DPD or worse items in the past 12 months (excluding medical colls)",
+          "@_Value": "14"
+        },
+        {
+          "@_Name": "G250C:Number of 30 DPD or worse items in the past 24 months (excluding medical colls)",
+          "@_Value": "15"
+        },
+        {
+          "@_Name": "G251A:Number of 60 DPD or worse items ever (excluding medical colls)",
+          "@_Value": "14"
+        },
+        {
+          "@_Name": "G302S:Worst rating on revolving trades in past 12 months",
+          "@_Value": "9"
+        },
+        {
+          "@_Name": "G304S:Worst rating on installment trades in past 12 months",
+          "@_Value": "9"
+        },
+        {
+          "@_Name": "G310S:Worst rating on all trades in past 12 months",
+          "@_Value": "9"
+        },
+        {
+          "@_Name": "GB311:Indicates if bankruptcies have been filed",
+          "@_Value": "-4"
+        },
+        {
+          "@_Name": "HI57S:Total past due amount of open home equity loan trades verified in past 12 months",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "HR57S:Total past due amount of open HELOC trades verified in past 12 months",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "IN02S:Number of open installment trades",
+          "@_Value": "11"
+        },
+        {
+          "@_Name": "IN06S:Number of installment trades opened in past 6 months",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "IN28S:Total credit line of open installment trades verified in past 12 months",
+          "@_Value": "22243"
+        },
+        {
+          "@_Name": "IN33S:Total balance of open installment trades verified in past 12 months",
+          "@_Value": "21637"
+        },
+        {
+          "@_Name": "IN34S:Utilization for open installment trades verified in past 12 months",
+          "@_Value": "97"
+        },
+        {
+          "@_Name": "IN36S:Months since most recent installment delinquency",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "IN57S:Total past due amount of open installment trades verified in past 12 months",
+          "@_Value": "989"
+        },
+        {
+          "@_Name": "MT02S:Number of open mortgage trades",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "MT06S:Number of mortgage trades opened in past 6 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "MT28S:Total credit line of open mortgage trades verified in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "MT33S:Total balance of open mortgage trades verified in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "MT34S:Utilization for open mortgage trades verified in past 12 months",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "MT36S:Months since most recent mortgage delinquency",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "MT57S:Total past due amount of open mortgage trades verified in past 12 months",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "RE02S:Number of open revolving trades",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "RE06S:Number of revolving trades opened in past 6 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "RE12S:Number of open revolving trades verified in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "RE20S:Months since oldest revolving trade opened",
+          "@_Value": "18"
+        },
+        {
+          "@_Name": "RE21S:Months since most recent revolving trade opened",
+          "@_Value": "18"
+        },
+        {
+          "@_Name": "RE28S:Total credit line of open revolving trades verified in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "RE30S:Percentage of open revolving trades > 50% of credit line verified in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "RE31S:Percentage of open revolving trades > 75% of credit line verified in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "RE33S:Total balance of open revolving trades verified in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "RE34S:Utilization for open revolving trades verified in past 12 months",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "RE36S:Months since most recent revolving delinquency",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "RE57S:Total past due amount of open revolving trades verified in past 12 months",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "RE102S:Average credit line of open revolving trades verified in past 12 months",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "RP04S:Months since most recent repossession trade was first reported",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "S004S:Average number of months trades have been on file",
+          "@_Value": "25"
+        },
+        {
+          "@_Name": "S043S:Number of open trades > 50% of credit line verified in 12 mons (excl installs and morts)",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "S061S:Months since most recent 60 or more days past due",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "S062S:Months since most recent 90 or more days past due",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "S068A:Number of third party collections",
+          "@_Value": "7"
+        },
+        {
+          "@_Name": "S114S:Number of deduped inquiries in past 6 months (excl auto and mortgage inquiries)",
+          "@_Value": "2"
+        },
+        {
+          "@_Name": "S204A:Total balance of non-medical third party collections verified in past 12 months",
+          "@_Value": "10873"
+        },
+        {
+          "@_Name": "S207A:Months since most recent tradeline bankruptcy",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "S207S:Months since most recent public record bankruptcy",
+          "@_Value": "-4"
+        },
+        {
+          "@_Name": "S209A:Months since most recent non-medical third party collection",
+          "@_Value": "9"
+        },
+        {
+          "@_Name": "ST28S:Total credit line of open student loan trades verified in past 12 months",
+          "@_Value": "7837"
+        },
+        {
+          "@_Name": "ST33S:Total balance of open student loan trades verified in past 12 months",
+          "@_Value": "8811"
+        },
+        {
+          "@_Name": "ST34S:Utilization for open student loan trades verified in past 12 months",
+          "@_Value": "112"
+        },
+        {
+          "@_Name": "ST57S:Total past due amount of open student loan trades verified in past 12 months",
+          "@_Value": "307"
+        },
+        {
+          "@_Name": "PT014:Total Scheduled Monthly Payment",
+          "@_Value": "2765"
+        },
+        {
+          "@_Name": "PT016:Utilization on revolving trades",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "PT017:Total balance on open revolving trades",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT019:Total Mortgage Monthly Payment",
+          "@_Value": "-5"
+        },
+        {
+          "@_Name": "PT020:Total balance on open Mortgages",
+          "@_Value": "-5"
+        },
+        {
+          "@_Name": "PT021:Total Monthly Automobile Payment",
+          "@_Value": "491"
+        },
+        {
+          "@_Name": "PT022:Date of oldest trade",
+          "@_Value": "042013"
+        },
+        {
+          "@_Name": "PT023:Months since infile created at bureau",
+          "@_Value": "97"
+        },
+        {
+          "@_Name": "PT027:Total occurrances of delinquencies in past 12 months",
+          "@_Value": "11"
+        },
+        {
+          "@_Name": "PT038:Number of Inquiries in past 6 months",
+          "@_Value": "2"
+        },
+        {
+          "@_Name": "PT054:Total Credit Limit/High Credit on open tradelines",
+          "@_Value": "22864"
+        },
+        {
+          "@_Name": "PT056:Total balance on all tradelines",
+          "@_Value": "31860"
+        },
+        {
+          "@_Name": "PT063:Number of currently delinquent tradelines",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "PT064:Number of currently delinquent revolving tradelines",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT065:Number of currently delinquent installment tradelines",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "PT068:Average balance on open tradelines",
+          "@_Value": "2023"
+        },
+        {
+          "@_Name": "PT069:Number of Chargeoffs in past 12 months",
+          "@_Value": "3"
+        },
+        {
+          "@_Name": "PT071:Total occurrances of delinquencies in the past 2 years",
+          "@_Value": "18"
+        },
+        {
+          "@_Name": "PT072:Total occurrances of delinquencies in the past 30 days",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "PT073:Total occurrances of delinquencies in the past 60 days",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "PT074:Total occurrances of delinquencies in the past 7 years",
+          "@_Value": "18"
+        },
+        {
+          "@_Name": "PT076:Date of oldest trade",
+          "@_Value": "042013"
+        },
+        {
+          "@_Name": "PT079:Number of months since oldest installment tradeline opened",
+          "@_Value": "61"
+        },
+        {
+          "@_Name": "PT080:Number of months since oldest revolving tradeline opened",
+          "@_Value": "18"
+        },
+        {
+          "@_Name": "PT082:Number of months since most recent tradeline opened",
+          "@_Value": "5"
+        },
+        {
+          "@_Name": "PT083:Number of mortgage trades",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT088:Number of months since 90+ late or worse derogatory",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "PT089:Number of tradelines reported in past 2 months and currently 120 days past due",
+          "@_Value": "5"
+        },
+        {
+          "@_Name": "PT090:Number of tradelines currently 30 days past due",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "PT091:Number of tradelines 90+ days past due in past 24 months",
+          "@_Value": "7"
+        },
+        {
+          "@_Name": "PT092:Number of tradelines opened in past 12 months",
+          "@_Value": "4"
+        },
+        {
+          "@_Name": "PT093:Percentage of tradelines never delinquent",
+          "@_Value": "60"
+        },
+        {
+          "@_Name": "PT094:Number of tradelines ever 120 days past due",
+          "@_Value": "7"
+        },
+        {
+          "@_Name": "PT095:Number of months since oldest bank installment tradeline",
+          "@_Value": "61"
+        },
+        {
+          "@_Name": "PT103:Total credit limit/high credit on open installment tradelines",
+          "@_Value": "22864"
+        },
+        {
+          "@_Name": "PT104:Number of currently satisfactory tradelines",
+          "@_Value": "4"
+        },
+        {
+          "@_Name": "PT105:Number of revolving tradelines",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "PT110:Number of revolving tradelines opened in past 7 years",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "PT111:Total credit limit/high credit on open revolving tradelines",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT112:Total available credit on open bankcard tradelines verified in the last 6 mons",
+          "@_Value": "-5"
+        },
+        {
+          "@_Name": "PT115:Percent of bankcard tradelines gt 75% of credit limit",
+          "@_Value": "-5"
+        },
+        {
+          "@_Name": "PT118:Total credit limit/high credit on open bankcard tradelines",
+          "@_Value": "-5"
+        },
+        {
+          "@_Name": "PT119:Number of bankcard tradelines",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT120:Number of months since most recent bankcard tradeline opened",
+          "@_Value": "-5"
+        },
+        {
+          "@_Name": "PT121:Number of bankcard tradelines opened in the past 6 months",
+          "@_Value": "-5"
+        },
+        {
+          "@_Name": "PT122:Number of bankcard tradelines never delinquent",
+          "@_Value": "-5"
+        },
+        {
+          "@_Name": "PT125:Number of months since most recent bankcard delinquency",
+          "@_Value": "-5"
+        },
+        {
+          "@_Name": "PT126:Percent utilization on bankcard tradelines",
+          "@_Value": "-5"
+        },
+        {
+          "@_Name": "PT129:Number of Public Records with amount gt 100",
+          "@_Value": "-4"
+        },
+        {
+          "@_Name": "PT130:Number of Tax Liens",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT132:Total amount on Collections",
+          "@_Value": "11568"
+        },
+        {
+          "@_Name": "PT133:Number of repossessions",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT134:Number of foreclosures",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT136:Number of Collections/Chargeoffs in past 24 months; excluding medical",
+          "@_Value": "3"
+        },
+        {
+          "@_Name": "PT137:Total amount on Collections in past 36 months; excluding medical",
+          "@_Value": "5"
+        },
+        {
+          "@_Name": "PT138:Number of tradelines active within the past 6 months",
+          "@_Value": "11"
+        },
+        {
+          "@_Name": "PT139:Number of mortgage tradelines opened in past 6 months",
+          "@_Value": "-5"
+        },
+        {
+          "@_Name": "PT140:Number of open installment tradelines opened within the past 24 months",
+          "@_Value": "3"
+        },
+        {
+          "@_Name": "PT141:Total occurrances of 30 days late within the past 12 months on Mortgage trades",
+          "@_Value": "-5"
+        },
+        {
+          "@_Name": "PT142:Number of mortgages passed due 30 days or more in the last 6 months",
+          "@_Value": "-5"
+        },
+        {
+          "@_Name": "PT143:Total occurrances of 30 days late within the past 12 months",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "PT144:Number of collections with amount gt 500",
+          "@_Value": "5"
+        },
+        {
+          "@_Name": "PT145:Total balance on unsecured credit card tradelines",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT146:Total balance on unsecured tradelines",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT147:Total amount on Tax Liens filed within the past 36 months",
+          "@_Value": "-4"
+        },
+        {
+          "@_Name": "PT148:Total amount on Judgements filed within the past 36 months",
+          "@_Value": "-4"
+        },
+        {
+          "@_Name": "PT149:Number of Public Records filed in past 24 months",
+          "@_Value": "-4"
+        },
+        {
+          "@_Name": "PT150:Number of non-federal Student Loan tradelines",
+          "@_Value": "9"
+        },
+        {
+          "@_Name": "PT151:Number of repossessed auto loan tradelines",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT153:Percent utilization on installment tradelines",
+          "@_Value": "71"
+        },
+        {
+          "@_Name": "PT154:Number of revolving tradelines with balance gt 0",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "PT155:Number of installment tradelines opened in past 12 months",
+          "@_Value": "4"
+        },
+        {
+          "@_Name": "PT157:Number of revolving tradelines opened in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT158:Number of revolving tradelines opened in past 24 months",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "PT159:Number of credit union tradelines",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT160:Percent utilization on all open tradelines",
+          "@_Value": "97"
+        },
+        {
+          "@_Name": "PT162:Maximum balance on revolving tradelines",
+          "@_Value": "249"
+        },
+        {
+          "@_Name": "PT163:Number months since more recent installment tradeline opened",
+          "@_Value": "5"
+        },
+        {
+          "@_Name": "PT165:Number of auto tradelines 30 days past due in past 6 months",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "PT166:Number of auto tradelines opened in past 6 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT167:Number of retail tradelines opened in past 6 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT168:Number of student loans opened in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT174:Total amount on Collections; excluding medical",
+          "@_Value": "11494"
+        },
+        {
+          "@_Name": "PT175:Total amount on Tax Liens",
+          "@_Value": "-4"
+        },
+        {
+          "@_Name": "PT176:Total amount on Judgements",
+          "@_Value": "-4"
+        },
+        {
+          "@_Name": "PT177:Total credit limit on open credit card trades",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT178:Total credit limit on open retail trades",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT179:Total balance on open credit card trades",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT180:Total balance on open retail trades",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT181:Age of oldest trade in months",
+          "@_Value": "61"
+        },
+        {
+          "@_Name": "PT182:Total number of open credit card trades",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT183:Total number of open retail trades",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT184:Total number of trades ever delinquent",
+          "@_Value": "8"
+        },
+        {
+          "@_Name": "PT185:Total number of tradelines delinquent in the last 6 months",
+          "@_Value": "6"
+        },
+        {
+          "@_Name": "PT186:Total number of installment tradelines 60 days late or worse in the last 6 months",
+          "@_Value": "5"
+        },
+        {
+          "@_Name": "PT187:Total balances on currently delinquent tradelines",
+          "@_Value": "20043"
+        },
+        {
+          "@_Name": "PT188:Worst current status on any open tradeline",
+          "@_Value": "400"
+        },
+        {
+          "@_Name": "PT189:Worst status in the past 12 months on any mortgage tradeline",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT190:Total number of closed credit card trades",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "PT191:Total number of closed installment trades",
+          "@_Value": "8"
+        },
+        {
+          "@_Name": "PT192:Percent of revolving credit available",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT193:Number of loans or credit cards applied for in past 24 months",
+          "@_Value": "12"
+        },
+        {
+          "@_Name": "PT194:Number of Installment tradelines not delinquent within the last 24 months",
+          "@_Value": "4"
+        },
+        {
+          "@_Name": "PT195:Max credit limit on open bank credit cards",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT196:Number of collections with amount gt 0",
+          "@_Value": "7"
+        },
+        {
+          "@_Name": "PT197:Total Number of delinquent credit card and retail trades in last 6 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT198:Total number of open credit card tradelines with utilization gt 90%",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT199:Total number of open retail tradelines with utilization gt 90%",
+          "@_Value": "10"
+        },
+        {
+          "@_Name": "Deceased Indicator",
+          "@_Value": "N"
+        },
+        {
+          "@_Name": "Public Record Info",
+          "@_Value": ""
+        }
+      ]
+    },
+    "CREDIT_SUMMARY_TUI": {
+      "@BorrowerID": "Borrower01",
+      "@_Name": "Attributes",
+      "_DATA_SET": [
+        {
+          "@_Name": "Number of tradelines",
+          "@_Value": "26"
+        },
+        {
+          "@_Name": "Average age of open tradelines",
+          "@_Value": "48"
+        },
+        {
+          "@_Name": "Average age of open tradelines; exclude auth user and joint ecoa",
+          "@_Value": "48"
+        },
+        {
+          "@_Name": "Number of hard inquiries",
+          "@_Value": "8"
+        },
+        {
+          "@_Name": "Number of payments",
+          "@_Value": "506"
+        },
+        {
+          "@_Name": "Revolving utilization on open credit cards",
+          "@_Value": "14"
+        },
+        {
+          "@_Name": "Total occurrences of minor delinqs",
+          "@_Value": "86"
+        },
+        {
+          "@_Name": "Total number of major derogatory tradelines",
+          "@_Value": "4"
+        },
+        {
+          "@_Name": "AT01S:Number of trades",
+          "@_Value": "26"
+        },
+        {
+          "@_Name": "AT02S:Number of open trades",
+          "@_Value": "13"
+        },
+        {
+          "@_Name": "AT06S:Number of trades opened in past 6 months",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "AT09S:Number of trades opened in past 24 months",
+          "@_Value": "3"
+        },
+        {
+          "@_Name": "AT20S:Months since oldest trade opened",
+          "@_Value": "230"
+        },
+        {
+          "@_Name": "AT28A:Total credit line of open trades verified in past 12 months",
+          "@_Value": "35605"
+        },
+        {
+          "@_Name": "AT28B:Total credit line of open trades verified in past 12 months (excl mort and home equity)",
+          "@_Value": "35605"
+        },
+        {
+          "@_Name": "AT33A:Total balance of open trades verified in past 12 months",
+          "@_Value": "26855"
+        },
+        {
+          "@_Name": "AT33B:Total balance of open trades verified in past 12 months (excl mort and home equity)",
+          "@_Value": "26855"
+        },
+        {
+          "@_Name": "AT34A:Utilization for open trades verified in past 12 months",
+          "@_Value": "75"
+        },
+        {
+          "@_Name": "AT34B:Utilization for open trades verified in past 12 months (excl mort and home equity)",
+          "@_Value": "75"
+        },
+        {
+          "@_Name": "AT36S:Months since most recent delinquency",
+          "@_Value": "12"
+        },
+        {
+          "@_Name": "AT57S:Total past due amount of open trades verified in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "AT103S:Percentage of satisfactory open trades to all open trades",
+          "@_Value": "92"
+        },
+        {
+          "@_Name": "AT104S:Percentage of all trades opened in past 24 months to all trades",
+          "@_Value": "12"
+        },
+        {
+          "@_Name": "ATAP01:Total scheduled monthly payment for all trades verified in past 12 months",
+          "@_Value": "6128"
+        },
+        {
+          "@_Name": "AU28S:Total credit line of open auto trades verified in past 12 months",
+          "@_Value": "14103"
+        },
+        {
+          "@_Name": "AU33S:Total balance of open auto trades verified in past 12 months",
+          "@_Value": "5632"
+        },
+        {
+          "@_Name": "AU34S:Utilization for open auto trades verified in past 12 months",
+          "@_Value": "40"
+        },
+        {
+          "@_Name": "AU57S:Total past due amount of open auto trades verified in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "BC02S:Number of open credit card trades",
+          "@_Value": "4"
+        },
+        {
+          "@_Name": "BC06S:Number of credit card trades opened in past 6 months",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "BC102S:Average credit line of open credit card trades verified in past 12 months",
+          "@_Value": "483"
+        },
+        {
+          "@_Name": "BC12S:Number of open credit card trades verified in past 12 months",
+          "@_Value": "4"
+        },
+        {
+          "@_Name": "BC20S:Months since oldest credit card trade opened",
+          "@_Value": "63"
+        },
+        {
+          "@_Name": "BC28S:Total credit line of open credit card trades verified in past 12 months",
+          "@_Value": "1930"
+        },
+        {
+          "@_Name": "BC30S:Percentage of open credit card trades > 50% of credit line verified in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "BC31S:Percentage of open credit card trades > 75% of credit line verified in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "BC33S:Total balance of open credit card trades verified in past 12 months",
+          "@_Value": "272"
+        },
+        {
+          "@_Name": "BC34S:Utilization for open credit card trades verified in past 12 months",
+          "@_Value": "14"
+        },
+        {
+          "@_Name": "BC57S:Total past due amount of open credit card trades verified in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "CO04S:Months since most recent charged-off trade was first reported",
+          "@_Value": "45"
+        },
+        {
+          "@_Name": "FC04S:Months since most recent foreclosure trade was first reported",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "G020S:Number of trades with maximum delinquency of 30 days past due in past 24 months",
+          "@_Value": "2"
+        },
+        {
+          "@_Name": "G051S:Percentage of trades ever delinquent",
+          "@_Value": "54"
+        },
+        {
+          "@_Name": "G093S:Number of public records",
+          "@_Value": "-4"
+        },
+        {
+          "@_Name": "G094S:Number of public record bankruptcies",
+          "@_Value": "-4"
+        },
+        {
+          "@_Name": "G095S:Months since most recent public record",
+          "@_Value": "-4"
+        },
+        {
+          "@_Name": "G103S:Months since most recent credit inquiry",
+          "@_Value": "4"
+        },
+        {
+          "@_Name": "G202A:Total open to buy of open trades verified in past 12 months (excl installs and morts)",
+          "@_Value": "1658"
+        },
+        {
+          "@_Name": "G215B:Number of non-medical third party collections with balance > $0",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "G217S:Total past due amount of all trades verified in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "G218B:Number of trades verified in the past 12 months that are currently 30+ DPD",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "G224A:Number of 90 days past due or worse items ever (excluding medical colls)",
+          "@_Value": "11"
+        },
+        {
+          "@_Name": "G238S:Number of credit inquiries in past 12 months (excl coll inqs)",
+          "@_Value": "8"
+        },
+        {
+          "@_Name": "G244S:Number of inquiries (includes duplicates) in past 12 months",
+          "@_Value": "8"
+        },
+        {
+          "@_Name": "G250A:Number of 30 DPD or worse items ever (excluding medical colls)",
+          "@_Value": "14"
+        },
+        {
+          "@_Name": "G250B:Number of 30 DPD or worse items in the past 12 months (excluding medical colls)",
+          "@_Value": "4"
+        },
+        {
+          "@_Name": "G250C:Number of 30 DPD or worse items in the past 24 months (excluding medical colls)",
+          "@_Value": "12"
+        },
+        {
+          "@_Name": "G251A:Number of 60 DPD or worse items ever (excluding medical colls)",
+          "@_Value": "11"
+        },
+        {
+          "@_Name": "G302S:Worst rating on revolving trades in past 12 months",
+          "@_Value": "9"
+        },
+        {
+          "@_Name": "G304S:Worst rating on installment trades in past 12 months",
+          "@_Value": "9"
+        },
+        {
+          "@_Name": "G310S:Worst rating on all trades in past 12 months",
+          "@_Value": "9"
+        },
+        {
+          "@_Name": "GB311:Indicates if bankruptcies have been filed",
+          "@_Value": "-4"
+        },
+        {
+          "@_Name": "HI57S:Total past due amount of open home equity loan trades verified in past 12 months",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "HR57S:Total past due amount of open HELOC trades verified in past 12 months",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "IN02S:Number of open installment trades",
+          "@_Value": "9"
+        },
+        {
+          "@_Name": "IN06S:Number of installment trades opened in past 6 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "IN28S:Total credit line of open installment trades verified in past 12 months",
+          "@_Value": "33675"
+        },
+        {
+          "@_Name": "IN33S:Total balance of open installment trades verified in past 12 months",
+          "@_Value": "26583"
+        },
+        {
+          "@_Name": "IN34S:Utilization for open installment trades verified in past 12 months",
+          "@_Value": "79"
+        },
+        {
+          "@_Name": "IN36S:Months since most recent installment delinquency",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "IN57S:Total past due amount of open installment trades verified in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "MT02S:Number of open mortgage trades",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "MT06S:Number of mortgage trades opened in past 6 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "MT28S:Total credit line of open mortgage trades verified in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "MT33S:Total balance of open mortgage trades verified in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "MT34S:Utilization for open mortgage trades verified in past 12 months",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "MT36S:Months since most recent mortgage delinquency",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "MT57S:Total past due amount of open mortgage trades verified in past 12 months",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "RE02S:Number of open revolving trades",
+          "@_Value": "4"
+        },
+        {
+          "@_Name": "RE06S:Number of revolving trades opened in past 6 months",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "RE12S:Number of open revolving trades verified in past 12 months",
+          "@_Value": "4"
+        },
+        {
+          "@_Name": "RE20S:Months since oldest revolving trade opened",
+          "@_Value": "230"
+        },
+        {
+          "@_Name": "RE21S:Months since most recent revolving trade opened",
+          "@_Value": "5"
+        },
+        {
+          "@_Name": "RE28S:Total credit line of open revolving trades verified in past 12 months",
+          "@_Value": "1930"
+        },
+        {
+          "@_Name": "RE30S:Percentage of open revolving trades > 50% of credit line verified in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "RE31S:Percentage of open revolving trades > 75% of credit line verified in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "RE33S:Total balance of open revolving trades verified in past 12 months",
+          "@_Value": "272"
+        },
+        {
+          "@_Name": "RE34S:Utilization for open revolving trades verified in past 12 months",
+          "@_Value": "14"
+        },
+        {
+          "@_Name": "RE36S:Months since most recent revolving delinquency",
+          "@_Value": "4"
+        },
+        {
+          "@_Name": "RE57S:Total past due amount of open revolving trades verified in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "RE102S:Average credit line of open revolving trades verified in past 12 months",
+          "@_Value": "483"
+        },
+        {
+          "@_Name": "RP04S:Months since most recent repossession trade was first reported",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "S004S:Average number of months trades have been on file",
+          "@_Value": "49"
+        },
+        {
+          "@_Name": "S043S:Number of open trades > 50% of credit line verified in 12 mons (excl installs and morts)",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "S061S:Months since most recent 60 or more days past due",
+          "@_Value": "23"
+        },
+        {
+          "@_Name": "S062S:Months since most recent 90 or more days past due",
+          "@_Value": "23"
+        },
+        {
+          "@_Name": "S068A:Number of third party collections",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "S114S:Number of deduped inquiries in past 6 months (excl auto and mortgage inquiries)",
+          "@_Value": "2"
+        },
+        {
+          "@_Name": "S204A:Total balance of non-medical third party collections verified in past 12 months",
+          "@_Value": "5569"
+        },
+        {
+          "@_Name": "S207A:Months since most recent tradeline bankruptcy",
+          "@_Value": "N/A"
+        },
+        {
+          "@_Name": "S207S:Months since most recent public record bankruptcy",
+          "@_Value": "-4"
+        },
+        {
+          "@_Name": "S209A:Months since most recent non-medical third party collection",
+          "@_Value": "29"
+        },
+        {
+          "@_Name": "ST28S:Total credit line of open student loan trades verified in past 12 months",
+          "@_Value": "15003"
+        },
+        {
+          "@_Name": "ST33S:Total balance of open student loan trades verified in past 12 months",
+          "@_Value": "15382"
+        },
+        {
+          "@_Name": "ST34S:Utilization for open student loan trades verified in past 12 months",
+          "@_Value": "103"
+        },
+        {
+          "@_Name": "ST57S:Total past due amount of open student loan trades verified in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT014:Total Scheduled Monthly Payment",
+          "@_Value": "6128"
+        },
+        {
+          "@_Name": "PT016:Utilization on revolving trades",
+          "@_Value": "14"
+        },
+        {
+          "@_Name": "PT017:Total balance on open revolving trades",
+          "@_Value": "272"
+        },
+        {
+          "@_Name": "PT019:Total Mortgage Monthly Payment",
+          "@_Value": "-5"
+        },
+        {
+          "@_Name": "PT020:Total balance on open Mortgages",
+          "@_Value": "-5"
+        },
+        {
+          "@_Name": "PT021:Total Monthly Automobile Payment",
+          "@_Value": "319"
+        },
+        {
+          "@_Name": "PT022:Date of oldest trade",
+          "@_Value": "041996"
+        },
+        {
+          "@_Name": "PT023:Months since infile created at bureau",
+          "@_Value": "205"
+        },
+        {
+          "@_Name": "PT027:Total occurrances of delinquencies in past 12 months",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "PT038:Number of Inquiries in past 6 months",
+          "@_Value": "2"
+        },
+        {
+          "@_Name": "PT054:Total Credit Limit/High Credit on open tradelines",
+          "@_Value": "35605"
+        },
+        {
+          "@_Name": "PT056:Total balance on all tradelines",
+          "@_Value": "26855"
+        },
+        {
+          "@_Name": "PT063:Number of currently delinquent tradelines",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT064:Number of currently delinquent revolving tradelines",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT065:Number of currently delinquent installment tradelines",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT068:Average balance on open tradelines",
+          "@_Value": "2066"
+        },
+        {
+          "@_Name": "PT069:Number of Chargeoffs in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT071:Total occurrances of delinquencies in the past 2 years",
+          "@_Value": "2"
+        },
+        {
+          "@_Name": "PT072:Total occurrances of delinquencies in the past 30 days",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT073:Total occurrances of delinquencies in the past 60 days",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT074:Total occurrances of delinquencies in the past 7 years",
+          "@_Value": "29"
+        },
+        {
+          "@_Name": "PT076:Date of oldest trade",
+          "@_Value": "041996"
+        },
+        {
+          "@_Name": "PT079:Number of months since oldest installment tradeline opened",
+          "@_Value": "65"
+        },
+        {
+          "@_Name": "PT080:Number of months since oldest revolving tradeline opened",
+          "@_Value": "230"
+        },
+        {
+          "@_Name": "PT082:Number of months since most recent tradeline opened",
+          "@_Value": "5"
+        },
+        {
+          "@_Name": "PT083:Number of mortgage trades",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT088:Number of months since 90+ late or worse derogatory",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "PT089:Number of tradelines reported in past 2 months and currently 120 days past due",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT090:Number of tradelines currently 30 days past due",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT091:Number of tradelines 90+ days past due in past 24 months",
+          "@_Value": "8"
+        },
+        {
+          "@_Name": "PT092:Number of tradelines opened in past 12 months",
+          "@_Value": "2"
+        },
+        {
+          "@_Name": "PT093:Percentage of tradelines never delinquent",
+          "@_Value": "58"
+        },
+        {
+          "@_Name": "PT094:Number of tradelines ever 120 days past due",
+          "@_Value": "8"
+        },
+        {
+          "@_Name": "PT095:Number of months since oldest bank installment tradeline",
+          "@_Value": "65"
+        },
+        {
+          "@_Name": "PT103:Total credit limit/high credit on open installment tradelines",
+          "@_Value": "33675"
+        },
+        {
+          "@_Name": "PT104:Number of currently satisfactory tradelines",
+          "@_Value": "15"
+        },
+        {
+          "@_Name": "PT105:Number of revolving tradelines",
+          "@_Value": "10"
+        },
+        {
+          "@_Name": "PT110:Number of revolving tradelines opened in past 7 years",
+          "@_Value": "8"
+        },
+        {
+          "@_Name": "PT111:Total credit limit/high credit on open revolving tradelines",
+          "@_Value": "1930"
+        },
+        {
+          "@_Name": "PT112:Total available credit on open bankcard tradelines verified in the last 6 mons",
+          "@_Value": "1658"
+        },
+        {
+          "@_Name": "PT115:Percent of bankcard tradelines gt 75% of credit limit",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT118:Total credit limit/high credit on open bankcard tradelines",
+          "@_Value": "1930"
+        },
+        {
+          "@_Name": "PT119:Number of bankcard tradelines",
+          "@_Value": "7"
+        },
+        {
+          "@_Name": "PT120:Number of months since most recent bankcard tradeline opened",
+          "@_Value": "5"
+        },
+        {
+          "@_Name": "PT121:Number of bankcard tradelines opened in the past 6 months",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "PT122:Number of bankcard tradelines never delinquent",
+          "@_Value": "4"
+        },
+        {
+          "@_Name": "PT125:Number of months since most recent bankcard delinquency",
+          "@_Value": "12"
+        },
+        {
+          "@_Name": "PT126:Percent utilization on bankcard tradelines",
+          "@_Value": "10"
+        },
+        {
+          "@_Name": "PT129:Number of Public Records with amount gt 100",
+          "@_Value": "-4"
+        },
+        {
+          "@_Name": "PT130:Number of Tax Liens",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT132:Total amount on Collections",
+          "@_Value": "5569"
+        },
+        {
+          "@_Name": "PT133:Number of repossessions",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT134:Number of foreclosures",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT136:Number of Collections/Chargeoffs in past 24 months; excluding medical",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT137:Total amount on Collections in past 36 months; excluding medical",
+          "@_Value": "2"
+        },
+        {
+          "@_Name": "PT138:Number of tradelines active within the past 6 months",
+          "@_Value": "13"
+        },
+        {
+          "@_Name": "PT139:Number of mortgage tradelines opened in past 6 months",
+          "@_Value": "-5"
+        },
+        {
+          "@_Name": "PT140:Number of open installment tradelines opened within the past 24 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT141:Total occurrances of 30 days late within the past 12 months on Mortgage trades",
+          "@_Value": "-5"
+        },
+        {
+          "@_Name": "PT142:Number of mortgages passed due 30 days or more in the last 6 months",
+          "@_Value": "-5"
+        },
+        {
+          "@_Name": "PT143:Total occurrances of 30 days late within the past 12 months",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "PT144:Number of collections with amount gt 500",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "PT145:Total balance on unsecured credit card tradelines",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT146:Total balance on unsecured tradelines",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT147:Total amount on Tax Liens filed within the past 36 months",
+          "@_Value": "-4"
+        },
+        {
+          "@_Name": "PT148:Total amount on Judgements filed within the past 36 months",
+          "@_Value": "-4"
+        },
+        {
+          "@_Name": "PT149:Number of Public Records filed in past 24 months",
+          "@_Value": "-4"
+        },
+        {
+          "@_Name": "PT150:Number of non-federal Student Loan tradelines",
+          "@_Value": "14"
+        },
+        {
+          "@_Name": "PT151:Number of repossessed auto loan tradelines",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT153:Percent utilization on installment tradelines",
+          "@_Value": "55"
+        },
+        {
+          "@_Name": "PT154:Number of revolving tradelines with balance gt 0",
+          "@_Value": "2"
+        },
+        {
+          "@_Name": "PT155:Number of installment tradelines opened in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT157:Number of revolving tradelines opened in past 12 months",
+          "@_Value": "2"
+        },
+        {
+          "@_Name": "PT158:Number of revolving tradelines opened in past 24 months",
+          "@_Value": "3"
+        },
+        {
+          "@_Name": "PT159:Number of credit union tradelines",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT160:Percent utilization on all open tradelines",
+          "@_Value": "75"
+        },
+        {
+          "@_Name": "PT162:Maximum balance on revolving tradelines",
+          "@_Value": "254"
+        },
+        {
+          "@_Name": "PT163:Number months since more recent installment tradeline opened",
+          "@_Value": "34"
+        },
+        {
+          "@_Name": "PT165:Number of auto tradelines 30 days past due in past 6 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT166:Number of auto tradelines opened in past 6 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT167:Number of retail tradelines opened in past 6 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT168:Number of student loans opened in past 12 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT174:Total amount on Collections; excluding medical",
+          "@_Value": "5569"
+        },
+        {
+          "@_Name": "PT175:Total amount on Tax Liens",
+          "@_Value": "-4"
+        },
+        {
+          "@_Name": "PT176:Total amount on Judgements",
+          "@_Value": "-4"
+        },
+        {
+          "@_Name": "PT177:Total credit limit on open credit card trades",
+          "@_Value": "1930"
+        },
+        {
+          "@_Name": "PT178:Total credit limit on open retail trades",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT179:Total balance on open credit card trades",
+          "@_Value": "272"
+        },
+        {
+          "@_Name": "PT180:Total balance on open retail trades",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT181:Age of oldest trade in months",
+          "@_Value": "230"
+        },
+        {
+          "@_Name": "PT182:Total number of open credit card trades",
+          "@_Value": "4"
+        },
+        {
+          "@_Name": "PT183:Total number of open retail trades",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT184:Total number of trades ever delinquent",
+          "@_Value": "11"
+        },
+        {
+          "@_Name": "PT185:Total number of tradelines delinquent in the last 6 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT186:Total number of installment tradelines 60 days late or worse in the last 6 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT187:Total balances on currently delinquent tradelines",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT188:Worst current status on any open tradeline",
+          "@_Value": "400"
+        },
+        {
+          "@_Name": "PT189:Worst status in the past 12 months on any mortgage tradeline",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT190:Total number of closed credit card trades",
+          "@_Value": "5"
+        },
+        {
+          "@_Name": "PT191:Total number of closed installment trades",
+          "@_Value": "7"
+        },
+        {
+          "@_Name": "PT192:Percent of revolving credit available",
+          "@_Value": "98"
+        },
+        {
+          "@_Name": "PT193:Number of loans or credit cards applied for in past 24 months",
+          "@_Value": "8"
+        },
+        {
+          "@_Name": "PT194:Number of Installment tradelines not delinquent within the last 24 months",
+          "@_Value": "7"
+        },
+        {
+          "@_Name": "PT195:Max credit limit on open bank credit cards",
+          "@_Value": "710"
+        },
+        {
+          "@_Name": "PT196:Number of collections with amount gt 0",
+          "@_Value": "1"
+        },
+        {
+          "@_Name": "PT197:Total Number of delinquent credit card and retail trades in last 6 months",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT198:Total number of open credit card tradelines with utilization gt 90%",
+          "@_Value": "0"
+        },
+        {
+          "@_Name": "PT199:Total number of open retail tradelines with utilization gt 90%",
+          "@_Value": "8"
+        },
+        {
+          "@_Name": "Deceased Indicator",
+          "@_Value": "N"
+        },
+        {
+          "@_Name": "Public Record Info",
+          "@_Value": ""
+        }
+      ]
+    }
+  }
+}

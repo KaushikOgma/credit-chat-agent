@@ -78,7 +78,7 @@ class VectorizerEngine:
         encoder: OpenAIEmbeddings,
         vector_db_name: str,
         batch_size: int = 128,
-        dimension: int = 768,
+        dimension: int = settings.VECTOR_DIMENSION,
         namespace: str = "questions",
     ):
         """
