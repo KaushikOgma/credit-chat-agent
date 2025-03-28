@@ -30,3 +30,4 @@ class ChatController:
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
+

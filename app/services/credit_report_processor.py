@@ -8,7 +8,6 @@ import os
 sys.path.append(os.getcwd())
 import numpy as np
 from tqdm import tqdm
-from app.services.pinecone_vectorizer import OpenAIEmbedding, VectorizerEngine
 from app.utils.helpers.prompt_helper import credit_report_process_conversation_messages
 from langchain_openai import ChatOpenAI
 from app.utils.config import settings
@@ -139,8 +138,6 @@ class CreditReportProcessor:
     A class to evaluate the quality of the AI-generated responses.
     """
     def __init__(self):
-        # Initialize the OpenAI Embedding
-        self.encoder = OpenAIEmbedding(model_name=settings.EMBEDDING_MODEL_NAME)
         # Initialize the Vectorizer Engine
         self.temperature = 0
         self.max_tokens = 500
@@ -151,13 +148,6 @@ class CreditReportProcessor:
         self.model_id = settings.BASE_MODEL
         self.openai.api_key = settings.OPENAI_API_KEY
         self.client = self.openai.Client()  # Create a client instance
-        self.vectorizer = VectorizerEngine(
-            encoder=self.encoder,
-            vector_db_name=settings.VECTOR_DB_NAME,
-            batch_size=10,
-            dimension=settings.VECTOR_DIMENSION,
-            namespace="credit_reports"
-        )
         self.report_processor = ArrayReportProcessor()
         self.similarity_threshold = 0.8
         self.service_name = "credit_report_processor"
