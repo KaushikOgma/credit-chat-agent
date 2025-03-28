@@ -1,4 +1,5 @@
 
+import datetime
 import traceback
 from typing import List, Union
 from app.utils.config import settings
@@ -82,7 +83,7 @@ class CreditReportRepository:
         try:
             pipeline = [
                 {"$match": filterData},
-                {"$project": CreditReportProjections.get_silected_attribute(input_timezone)},
+                {"$project": CreditReportProjections.get_all_attribute(input_timezone)},
                 {"$sort": sort_params}
             ]
             data = list(db[DBCollections.CREDIT_REPORT.value].aggregate(pipeline))
@@ -91,3 +92,22 @@ class CreditReportRepository:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
             raise error
         
+
+    async def get_todays_reoprt(self, db: Database, user_id: str):
+        try: 
+            today = datetime.utcnow()
+            start_of_day = today.replace(hour=0, minute=0, second=0, microsecond=0)
+            end_of_day = today.replace(hour=23, minute=59, second=59, microsecond=999999)
+
+            filter_data = {
+                "updatedAt": {
+                    "$gte": start_of_day,
+                    "$lt": end_of_day
+                },
+                "userId": user_id
+            }
+            report = await db[DBCollections.CREDIT_REPORT.value].find_one(filter_data)
+            return report
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
+            raise error

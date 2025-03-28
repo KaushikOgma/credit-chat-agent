@@ -37,10 +37,20 @@ class CreditReportController:
     async def get_credit_report_context(self, db: Database, user_id: str, user_query: str) -> Union[None, str]:
         user_context = None
         try:
-            credit_report = await self.credit_report_extractor_service.get_credit_report(user_id)     
-            mongo_data, vector_data = await self.credit_report_processor_service.process_report(credit_report, user_id)   
-
-            inserted_id = await self.credit_report_repo.add_report(db ,mongo_data)  
+            # step-1: first need to check if there is data in mongo db for the user
+            report = await self.credit_report_repo.get_todays_reoprt(user_id)
+            if report:
+                # There are report in the mongo that means we have the latest data
+                pass
+            else:
+                # There are no report in the mongo db for today
+                credit_report = await self.credit_report_extractor_service.get_credit_report(user_id)     
+                mongo_data, vector_data = await self.credit_report_processor_service.process_report(credit_report, user_id)   
+                inserted_id = self.credit_report_repo.add_report(db, mongo_data)
+                if not self.vectorizer.vectordb:
+                    self.vectorizer.load_vectorstore()
+                self.vectorizer.create_vectorstore(vector_data)
+            # inserted_id = await self.credit_report_repo.add_report(db ,mongo_data)  
 
             return user_context
         except Exception as error:
