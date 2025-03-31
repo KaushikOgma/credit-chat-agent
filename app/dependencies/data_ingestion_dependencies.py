@@ -3,6 +3,7 @@ from app.services.qa_generator import QAGenerator
 from app.controllers.data_ingestion_controller import DataIngestionController
 from app.repositories.metadata_repositories import MetadataRepository
 from app.repositories.finetune_repositories import FinetuneRepository
+from app.repositories.model_data_repositories import ModelDataRepository
 from app.repositories.evaluation_repositories import EvaluationRepository
 from app.controllers.metadata_controller import MetadataController
 from app.services.qa_evaluator import QAEvaluator
@@ -18,14 +19,15 @@ def get_data_ingestion_controller():
         DataIngestionController: An instance of DataIngestionController.
     """
     metadata_repo = MetadataRepository()
+    model_data_repos = ModelDataRepository()
     finetune_repo = FinetuneRepository()
     eval_repo = EvaluationRepository()
     data_ingestor = DataIngestor()
     qa_generator = QAGenerator()
     qa_evaluator = QAEvaluator()
     opeai_finetuner = OpenAIFineTuner()
-    finetune_controller = FinetuneController(finetune_repo, opeai_finetuner)
-    eval_controller = EvaluationController(eval_repo, qa_evaluator)
+    finetune_controller = FinetuneController(finetune_repo, model_data_repos, opeai_finetuner)
+    eval_controller = EvaluationController(eval_repo, model_data_repos, qa_evaluator)
     matadata_controller = MetadataController(
         metadata_repo,
         finetune_repo,
