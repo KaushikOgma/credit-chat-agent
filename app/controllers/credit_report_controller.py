@@ -47,16 +47,26 @@ class CreditReportController:
             report = await self.credit_report_repo.get_todays_reoprt(user_id)
             if report:
                 # There are report in the mongo that means we have the latest data
-                pass
+                if not report["isVectorized"]:
+                    if not self.vectorizer.vectordb:
+                        # Load the vector store
+                        self.vectorizer.load_vectorstore()
+                    mongo_data, vector_data = await self.credit_report_processor_service.process_report(credit_report, user_id, report["report"])   
+                    # Sync the vector DB with the latest QA pairs
+                    await self.vectorizer.create_vectorstore(vector_data, "report_data_id", "topics")
+                    await self.credit_report_repo.update_report(db, report["_id"], {"isVectorized": True})
             else:
                 # There are no report in the mongo db for today
                 credit_report = await self.credit_report_extractor_service.get_credit_report(user_id)     
                 if credit_report:
                     mongo_data, vector_data = await self.credit_report_processor_service.process_report(credit_report, user_id)   
-                    inserted_id = self.credit_report_repo.add_report(db, mongo_data)
-                    if not self.vectorizer.vectordb:
-                        self.vectorizer.load_vectorstore()
-                    self.vectorizer.create_vectorstore(vector_data, "report_data_id", "topics")
+                    if mongo_data is not None:
+                        mongo_data["isVectorized"] = False
+                        inserted_id = self.credit_report_repo.add_report(db, mongo_data)
+                        if not self.vectorizer.vectordb:
+                            self.vectorizer.load_vectorstore()
+                        self.vectorizer.create_vectorstore(vector_data, "report_data_id", "topics")
+                        await self.credit_report_repo.update_report(db, inserted_id, {"isVectorized": True})
             # inserted_id = await self.credit_report_repo.add_report(db ,mongo_data) 
             context_list, score_list = self.vectorizer.get_related_topics(user_id, user_query, top_context=3)
             if context_list is not None:
