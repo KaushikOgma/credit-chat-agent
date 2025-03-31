@@ -12,6 +12,7 @@ from app.utils.helpers.prompt_helper import credit_report_process_conversation_m
 from langchain_openai import ChatOpenAI
 from app.utils.config import settings
 import openai
+from app.utils.helpers.common_helper import generate_uuid
 from tenacity import (
     retry,
     wait_random_exponential,
@@ -209,7 +210,8 @@ class CreditReportProcessor:
             response_content = await self.parse_json_from_text(response_content)
             if "topics" in response_content:
                 response_content["topics"] = f"TOPICS: {"; ".join(elm.lower() for elm in response_content["topics"])}"
-            response_content["user_id"] = user_id
+            response_content["userId"] = user_id
+            response_content["report_data_id"] = generate_uuid()
             return response_content
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
@@ -250,6 +252,7 @@ class CreditReportProcessor:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return mongo_data, vector_data
 
+   
 async def start_processing():
     # Initialize the fine-tuner
     user_id = "32b397c1-d160-44bc-9940-3d16542d8718"

@@ -12,6 +12,7 @@ class CreditReportProjections:
         return {
             "userId": 1,
             "report": 1,
+            "isVectorized": 1,
             "createdAt": {
                 "$dateToString": {
                     "format": settings.ACCEPTED_DATE_TIME_STRING,

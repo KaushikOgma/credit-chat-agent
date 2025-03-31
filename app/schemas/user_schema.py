@@ -20,6 +20,8 @@ class UserSchema(BaseModel):
     contactNo: Optional[str] = None
     isActive: Optional[bool] = True
     isAdmin: Optional[bool] = False
+    isVerified: Optional[bool] = False
+    isPremium: Optional[bool] = False
     config: Optional[dict] = {}
     userId: Optional[str] = None
     apiKey: Optional[str] = None
@@ -36,6 +38,8 @@ class SaveUserSchema(BaseModel):
     contactNo: Optional[str]
     isActive: Optional[bool] = True
     isAdmin: Optional[bool] = False
+    isVerified: Optional[bool] = False
+    isPremium: Optional[bool] = False
     userId: Optional[str] = None
     config: Optional[dict] = {}
     apiKey: Optional[str] = None
@@ -50,6 +54,8 @@ class UpdateUserSchema(BaseModel):
     contactNo: Optional[str] = None
     isActive: Optional[str] = None
     isAdmin: Optional[str] = None
+    isVerified: Optional[bool] = None
+    isPremium: Optional[bool] = None
     userId: Optional[str] = None
     config: Optional[dict] = None
     apiKey: Optional[str] = None

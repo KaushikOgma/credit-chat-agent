@@ -102,34 +102,39 @@ class VectorizerEngine:
 
     @staticmethod
     def process_chunk(
-        qa_pairs: List[dict],
+        data: List[dict],
+        id_column: str,
+        vector_column: str
+
     ) -> Tuple[List[Document], List[UUID]]:
         try:
 
             # DataFrame creation
-            qa_pair_df = pd.DataFrame(qa_pairs)
+            data_df = pd.DataFrame(data)
 
             # Create corpus and drop temporary column
-            corpus = qa_pair_df["question"].tolist()
+            corpus = data_df[vector_column].tolist()
 
             # Collect food IDs and metadata
-            chunk_qa_pair_id_list = qa_pair_df["question_id"].tolist()
-            metadata = qa_pair_df.to_dict(orient="records")
+            data_chunk_id_list = data_df[id_column].tolist()
+            metadata = data_df.to_dict(orient="records")
             
             # Build Document instances
             chunk_documents = []
             for text_item, meta in zip(corpus, metadata):
                 chunk_documents.append(Document(page_content=preprocess_text(text_item), metadata=meta))
 
-            return chunk_documents, chunk_qa_pair_id_list
+            return chunk_documents, data_chunk_id_list
 
         except Exception as error:
-            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": "pinecone_vectorizer"})
             return [], []
 
     async def generate_documents(
         self,
         data: List[Dict],
+        id_column: str,
+        vector_column: str
     ) -> Tuple[List[Document], List[UUID]]:
         """
         Generate documents from a given dataset.
@@ -145,7 +150,7 @@ class VectorizerEngine:
         """
         try:
             documents = []
-            foodIdList = []
+            document_id_list = []
             chunk_size = 100
             loop = asyncio.get_running_loop()
             # Split data into chunks and process each chunk in parallel
@@ -161,6 +166,8 @@ class VectorizerEngine:
                                 process_executor,
                                 VectorizerEngine.process_chunk,
                                 data[i : i + chunk_size],
+                                id_column,
+                                vector_column
                             )
                             for i in range(0, len(data), chunk_size)
                         ]
@@ -169,9 +176,9 @@ class VectorizerEngine:
                         results = await asyncio.gather(*tasks, return_exceptions=True)
                         for result in results:
                             try:
-                                chunk_documents, chunk_foodIds = result
+                                chunk_documents, chunk_ids = result
                                 documents.extend(chunk_documents)
-                                foodIdList.extend(chunk_foodIds)
+                                document_id_list.extend(chunk_ids)
                             except Exception as e:
                                 print(result)
                                 print(f"Error while processing chunk: {e}")
@@ -179,7 +186,7 @@ class VectorizerEngine:
                         print(f"generate_documents:: Error in async processing: {e}")
                     finally:
                         process_executor.shutdown(wait=True)
-            return documents, foodIdList
+            return documents, document_id_list
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return [], []
@@ -245,9 +252,7 @@ class VectorizerEngine:
                 (id, embedding, metadata)
                 for id, embedding, metadata in zip(ids, embeddings, metadata_batch)
             ]
-            # self.vectordb.upsert(
-            #     upsert_data, namespace=self.namespace, show_progress=True
-            # )
+
             await asyncio.to_thread(
                 self.vectordb.upsert,
                 upsert_data,
@@ -255,6 +260,7 @@ class VectorizerEngine:
                 True,
                 show_progress=False,
             )
+
             return True
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
@@ -282,7 +288,7 @@ class VectorizerEngine:
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return False
-
+        
     async def init_vectorstore(
         self, ids, documents, batch_size: int
     ) -> Optional[PineconeVectorStore]:
@@ -319,7 +325,9 @@ class VectorizerEngine:
 
     async def create_vectorstore(
         self,
-        data: List[Dict]
+        data: List[Dict],
+        id_column: str,
+        vector_column: str
     ) -> bool:
         """
         Create a vector store from a given dataset.
@@ -335,18 +343,17 @@ class VectorizerEngine:
             # print("Loaded vector store")
             # Create documents are IDs
             documents, ids = await self.generate_documents(
-                data
+                data,
+                id_column,
+                vector_column
             )
             print(f"Length of ids: {len(ids)}")
             if len(ids):
                 await self.init_vectorstore(
                     ids=ids, documents=documents, batch_size=self.batch_size
                 )
-                # self.vectordb.delete(ids=toBeDeletedFoodIds)
             documents = None
             ids = None
-            # self.unload_vectorstore()
-            # print("Unloaded vector store")
             return True
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
@@ -378,6 +385,8 @@ class VectorizerEngine:
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
+
+
 
     async def delete_items(self, id_list: List[str]) -> bool:
         """
@@ -414,6 +423,8 @@ class VectorizerEngine:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
 
+
+
     def load_vectorstore(self) -> None:
         """
         Load existing vector store
@@ -430,6 +441,7 @@ class VectorizerEngine:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
 
+
     def unload_vectorstore(self) -> None:
         """
         Unload existing vector store
@@ -440,6 +452,7 @@ class VectorizerEngine:
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
+
 
     async def cosine_similarity(self, X: np.ndarray, Y: np.ndarray, batch_size: int = 1000, n_jobs: int = -1) -> np.ndarray:
         """
@@ -464,6 +477,7 @@ class VectorizerEngine:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
 
+
     async def get_data_by_ids(self, question_ids: List[str]) -> Optional[Dict]:
         try:
             target_item_vector_data = self.vectordb.fetch(
@@ -473,6 +487,7 @@ class VectorizerEngine:
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
+
 
     async def get_qa_similarity_score(
         self,
@@ -517,6 +532,57 @@ class VectorizerEngine:
                 # Compute similarity scores between the matched question and the matched answer
                 true_similarity_score = await self.cosine_similarity(np.array(matched_question_embedding), np.array(matched_answer_embedding))
                 return round(answer_similarity_score, 3), round(true_similarity_score, 3)
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            raise error
+
+
+    async def get_related_topics(
+        self,
+        user_id: str,
+        user_query: str,
+        top_context: int = 3
+    ):
+        """
+        Given a user_id and an query, Need to fetch related topics or context.
+
+        Args:
+            user_id (str): The user id for which we need to fetch the related credit topics.
+            user_query (str): The user query for which we need to fetch the realted credit topics.
+
+        Returns:
+            context: The user query related context.
+        """
+        try:
+            cleaned_user_query= preprocess_text(user_query)
+            cleaned_user_query_embedding = await asyncio.to_thread(self.encoder.embed_query, cleaned_user_query)
+            matched_data = await asyncio.to_thread(
+                lambda: self.vectordb.query(
+                    namespace=self.namespace,
+                    vector=cleaned_user_query_embedding,
+                    top_k=top_context,
+                    filter={
+                        "$and": [
+                            {"userId": {"$in": [user_id]}},
+                        ]
+                    },
+                    include_metadata=True,
+                    include_values=True,
+                )["matches"]
+            )
+            if not matched_data:
+                print("No relevant match found in vector database.")
+                return None, None  # Or any appropriate fallback score
+            else:
+                context_list = []
+                score_list = {}
+                for data in matched_data:
+                    matched_category = data["metadata"].get("category")
+                    matched_summary = data["metadata"].get("summary")
+                    context_list.append(f"{matched_category}:: {matched_summary}")
+                    score = data["score"] * 100
+                    score_list[len(context_list)] = score
+                return context_list, score_list
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error

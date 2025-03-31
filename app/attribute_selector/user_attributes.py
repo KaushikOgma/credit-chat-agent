@@ -18,6 +18,8 @@ class UserProjections:
             "isActive": 1,
             "isAdmin": 1,
             "userId": 1,
+            "isVerified": 1,
+            "isPremium": 1,
             "createdAt": {
                 "$dateToString": {
                     "format": settings.ACCEPTED_DATE_TIME_STRING,
@@ -49,6 +51,8 @@ class UserProjections:
             "contactNo": 1,
             "isActive": 1,
             "isAdmin": 1,
+            "isVerified": 1,
+            "isPremium": 1,
             "config": 1,
             "userId": 1,
             "apiKey": 1,
