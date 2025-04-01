@@ -43,13 +43,16 @@ class CreditReportController:
 
     async def get_credit_report_context(self, db: Database, user_id: str, user_query: str) -> Union[None, str]:
         user_context = None
+        print("User_id........", user_id)
+        print("User_query........", user_query)
         try:
             if not self.vectorizer.vectordb:
                 # Load the vector store
                 self.vectorizer.load_vectorstore()
             # step-1: first need to check if there is data in mongo db for the user
             report = await self.credit_report_repo.get_todays_reoprt(db, user_id)
-            print("get_credit_report_context: report:: ",len(report))
+            print(report)
+            # print("get_credit_report_context: report:: ",len(report))
             if report:
                 # There are report in the mongo that means we have the latest data
                 if not report["isVectorized"]:
