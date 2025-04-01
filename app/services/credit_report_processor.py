@@ -239,14 +239,17 @@ class CreditReportProcessor:
             return None
 
 
-    async def process_report(self, credit_report_json: dict, user_id: str):
+    async def process_report(self, user_id: str, credit_report_json: dict = None, categorized_resp: dict = None):
         mongo_data = None
         vector_data = None
         try:
-            categorized_resp = await self.report_processor.collect_categories(credit_report_json)
-            enhanced_resp = await self.get_processed_report({**categorized_resp}, user_id)
-            mongo_data = {"report": categorized_resp, "userId": user_id}
-            vector_data = [{**data, "category": category}for category, data in enhanced_resp.items()]
+            if categorized_resp is None:
+                if credit_report_json is not None:
+                    categorized_resp = await self.report_processor.collect_categories(credit_report_json)
+                    mongo_data = {"report": categorized_resp, "userId": user_id}
+            if categorized_resp:
+                enhanced_resp = await self.get_processed_report({**categorized_resp}, user_id)
+                vector_data = [{**data, "category": category}for category, data in enhanced_resp.items()]
             return mongo_data, vector_data
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
@@ -262,7 +265,7 @@ async def start_processing():
     credit_report_json = {}
     with open(credit_report_json_path, "r") as f:
         credit_report_json = json.load(f)
-    mongo_data, vector_data = await credit_report_processor.process_report(credit_report_json, user_id)
+    mongo_data, vector_data = await credit_report_processor.process_report(user_id=user_id, credit_report_json=credit_report_json, categorized_resp=None)
     with open(processed_credit_report_json_path, "w") as f:
         json.dump(vector_data, f, indent=3)
 

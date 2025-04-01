@@ -377,7 +377,6 @@ class VectorizerEngine:
                     print(
                         f"delete_item_chunk: Chunk delete error: {error} - Attempt {attempt + 1}"
                     )
-                    print("delete_item_chunk traceback: ", traceback.format_exc())
                     if attempt < max_retries - 1:  # Avoid delay on the last attempt
                         await asyncio.sleep(delay)  # Async wait for exponential backoff
                         delay *= 2  # Exponential backoff
@@ -577,6 +576,7 @@ class VectorizerEngine:
                 context_list = []
                 score_list = {}
                 for data in matched_data:
+                    # print("data:: ",json.dumps(data["metadata"], indent=3))
                     matched_category = data["metadata"].get("category")
                     matched_summary = data["metadata"].get("summary")
                     context_list.append(f"{matched_category}:: {matched_summary}")
@@ -584,6 +584,7 @@ class VectorizerEngine:
                     score_list[len(context_list)] = score
                 return context_list, score_list
         except Exception as error:
+            print("get_related_topics: ",traceback.format_exc())
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
 

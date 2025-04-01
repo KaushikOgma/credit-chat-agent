@@ -11,6 +11,7 @@ from app.routes import data_ingestion_route
 from app.routes import finetune_route
 from app.routes import evaluation_route
 from app.routes import chat_route
+from app.routes import credit_report_route
 from app.utils.constants import RouteTag, RoutePrefix
 
 # Initialize all routes
@@ -36,4 +37,7 @@ router.include_router(
 )
 router.include_router(
     chat_route.router, prefix=RoutePrefix.CHAT.value, tags=[RouteTag.CHAT.value]
+)
+router.include_router(
+    credit_report_route.router, prefix=RoutePrefix.CREDIT_REPORT.value, tags=[RouteTag.CREDIT_REPORT.value]
 )

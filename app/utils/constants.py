@@ -31,6 +31,7 @@ class RoutePrefix(Enum):
     FINETUNE = "/finetune"
     EVALUATION = "/eval"
     CHAT = "/chat"
+    CREDIT_REPORT = "/credit_report"
 
 
 class RouteTag(Enum):
@@ -50,3 +51,4 @@ class RouteTag(Enum):
     FINETUNE = "Finetune"
     EVALUATION = "Eval"
     CHAT = "Chat"
+    CREDIT_REPORT = "Credit Report"

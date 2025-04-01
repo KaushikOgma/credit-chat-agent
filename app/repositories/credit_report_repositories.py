@@ -95,7 +95,7 @@ class CreditReportRepository:
 
     async def get_todays_reoprt(self, db: Database, user_id: str):
         try: 
-            today = datetime.utcnow()
+            today = datetime.datetime.now(datetime.UTC)
             start_of_day = today.replace(hour=0, minute=0, second=0, microsecond=0)
             end_of_day = today.replace(hour=23, minute=59, second=59, microsecond=999999)
 
@@ -106,7 +106,7 @@ class CreditReportRepository:
                 },
                 "userId": user_id
             }
-            report = await db[DBCollections.CREDIT_REPORT.value].find_one(filter_data)
+            report = db[DBCollections.CREDIT_REPORT.value].find_one(filter_data)
             return report
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})
