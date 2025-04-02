@@ -8,6 +8,7 @@ from app.utils.config import settings
 import openai
 import urllib.parse
 from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo import MongoClient
 from langgraph.graph import StateGraph, START
 from app.dependencies.chat_report_dependencies import get_credit_report_controller
 from app.utils.logger import setup_logger
@@ -21,15 +22,25 @@ db = get_db_instance()
 class ToolFunction:
     def __init__(self):
         self.chat_limit = settings.CHAT_HISTORY_LIMIT
-        self.chat_collection = db["chat_history"]
+        # Use a different database name for chat storage
+        self.chat_db = db  # Synchronous database instance
+        self.chat_collection = self.chat_db["chat_history"]
 
-    async def fetch_previous_chat(self, state: Dict[str, Any]) -> list:
+    async def fetch_previous_chat(self, state: Dict[str, Any]) -> Dict[str, Any]:
+        print(f"[DEBUG] Input to fetch_previous_chat: {state}")  # Debugging
         user_id = state.get("user_id")
+        print(user_id)  # Debugging
         if not user_id:
             raise ValueError("Missing user_id in fetch_previous_chat")
-        chat_data = await self.chat_collection.find_one({"user_id": user_id})
-        return chat_data.get("chat_history", [])[-self.chat_limit:] if chat_data else []
-
+        
+        # Run the synchronous `find_one` in a thread
+        chat_data = await asyncio.to_thread(self.chat_collection.find_one, {"user_id": user_id})
+        chat_history = chat_data.get("chat_history", [])[-self.chat_limit:] if chat_data else []
+        print(f"[DEBUG] Output from fetch_previous_chat")
+        # Return the chat history wrapped in a dictionary
+        # state["chat_history"] = chat_history
+        # return state
+        return {"chat_history": chat_history, "context": state["context"] if "context" in state else []}  # Return the chat history directly
     async def store_chat(self, user_id: str, user_query: str, bot_response: str) -> Dict[str, Any]:
         """
         Stores the chat in the database and ensures the bot_response is passed through.
@@ -42,7 +53,9 @@ class ToolFunction:
             return {"bot_response": bot_response}  # Return the bot_response directly
 
         try:
-            await self.chat_collection.update_one(
+            # Run the synchronous `update_one` in a thread
+            await asyncio.to_thread(
+                self.chat_collection.update_one,
                 {"user_id": user_id},
                 {"$push": {"chat_history": {"user_query": user_query, "bot_response": bot_response}}},
                 upsert=True
@@ -75,18 +88,15 @@ class ToolFunction:
     def merge_context(self, data: Union[List[Dict[str, Any]], Dict[str, Any]]) -> Dict[str, Any]:
         """Merge multiple dictionaries into a single context dictionary."""
         print(f"[DEBUG] Input to merge_context: {data}")
-        if isinstance(data, dict):
-            # If a single dictionary is passed, wrap it in a list
-            data = [data]
-        elif isinstance(data, str):
-            # If a string is passed, wrap it in a list of dictionaries
-            data = [{"context": data}]
-        if not isinstance(data, list):
-            raise ValueError("merge_context expects a list of dictionaries or a string")
-        merged_data = {}
-        for item in data:
-            if isinstance(item, dict):
-                merged_data.update(item)
+
+        merged_data = {"context": []}  # Initialize context as a list
+        if "chat_history" in data:
+            for item in data["chat_history"]:
+                merged_data["context"].append(item)
+        if "context" in data:
+            for item in data["context"]:
+                merged_data["context"].append(item["context"])
+
         print(f"[DEBUG] Output from merge_context: {merged_data}")
         return merged_data
 
@@ -101,35 +111,42 @@ class ChatService:
         self.model_id = 'ft:gpt-4o-2024-08-06:the-great-american-credit-secret-llc::BABaftly'
 
     async def get_response(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        user_query = input_data.get("user_query")
+        context = input_data.get("context", [])
+        user_id = input_data.get("user_id")
+
+        # Validate input data
+        if not user_query:
+            raise ValueError("Missing 'user_query' in input_data")
+        if not isinstance(context, list):
+            raise ValueError("'context' must be a list")
+
+        # Format the question string with actual values
+        question = f"""                       
+        Additional context:
+        ---------------------------------
+        {context}
+        
+        User's question:
+        --------------------
+        {user_query}
+        
+        Note:
+        -------
+        Given the conversation history and the additional context, provide the best possible answer.
+        If you are unsure about some details, you may provide disclaimers or clarifications.
+        """
+        print(f"[DEBUG] Sending question to OpenAI: {question}")
+
         try:
-            # Extract 'user_query' and 'context'
-            user_query = input_data.get("user_query")
-            context = input_data.get("context", [])
-
-            if not user_query:
-                raise ValueError("Missing 'user_query' in input_data")
-
-            print(f"[DEBUG] Sending question to OpenAI: {user_query} with context: {context}")
-
-            # Prepare messages for OpenAI API
-            messages = [{"role": "system", "content": self.system_prompt}]
-            
-            # Validate and format context
-            if context:
-                for ctx in context:
-                    if not isinstance(ctx, dict) or "context" not in ctx:
-                        raise ValueError(f"Invalid context format: {ctx}")
-                    # Transform context to include a role
-                    messages.append({"role": "assistant", "content": ctx["context"]})
-            
-            # Add the user query
-            messages.append({"role": "user", "content": user_query})
-
-            # Call OpenAI API
+            # Call OpenAI API asynchronously
             response = await asyncio.to_thread(
                 self.client.chat.completions.create,
                 model=self.model_id,
-                messages=messages,
+                messages=[
+                    {"role": "system", "content": self.system_prompt},
+                    {"role": "user", "content": question}
+                ],
                 temperature=self.temperature,
                 max_tokens=self.max_tokens
             )
@@ -139,36 +156,37 @@ class ChatService:
             print(f"[DEBUG] OpenAI Response: {bot_response}")
 
             # Return both user_query and bot_response
-            return {"user_query": user_query, "bot_response": bot_response}
+            return {"user_id": user_id, "user_query": user_query, "bot_response": bot_response}
 
         except Exception as error:
+            # Log the error and return a fallback response
             print(f"[DEBUG] Error in get_response: {error}")
-            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": "chat_service"})
-            # Return user_query with None as bot_response in case of an error
-            return {"user_id": input_data.get("user_id"), "user_query": input_data.get("user_query"), "bot_response": None}
+            logger.exception(
+                "Error in get_response",
+                extra={"moduleName": settings.MODULE, "serviceName": "chat_service"}
+            )
+            return {
+                "user_id": input_data.get("user_id"),
+                "user_query": user_query,
+                "bot_response": None
+            }
         
 async def credit_report_context_wrapper(state):
     controller = get_credit_report_controller()
     return await controller.get_credit_report_context(db, state["user_id"], state["user_query"])
 
-async def fetch_previous_chat(state: Dict[str, Any]) -> Dict[str, Any]:
-    try:
-        previous_chat = await tool.fetch_previous_chat(state)
-        print(f"[DEBUG] Fetched previous chat: {previous_chat}")
-        return {"context": previous_chat if previous_chat else []}
-    except Exception as e:
-        logger.error(f"fetch_previous_chat failed: {e}")
-        return {"context": []}  # Return an empty list if an error occurs
-
 async def check_recent_data(state: Dict[str, Any]) -> Dict[str, Any]:
+    print(f"[DEBUG] Input to check_recent_data: {state}")  # Debug
     try:
         controller = get_credit_report_controller()
         credit_context = await controller.get_credit_report_context(db, state["user_id"], state["user_query"])
-        print(f"[DEBUG] Fetched report: {credit_context}")
+        # print(f"[DEBUG] Fetched report: {credit_context}")
         if isinstance(credit_context, str):
             print("[DEBUG] Converting string context to list")
             credit_context = [{"context": credit_context}]
-        return {"context": credit_context if credit_context else []}
+        # state["context"] = credit_context if credit_context else []
+        # return state
+        return {"context": credit_context if credit_context else [], "chat_history": state["chat_history"] if "chat_history" in state else []}  # Return the context directly
     except Exception as e:
         logger.error(f"get_credit_report_context failed: {e}")
         return {"context": []}  # Return an empty list if an error occurs
@@ -183,6 +201,7 @@ def setup_graph():
         is_verified: bool
         context: Annotated[list, operator.add]
         bot_response: str
+        chat_history: list
 
     graph = StateGraph(State)
     tool = ToolFunction()
@@ -197,7 +216,7 @@ def setup_graph():
     graph.add_node("check_recent_data", check_recent_data)
 
     # Step 3: Fetch previous chat history
-    graph.add_node("fetch_previous_chat", fetch_previous_chat)
+    graph.add_node("fetch_previous_chat", tool.fetch_previous_chat)
 
     # Step 4: Merge the fetched context
     graph.add_node("merge_context", tool.merge_context)
@@ -215,15 +234,20 @@ def setup_graph():
     def check_verification(state):
         print("[DEBUG] Checking verification for state:", state)  # Debug
         if state.get("is_verified", False):
-            return "check_recent_data"  # Fetch credit report only if verified
-        return "fetch_previous_chat"  # Otherwise, fetch previous chat
+            # Trigger both `check_recent_data` and `fetch_previous_chat`
+            return "trigger_check_recent_data"
+        # Trigger only `fetch_previous_chat` if not verified
+        return "trigger_fetch_previous_chat"
 
     # Graph edges
     graph.add_edge(START, "get_user_query_and_id")
     graph.add_edge("get_user_query_and_id", "get_user_query")
     graph.add_edge("get_user_query_and_id", "get_user_id")
-    graph.add_conditional_edges("get_user_query_and_id", check_verification)
-    graph.add_edge("check_recent_data", "merge_context")
+    graph.add_conditional_edges("get_user_query_and_id", check_verification,{
+        "trigger_check_recent_data": "check_recent_data",
+        "trigger_fetch_previous_chat": "fetch_previous_chat"
+    })
+    graph.add_edge("check_recent_data", "fetch_previous_chat")
     graph.add_edge("fetch_previous_chat", "merge_context")
     graph.add_edge("merge_context", "agent1_process")  # Ensure agent1_process runs after merge_context
     graph.add_edge("agent1_process", "store_chat")  # Ensure store_chat runs after agent1_process
@@ -234,10 +258,15 @@ def setup_graph():
 async def main():
     graph = setup_graph()
     runnable_graph = graph.compile()
+    print(runnable_graph.get_graph().print_ascii())
+ 
     test_input = {
         "user_id": "32b397c1-d160-44bc-9940-3d16542d8718",
         "user_query": "What is my credit score?",
-        "is_verified": True
+        "is_verified": True,
+        "context": [],
+        "chat_history": []
+        
     }
     print(f"[DEBUG] Test input: {test_input}")  # Debug
     result = await runnable_graph.ainvoke(test_input)
