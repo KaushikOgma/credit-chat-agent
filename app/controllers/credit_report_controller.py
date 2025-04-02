@@ -1,3 +1,6 @@
+import os
+import sys
+sys.path.append(os.getcwd())
 import traceback
 from typing import Union
 from fastapi.responses import JSONResponse
@@ -43,13 +46,16 @@ class CreditReportController:
 
     async def get_credit_report_context(self, db: Database, user_id: str, user_query: str) -> Union[None, str]:
         user_context = None
+        print("User_id........", user_id)
+        print("User_query........", user_query)
         try:
             if not self.vectorizer.vectordb:
                 # Load the vector store
                 self.vectorizer.load_vectorstore()
             # step-1: first need to check if there is data in mongo db for the user
             report = await self.credit_report_repo.get_todays_reoprt(db, user_id)
-            print("get_credit_report_context: report:: ",len(report))
+            # print(report)
+            # print("get_credit_report_context: report:: ",len(report))
             if report:
                 # There are report in the mongo that means we have the latest data
                 if not report["isVectorized"]:
@@ -90,4 +96,49 @@ class CreditReportController:
             print("get_credit_report_context:: error:: ",traceback.format_exc())
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return user_context
+        
 
+# import asyncio
+# from app.repositories.credit_report_repositories import CreditReportRepository
+# from app.services.credit_report_extractor import CreditReportExtractor
+# from app.services.credit_report_processor import CreditReportProcessor
+# from app.db import get_db_instance
+
+
+# async def test_report():
+#     try:
+#         db = get_db_instance()
+
+#         # Mock services
+#         credit_report_extractor_service = CreditReportExtractor()
+#         credit_report_processor_service = CreditReportProcessor()
+#         credit_report_repo = CreditReportRepository()
+
+#     # Initialize the controller
+#         controller = CreditReportController(
+#             credit_report_extractor_service=credit_report_extractor_service,
+#             credit_report_processor_service=credit_report_processor_service,
+#             credit_report_repo=credit_report_repo,
+#         )
+
+#         # Test data
+#         user_id = "32b397c1-d160-44bc-9940-3d16542d8718"
+#         user_query = "What is my credit score?"
+
+#         # Call the method and print the result
+#         try:
+#             result = await controller.get_credit_report_context(db, user_id, user_query)
+#             print("Result:", result)
+#         except Exception as e:
+#             print(f"[ERROR] Failed to fetch credit report context: {e}")
+            
+#     except Exception as e:
+#         print(f"[ERROR] Main function failed: {e}")
+#         traceback.print_exc()
+#     finally:
+#         # Ensure the database connection is closed
+#         if db is not None:
+#             db.client.close()
+
+# if __name__ == "__main__":
+#     asyncio.run(test_report())

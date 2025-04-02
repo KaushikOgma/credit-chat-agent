@@ -97,6 +97,9 @@ class Settings(BaseSettings):
     ARRAY_APP_KEY: str = Field(..., env="ARRAY_APP_KEY")
     ARRAY_SERVER_TOKEN: str = Field(..., env="ARRAY_SERVER_TOKEN")
     ARRAY_BASE_URL: str = Field(..., env="ARRAY_BASE_URL")
+    
+    #Chat Limit
+    CHAT_HISTORY_LIMIT: int = Field(..., env="CHAT_HISTORY_LIMIT")
 
     @model_validator(mode="before")
     def load_yaml_values(cls, values):
