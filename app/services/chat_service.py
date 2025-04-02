@@ -89,16 +89,26 @@ class ToolFunction:
         """Merge multiple dictionaries into a single context dictionary."""
         print(f"[DEBUG] Input to merge_context: {data}")
 
-        merged_data = {"context": []}  # Initialize context as a list
+        context = []
+        chat_history = []
         if "chat_history" in data:
+            chat_ref = ""
             for item in data["chat_history"]:
-                merged_data["context"].append(item)
+                chat_ref += f"USER: {item['user_query']}\n ASSISTANT: {item['bot_response']}\n\n"
+            if len(chat_ref) > 1:
+                chat_history.append(chat_ref)
         if "context" in data:
+            curr_context = ""
             for item in data["context"]:
-                merged_data["context"].append(item["context"])
-
+                curr_context += f"{item['context']}\n\n"
+            if len(curr_context) > 1:
+                print(">>>>>>>>>>>>>>>>> curr_context:: ",curr_context)
+                context.append(curr_context)
+                print(">>>>>>>>>>>>>>>>> context:: ",context)
+        merged_data = {"context": context, "chat_history": chat_history}
         print(f"[DEBUG] Output from merge_context: {merged_data}")
-        return merged_data
+        # return  {"context": context, "chat_history": chat_history}
+        return {"merged_data": merged_data} 
 
 class ChatService:
     def __init__(self):
@@ -107,30 +117,64 @@ class ChatService:
         self.openai = openai
         self.openai.api_key = settings.OPENAI_API_KEY
         self.client = self.openai.Client()
+        self.similarity_threshold = 0.8
         self.system_prompt = chat_system_content_message()
         self.model_id = 'ft:gpt-4o-2024-08-06:the-great-american-credit-secret-llc::BABaftly'
+        self.service_name = "chat_service"
 
-    async def get_response(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def get_response(self, question: str, model_id: str) -> Union[str, None]:
+        try:
+            # system_propmt = "You are a Credit Genius Assistant."
+            response = await asyncio.to_thread(
+                self.client.chat.completions.create,  # Correct method for OpenAI >= 1.0
+                model=model_id,
+                messages=[
+                    {"role": "system", "content": self.system_prompt},
+                    {"role": "user", "content": question}
+                ],
+                temperature=self.temperature,
+                max_tokens=self.max_tokens
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            return None
+    
+    async def get_contextual_response(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        merged_data = input_data.get("merged_data",{})
         user_query = input_data.get("user_query")
-        context = input_data.get("context", [])
+        context = merged_data.get("context",input_data.get("context", None))
+        context = context[0] if context is not None else None
+        chat_history = merged_data.get("chat_history",input_data.get("chat_history", None))
+        chat_history = chat_history[0] if chat_history is not None else None
         user_id = input_data.get("user_id")
 
         # Validate input data
         if not user_query:
             raise ValueError("Missing 'user_query' in input_data")
-        if not isinstance(context, list):
-            raise ValueError("'context' must be a list")
+        
 
         # Format the question string with actual values
-        question = f"""                       
-        Additional context:
-        ---------------------------------
-        {context}
+        question = ""
+        if chat_history is not None:
+            question += f"""
+            The conversation referance:
+            ------------------------
+            {chat_history}
         
+            """
+        if context is not None:
+            question += f"""
+            Additional context:
+            ------------------------
+            {context}
+        
+            """
+        question += f"""
         User's question:
-        --------------------
+        ------------------------
         {user_query}
-        
+    
         Note:
         -------
         Given the conversation history and the additional context, provide the best possible answer.
@@ -160,9 +204,9 @@ class ChatService:
 
         except Exception as error:
             # Log the error and return a fallback response
-            print(f"[DEBUG] Error in get_response: {error}")
+            print(f"[DEBUG] Error in get_contextual_response: {error}")
             logger.exception(
-                "Error in get_response",
+                "Error in get_contextual_response",
                 extra={"moduleName": settings.MODULE, "serviceName": "chat_service"}
             )
             return {
@@ -202,6 +246,7 @@ def setup_graph():
         context: Annotated[list, operator.add]
         bot_response: str
         chat_history: list
+        merged_data: dict
 
     graph = StateGraph(State)
     tool = ToolFunction()
@@ -222,7 +267,7 @@ def setup_graph():
     graph.add_node("merge_context", tool.merge_context)
 
     # Step 5: Process query with AI agent
-    graph.add_node("agent1_process", chat_service.get_response)
+    graph.add_node("agent1_process", chat_service.get_contextual_response)
 
     # Step 6: Store chat history
     async def store_chat_wrapper(state):
@@ -265,7 +310,8 @@ async def main():
         "user_query": "What is my credit score?",
         "is_verified": True,
         "context": [],
-        "chat_history": []
+        "chat_history": [],
+        "merged_data": {}
         
     }
     print(f"[DEBUG] Test input: {test_input}")  # Debug
