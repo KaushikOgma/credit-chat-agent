@@ -11,15 +11,12 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from langgraph.graph import StateGraph, START
 from app.dependencies.chat_report_dependencies import get_credit_report_controller
 from app.utils.logger import setup_logger
+from app.db import get_db_instance
 import operator
 
 logger = setup_logger()
 
-# MongoDB Initialization
-mongo_client = AsyncIOMotorClient(
-    f"{settings.DB_PROTOCOL}://{urllib.parse.quote_plus(settings.DB_USER)}:{urllib.parse.quote_plus(settings.DB_PASSWORD)}@{settings.DB_HOST}"
-)
-db = mongo_client[settings.DB_NAME]
+db = get_db_instance()
 
 class ToolFunction:
     def __init__(self):
@@ -81,8 +78,11 @@ class ToolFunction:
         if isinstance(data, dict):
             # If a single dictionary is passed, wrap it in a list
             data = [data]
+        elif isinstance(data, str):
+            # If a string is passed, wrap it in a list of dictionaries
+            data = [{"context": data}]
         if not isinstance(data, list):
-            raise ValueError("merge_context expects a list of dictionaries")
+            raise ValueError("merge_context expects a list of dictionaries or a string")
         merged_data = {}
         for item in data:
             if isinstance(item, dict):
@@ -113,8 +113,16 @@ class ChatService:
 
             # Prepare messages for OpenAI API
             messages = [{"role": "system", "content": self.system_prompt}]
+            
+            # Validate and format context
             if context:
-                messages.extend(context)  # Add context messages if available
+                for ctx in context:
+                    if not isinstance(ctx, dict) or "context" not in ctx:
+                        raise ValueError(f"Invalid context format: {ctx}")
+                    # Transform context to include a role
+                    messages.append({"role": "assistant", "content": ctx["context"]})
+            
+            # Add the user query
             messages.append({"role": "user", "content": user_query})
 
             # Call OpenAI API
@@ -137,7 +145,7 @@ class ChatService:
             print(f"[DEBUG] Error in get_response: {error}")
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": "chat_service"})
             # Return user_query with None as bot_response in case of an error
-            return {"user_id": input_data.get("user_id"),"user_query": input_data.get("user_query"), "bot_response": None}
+            return {"user_id": input_data.get("user_id"), "user_query": input_data.get("user_query"), "bot_response": None}
         
 async def credit_report_context_wrapper(state):
     controller = get_credit_report_controller()
@@ -157,6 +165,9 @@ async def check_recent_data(state: Dict[str, Any]) -> Dict[str, Any]:
         controller = get_credit_report_controller()
         credit_context = await controller.get_credit_report_context(db, state["user_id"], state["user_query"])
         print(f"[DEBUG] Fetched report: {credit_context}")
+        if isinstance(credit_context, str):
+            print("[DEBUG] Converting string context to list")
+            credit_context = [{"context": credit_context}]
         return {"context": credit_context if credit_context else []}
     except Exception as e:
         logger.error(f"get_credit_report_context failed: {e}")
