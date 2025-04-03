@@ -75,8 +75,10 @@ class VectorizerEngine:
 
     def __init__(
         self,
-        encoder: OpenAIEmbeddings,
-        vector_db_name: str,
+        encoder: OpenAIEmbeddings = OpenAIEmbedding(
+            model_name=settings.EMBEDDING_MODEL_NAME,
+        ),
+        vector_db_name: str = settings.VECTOR_DB_NAME,
         batch_size: int = 128,
         dimension: int = settings.VECTOR_DIMENSION,
         namespace: str = "questions",
@@ -577,9 +579,10 @@ class VectorizerEngine:
                 score_list = {}
                 for data in matched_data:
                     # print("data:: ",json.dumps(data["metadata"], indent=3))
-                    matched_category = data["metadata"].get("category")
-                    matched_summary = data["metadata"].get("summary")
-                    context_list.append(f"{matched_category}:: {matched_summary}")
+                    matched_category = data["metadata"].get("category", "")
+                    matched_summary = data["metadata"].get("summary", "")
+                    metadata = f"{matched_category}:: {matched_summary}"
+                    context_list.append(metadata)
                     score = data["score"] * 100
                     score_list[len(context_list)] = score
                 return context_list, score_list
@@ -588,6 +591,125 @@ class VectorizerEngine:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
 
+    async def check_for_data(self, user_id: str) -> bool:
+        try:
+            res = self.vectordb.query(
+                vector=[0]*self.dimension, 
+                filter={
+                    "userId":user_id
+                },
+                top_k=1
+            )
+            return res
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            raise error
+        
+
+
+class CustomMetadataRetriever:
+    
+    def __init__(
+        self,
+        user_id: str,
+        top_k: int = 3,
+        encoder: OpenAIEmbeddings = OpenAIEmbedding(
+            model_name=settings.EMBEDDING_MODEL_NAME,
+        ),
+        vector_db_name: str = settings.VECTOR_DB_NAME,
+        batch_size: int = 128,
+        dimension: int = settings.VECTOR_DIMENSION,
+        namespace: str = "credit_reports",
+    ):
+        self.batch_size = batch_size
+        self.vector_db_name = vector_db_name
+        self.dimension = dimension
+        self.namespace = namespace
+        self.semaphore = asyncio.Semaphore(settings.MAX_THREADS)
+        self.encoder = encoder
+        self.service_name = "custom_metadata_retriver"
+        self.user_id = user_id
+        self.top_k = top_k
+        self.vectordb = None
+        self.load_vectorstore()
+
+
+    def load_vectorstore(self) -> None:
+        """
+        Load existing vector store
+        """
+        try:
+            self.vectordb = PineconeVectorStore(
+                index_name=self.vector_db_name,
+                embedding=self.encoder,
+                distance_strategy="COSINE",
+            ).get_pinecone_index(self.vector_db_name)
+            # print("loaded vector store")
+            return True
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            raise error
+
+
+    def unload_vectorstore(self) -> None:
+        """
+        Unload existing vector store
+        """
+        try:
+            self.vectordb = None
+            return True
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            raise error
+
+    def check_for_data(self) -> bool:
+        try:
+            res = self.vectordb.query(
+                vector=[0]*self.dimension, 
+                filter={
+                    "userId":self.user_id
+                },
+                top_k=1
+            )
+            return res
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            raise error
+        
+    async def _fetch_related_documents(self, user_query: str):
+        cleaned_user_query = preprocess_text(user_query)
+        cleaned_user_query_embedding = await asyncio.to_thread(self.encoder.embed_query, cleaned_user_query)
+        
+        matched_data = await asyncio.to_thread(
+            lambda: self.vectordb.query(
+                namespace=self.namespace,
+                vector=cleaned_user_query_embedding,
+                top_k=self.top_k,
+                filter={"$and": [{"userId": {"$in": [self.user_id]}}]},
+                include_metadata=True,
+                include_values=True,
+            )["matches"]
+        )
+
+        if not matched_data:
+            print("No relevant match found in vector database.")
+            return []
+
+        return [
+            Document(page_content=f"{data['metadata'].get('category', '')}:: {data['metadata'].get('summary', '')}")
+            for data in matched_data
+        ]
+
+    def get_related_documents(self, user_query: str):
+        try:
+            return asyncio.run(self._fetch_related_documents(user_query))
+        except Exception as error:
+            print("get_related_topics: ", traceback.format_exc())
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            raise error
+
+    def as_langchain_retriever(self):
+        return self
 
 openai_embedding_encoder = OpenAIEmbedding(
     model_name=settings.EMBEDDING_MODEL_NAME,
