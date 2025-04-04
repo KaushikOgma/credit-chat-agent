@@ -74,6 +74,15 @@ class State(dict):
 
 # --- Node1: Initialize tools ---
 async def initialization_node(state):
+    """Initialize the tools and services needed for the workflow.
+    This function sets up the MongoDB connection, initializes the credit report processor and extractor services,
+
+    Args:
+        state (State): The current state of the workflow.
+
+    Returns:
+        State: The updated state with initialized tools and services.
+    """    
     try:
         print("initialization_node:: ")
         # Explicit Mongo Connection
@@ -105,6 +114,15 @@ async def initialization_node(state):
 
 # --- Node2: Load message history ---
 async def load_history_node(state):
+    """Load the message history from MongoDB and set up the chat history for the user.
+    This function is called at the beginning of the workflow to retrieve the user's previous messages.
+
+    Args:
+        state (State): The current state of the workflow.
+
+    Returns:
+        State: The updated state with the loaded chat history and question number.
+    """
     try:
         print("load_history_node:: ")
         mongo_history_repo = ChatHistoryRepository(state["user_id"], state["mongo_db"])
@@ -127,6 +145,15 @@ async def load_history_node(state):
 
 # --- Node3: Check if user is verfied or not ---
 async def check_for_verfied_condition(state):
+    """Checks if the user is verified or not.
+    This is used to determine the next node in the workflow.
+    
+    Args:
+        state (State): The current state of the workflow.
+
+    Returns:
+        str: The next node to be executed in the workflow.
+    """
     try:
         print("check_for_verfied_condition:: ")
         if state["is_verified"]:
@@ -140,6 +167,16 @@ async def check_for_verfied_condition(state):
 
 # --- Node4: Check if user report exists in mongo ---
 async def fetch_today_report_node(state):
+    """Fetch the user's credit report for today from MongoDB.
+    This function retrieves the report and checks if it has been vectorized.
+    If the report is not found, it will be handled in the next node.
+    
+    Args:
+        state (State): The current state of the workflow.
+
+    Returns:
+        State: The updated state with the fetched credit report and vectorization status.
+    """    
     try:
         print("fetch_today_report_node:: ")
         data = await state["credit_report_repo"].get_todays_reoprt(state["mongo_db"], state["user_id"])
@@ -155,6 +192,16 @@ async def fetch_today_report_node(state):
 
 # --- Node4: Check if user report exists in mongo ---
 async def check_today_report_condition(state):
+    """Check if the user's credit report for today exists in MongoDB.
+    This function determines the next node in the workflow based on the report's vectorization status.
+    If the report is not found, it will be handled in the next node.
+    
+    Args:
+        state (State): The current state of the workflow.
+
+    Returns:
+        str: The next node to be executed in the workflow.
+    """    
     try:
         print("fetch_today_report_node:: ")
         data = state["current_credit_report"]
@@ -173,6 +220,15 @@ async def check_today_report_condition(state):
 
 # ---Node5: Fetch and sync data explicitly async---
 async def fetch_and_sync_new_data_node(state):
+    """Fetch and sync new data from the user's credit report.
+    This function processes the report, vectorizes it, and updates the MongoDB and Pinecone database accordingly.
+    
+    Args:
+        state (State): The current state of the workflow.
+
+    Returns:
+        State: The updated state with the processed credit report and vectorization status.
+    """    
     try:
         print("fetch_and_sync_new_data_node:: ")
         state["pinecone_data_available"] = False
@@ -221,6 +277,15 @@ async def fetch_and_sync_new_data_node(state):
 
 # --- Node6: Check if user data exists in Pinecone ---
 async def fetch_vector_db_node(state):
+    """Fetch the vector database node and check if the user data exists in Pinecone.
+    This function is used to determine if the user data needs to be populated in the vector database.
+    
+    Args:
+        state (State): The current state of the workflow.
+
+    Returns:
+        State: The updated state with the vector database status.
+    """    
     try:
         print("fetch_vector_db_node:: ")
         if not state["vectorizer"].vectordb:
@@ -240,6 +305,17 @@ async def fetch_vector_db_node(state):
 
 
 async def check_vector_db_condition(state):
+    """Check if the vector database needs to be populated or not.
+    This function is used to determine the next node in the workflow based on the vector database status.
+    
+    Args:
+        state (State): The current state of the workflow.
+
+    Returns:
+        str: The next node to be executed in the workflow.
+    1. If the vector database needs to be populated, return "populate_vector_db_node".
+    2. Otherwise, return "pull_model_config_node".
+    """    
     try:
         print("check_vector_db_condition:: ")
         if state["populate_vector_db"]:
@@ -253,6 +329,18 @@ async def check_vector_db_condition(state):
 
 # --- Node7: Populate Pinecone if missing ---
 async def populate_vector_db_node(state):
+    """Populate the vector database with the user's data if it is missing.
+    This function is called if the vector database needs to be populated.
+    
+    Args:
+        state (State): The current state of the workflow.
+
+    Returns:
+        State: The updated state with the populated vector database.
+    1. If the vector database is not available, load it and create a new vector store.
+    2. Set the "pinecone_data_available" flag to True.
+    3. Append the current node to the state path.
+    """    
     try:
         print("populate_vector_db_node:: ")
         if not state["pinecone_data_available"]:
@@ -271,6 +359,21 @@ async def populate_vector_db_node(state):
 
 # --- Node8: Pull latest model configs ---
 async def pull_model_config_node(state):
+    """Pull the latest model configuration from the database.
+    This function retrieves the model configuration and sets it in the state.
+    
+    Args:
+        state (State): The current state of the workflow.
+
+    Returns:
+        State: The updated state with the model configuration.
+    1. If the model configuration is not found, set the default model ID.
+    2. Append the current node to the state path.
+    3. Return the updated state.
+    4. If an error occurs, set the default model ID and return the state.
+    5. Print the error message and the traversed path.
+    6. Return the state with the default model ID.
+    """    
     try:
         print("pull_model_config_node:: ")
         models = await state["model_data_repo"].get_models(state["mongo_db"])
@@ -286,6 +389,28 @@ async def pull_model_config_node(state):
 
 # --- Node9: Conversational Retrieval generation ---
 async def conversational_agent_node(state):
+    """Generate a conversational response using the LangChain ConversationalRetrievalChain.
+    This function sets up the language model, retriever, and prompt templates for the conversation.
+
+    Args:
+        state (State): The current state of the workflow.
+        question (str): The user's question.
+        context (str): The context for the conversation.
+        chat_system_content (str): The system content for the chat.
+
+    Returns:
+        State: The updated state with the generated answer.
+    1. Initialize the language model and retriever based on the user's verification status.
+    2. Set up the prompt templates for the conversation.
+    3. Create the ConversationalRetrievalChain and generate the response.
+    4. Append the current node to the state path.
+    5. Return the updated state.
+    6. If an error occurs, print the error message and the traversed path.
+    7. Return the state with the error message.
+    8. Print the error message and the traversed path.
+    9. Return the state with the error message.
+    10. Print the error message and the traversed path.
+    """    
     try:
         print("conversational_agent_node:: ")
         llm = ChatOpenAI(model= state["model_config"]["model_id"],openai_api_key=settings.OPENAI_API_KEY, temperature=0)
@@ -353,6 +478,19 @@ async def conversational_agent_node(state):
 
 # --- Node10: Persist message explicitly ---
 async def persist_messages_node(state):
+    """Persist the user and AI messages in the MongoDB database.
+    This function is called after the conversational agent generates a response.
+
+    Args:
+        state (State): The current state of the workflow.
+        user_query (str): The user's question.
+        answer (str): The AI-generated answer.
+        question_number (int): The question number for the conversation.
+
+    Returns:
+        State: The updated state with the persisted messages.
+    1. Add the user message to the MongoDB database.
+    """    
     try:
         print("persist_messages_node:: ")
         await state["mongo_history_repo"].add_user_message(state["user_query"], state["question_number"])
@@ -368,6 +506,28 @@ async def persist_messages_node(state):
 
 # --- Node11: Load message history ---
 async def deinitialization_node(state):
+    """Deinitialize the tools and services used in the workflow.
+    This function closes the MongoDB connection, deinitializes the encoder and vectorizer connections,
+    and cleans up any extra services.
+    It also cleans up the state flags and performs garbage collection.
+    
+        Finally, it appends the current node to the state path.
+
+    Args:
+        state (State): The current state of the workflow.
+
+    Returns:
+        State: The updated state after deinitialization.
+    1. Close the MongoDB client explicitly.
+    2. Deinitialize encoder connections (if needed explicitly).
+    3. Deinitialize vectorizer connections (if applicable explicitly).
+    4. Deinitialize any extra services explicitly (if needed).
+    5. Clean state flags explicitly.
+    6. Perform garbage collection explicitly.
+    7. Append the current node to the state path.
+    8. Return the updated state.
+    9. If an error occurs, print the error message and the traversed path.
+    """    
     try:# Close MongoDB client explicitly
         print("deinitialization_node:: ")
         mongo_client = state.get("mongo_client", None)
@@ -415,6 +575,20 @@ async def deinitialization_node(state):
         return state
 
 async def build_state_graph():
+    """Build the state graph for the LangGraph workflow.
+    This function defines the nodes and edges of the workflow, including the initialization, data fetching,
+    vectorization, and conversational agent nodes.
+    It also sets up the conditional edges based on the user's verification status and the vector database status.
+
+    Returns:
+        StateGraph: The compiled state graph for the workflow.
+    1. Define the nodes for the workflow.
+    2. Define the edges for the workflow.
+    3. Set the entry point for the workflow.
+    4. Compile the workflow into a runnable graph.
+    5. Return the runnable graph.
+    6. If an error occurs, print the error message and the traversed path.
+    """    
     # --- LangGraph workflow explicitly defined ---
     workflow = StateGraph(State)
 
