@@ -40,7 +40,7 @@ class ChatController:
             result = await runnable_graph.ainvoke(input)
             print("[DEBUG] Final Output:", result.get("answer")) 
             print("Travarsed Path:: ", " --> ".join(elm for elm in result.get("path",[])))
-            return {"question": result.get("question", input["user_query"]),"answer": result.get("answer"), "traversed_path": " --> ".join(elm for elm in result.get("path",[]))}
+            return {"question_number": result.get("question_number", None),"question": result.get("question", input["user_query"]),"answer": result.get("answer"), "traversed_path": " --> ".join(elm for elm in result.get("path",[]))}
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
