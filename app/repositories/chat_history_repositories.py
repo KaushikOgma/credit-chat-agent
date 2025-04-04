@@ -30,28 +30,31 @@ class ChatHistoryRepository:
 
     async def load_messages(self):
         docs = self.collection.find({"user_id": self.user_id}).sort("timestamp", pymongo.ASCENDING)
-        print("docs:: ",docs)
         messages = []
+        question_count = 0
         for doc in docs:
             if doc["sender"] == "human":
+                question_count += 1
                 messages.append(HumanMessage(content=doc["content"]))
             else:
                 messages.append(AIMessage(content=doc["content"]))
-        return messages
+        return messages, question_count
 
-    async def add_user_message(self, content: str):
+    async def add_user_message(self, content: str, question_number: int):
         self.collection.insert_one({
             "user_id": self.user_id, 
             "sender": "human",
             "content": content,
+            "question_number": question_number,
             "timestamp": datetime.datetime.now(datetime.UTC)
         })
 
-    async def add_ai_message(self, content: str):
+    async def add_ai_message(self, content: str, question_number: int):
         self.collection.insert_one({
             "user_id": self.user_id, 
             "sender": "ai",
             "content": content,
+            "question_number": question_number,
             "timestamp": datetime.datetime.now(datetime.UTC)
         })
 

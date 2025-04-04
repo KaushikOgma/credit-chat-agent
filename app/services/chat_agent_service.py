@@ -63,8 +63,10 @@ class State(dict):
     pinecone_data_available: bool
     populate_vector_db: bool
     model_config: dict
+    question_number: int
     answer: str
     tools_initialized: bool
+    path: list
 
 
 
@@ -92,9 +94,11 @@ async def initialization_node(state):
             namespace="credit_reports"
         )
         state["tools_initialized"] = True
+        state["path"] = ["initialization_node"]
         return state
     except Exception as error:
         print("initialization_node:: error - ",str(error))
+        print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         return state
 
 
@@ -103,7 +107,8 @@ async def load_history_node(state):
     try:
         print("load_history_node:: ")
         mongo_history_repo = ChatHistoryRepository(state["user_id"], state["mongo_db"])
-        chat_history = await mongo_history_repo.load_messages()
+        chat_history, question_count = await mongo_history_repo.load_messages()
+        state["question_number"] = question_count + 1
         state["chat_history"] = chat_history
         state["mongo_history_repo"] = mongo_history_repo
         state["chain_kwargs"]["memory"] = ConversationBufferMemory(
@@ -111,9 +116,11 @@ async def load_history_node(state):
             return_messages=True,
             memory_key="chat_history"
         )
+        state["path"].append("load_history_node")
         return state
     except Exception as error:
         print("load_history_node:: error - ",str(error))
+        print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         return state
     
 
@@ -127,6 +134,7 @@ async def check_for_verfied_condition(state):
             return "pull_model_config_node"
     except Exception as error:
         print("check_for_verfied_condition:: error - ",str(error))
+        print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         return "pull_model_config_node"
 
 # --- Node4: Check if user report exists in mongo ---
@@ -136,9 +144,11 @@ async def fetch_today_report_node(state):
         data = await state["credit_report_repo"].get_todays_reoprt(state["mongo_db"], state["user_id"])
         state["current_credit_report"] = data
         state["pinecone_data_available"] = data["isVectorized"]
+        state["path"].append("fetch_today_report_node")
         return state
     except Exception as error:
         print("fetch_today_report_node:: error - ",str(error))
+        print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         return state
 
 
@@ -156,6 +166,7 @@ async def check_today_report_condition(state):
             return "fetch_and_sync_new_data_node"
     except Exception as error:
         print("check_today_report_condition:: error - ",str(error))
+        print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         return "fetch_and_sync_new_data_node"
     
 
@@ -198,9 +209,11 @@ async def fetch_and_sync_new_data_node(state):
                     mongo_data["isVectorized"] = True
                     state["current_credit_report"] = mongo_data
                     state["pinecone_data_available"] = True
+        state["path"].append("fetch_and_sync_new_data_node")
         return state
     except Exception as error:
         print("fetch_and_sync_new_data_node:: error - ",str(error))
+        print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         return state
 
 
@@ -216,9 +229,11 @@ async def fetch_vector_db_node(state):
             state["populate_vector_db"] = True
         else:
             state["populate_vector_db"] = False
+        state["path"].append("fetch_vector_db_node")
         return state
     except Exception as error:
         print("check_vector_db_condition:: error - ",str(error))
+        print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         return state
 
 
@@ -231,6 +246,7 @@ async def check_vector_db_condition(state):
         return "pull_model_config_node"
     except Exception as error:
         print("check_vector_db_condition:: error - ",str(error))
+        print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         return "pull_model_config_node"
 
 
@@ -244,9 +260,11 @@ async def populate_vector_db_node(state):
                 state["vectorizer"].load_vectorstore()
             await state["vectorizer"].create_vectorstore(vector_data, "report_data_id", "topics")
             state["pinecone_data_available"] = True
+        state["path"].append("populate_vector_db_node")
         return state
     except Exception as error:
         print("populate_vector_db_node:: error - ",str(error))
+        print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         return state
 
 
@@ -256,10 +274,12 @@ async def pull_model_config_node(state):
         print("pull_model_config_node:: ")
         models = await state["model_data_repo"].get_models(state["mongo_db"])
         state["model_config"] = models[0] if len(models) > 0 else {"model_id": settings.BASE_MODEL}
+        state["path"].append("pull_model_config_node")
         return state
     except Exception as error:
         print("pull_model_config_node:: error - ",str(error))
         state["model_config"] = {"model_id": settings.BASE_MODEL}
+        print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         return state
 
 
@@ -315,21 +335,25 @@ async def conversational_agent_node(state):
         conversational_chain = ConversationalRetrievalChain.from_llm(**state["chain_kwargs"])
         response = conversational_chain.invoke({"question": state["user_query"]})
         state["answer"] = response["answer"]
+        state["path"].append("conversational_agent_node")
         return state
     except Exception as error:
         print("conversational_agent_node:: error - ",str(error))
         print(traceback.format_exc())
+        print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         return state
 
 # --- Node10: Persist message explicitly ---
 async def persist_messages_node(state):
     try:
         print("persist_messages_node:: ")
-        await state["mongo_history_repo"].add_user_message(state["user_query"])
-        await state["mongo_history_repo"].add_ai_message(state["answer"])
+        await state["mongo_history_repo"].add_user_message(state["user_query"], state["question_number"])
+        await state["mongo_history_repo"].add_ai_message(state["answer"], state["question_number"])
+        state["path"].append("persist_messages_node")
         return state
     except Exception as error:
         print("persist_messages_node:: error - ",str(error))
+        print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         return state
 
 
@@ -375,9 +399,11 @@ async def deinitialization_node(state):
         # Clean state flags explicitly
         state["tools_initialized"] = False
         await asyncio.to_thread(gc.collect)
+        state["path"].append("deinitialization_node")
         return state
     except Exception as error:
         print("deinitialization_node:: error - ",str(error))
+        print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         return state
 
 async def build_state_graph():
@@ -436,6 +462,7 @@ async def start():
     print(f"[DEBUG] Test input: {test_input}")  # Debug
     result = await runnable_graph.ainvoke(test_input)
     print("[DEBUG] Final Output:", result.get("answer"))  # Print the OpenAI response
+    print("Travarsed Path:: ", " --> ".join(elm for elm in result.get("path",[])))
 
 if __name__ == "__main__":
     asyncio.run(start())
