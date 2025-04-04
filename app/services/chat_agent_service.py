@@ -9,7 +9,7 @@ from langchain.prompts import SystemMessagePromptTemplate, ChatPromptTemplate, H
 sys.path.append(os.getcwd())
 import asyncio
 from typing import List, Union, Dict, Any, Annotated, TypedDict
-from app.utils.helpers.prompt_helper import chat_system_content_message
+from app.utils.helpers.prompt_helper import chat_system_content_message, condense_question_system_content_message
 from app.utils.config import settings
 import openai
 import urllib.parse
@@ -336,12 +336,7 @@ async def conversational_agent_node(state):
         state["chain_kwargs"]["combine_docs_chain_kwargs"] = {"prompt": chat_prompt}
 
 
-        condense_question_prompt_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in ENGLISH language.
-        Chat History:
-        {chat_history}
-        Follow Up Input: {question}
-        Standalone question:"""
-        condense_question_prompt = PromptTemplate.from_template(condense_question_prompt_template)
+        condense_question_prompt = PromptTemplate.from_template(condense_question_system_content_message())
         state["chain_kwargs"]["condense_question_prompt"] = condense_question_prompt
 
 

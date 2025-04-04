@@ -72,6 +72,12 @@ CHAT_SYSTEM_PROMPT: |
 
   [END OF INSTRUCTIONS]
 
+CONDENSE_QUESTION_SYSTEM_MESSAGE: |
+  Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in ENGLISH language.
+  Chat History:
+  {chat_history}
+  Follow Up Input: {question}
+  Standalone question:
 
 
 CREDIT_REPORT_PROCESS_SYSTEM_MESSAGE: |

@@ -74,6 +74,11 @@ def finetune_system_content_massage():
 def chat_system_content_message():
     return settings.CHAT_SYSTEM_PROMPT
 
+
+def condense_question_system_content_message():
+    return settings.CONDENSE_QUESTION_SYSTEM_MESSAGE
+
+
 def credit_report_process_conversation_messages(credit_report_chunk_json: dict, category: str):
     context_message = SystemMessage(content=settings.CREDIT_REPORT_PROCESS_SYSTEM_MESSAGE)
     
