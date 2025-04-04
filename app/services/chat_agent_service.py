@@ -18,6 +18,7 @@ from pymongo import MongoClient
 from langgraph.graph import StateGraph, START
 from app.dependencies.chat_report_dependencies import get_credit_report_controller
 from app.utils.logger import setup_logger
+from setuptools._distutils.util import strtobool
 from app.db import MONGO_URI
 import operator
 
@@ -85,7 +86,7 @@ async def initialization_node(state):
         state["model_data_repo"] = ModelDataRepository() 
         encoder = OpenAIEmbedding(model_name=settings.EMBEDDING_MODEL_NAME)
         state["encoder"] = encoder
-        state["chain_kwargs"]= {"verbose": True}
+        state["chain_kwargs"]= {"verbose": bool(strtobool(settings.VERBOSE))}
         state["vectorizer"] = VectorizerEngine(
             encoder=encoder,
             vector_db_name=settings.VECTOR_DB_NAME,

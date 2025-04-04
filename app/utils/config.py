@@ -92,6 +92,7 @@ class Settings(BaseSettings):
     DB_USER: str = Field(..., env="DB_USER")
     DB_PASSWORD: str = Field(..., env="DB_PASSWORD")
     SEEDING: str = Field(..., env="SEEDING")
+    VERBOSE: str = Field(..., env="VERBOSE")
 
     # Array Configuration
     ARRAY_APP_KEY: str = Field(..., env="ARRAY_APP_KEY")

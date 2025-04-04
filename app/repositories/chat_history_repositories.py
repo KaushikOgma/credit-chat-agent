@@ -17,6 +17,7 @@ from app.attribute_selector.credit_report_attributes import CreditReportProjecti
 from pymongo.database import Database
 from langchain.schema import HumanMessage, AIMessage
 from app.utils.constants import DBCollections
+from collections import deque
 from app.db import MONGO_URI
 from app.utils.logger import setup_logger
 logger = setup_logger()
@@ -38,6 +39,8 @@ class ChatHistoryRepository:
                 messages.append(HumanMessage(content=doc["content"]))
             else:
                 messages.append(AIMessage(content=doc["content"]))
+        messages = deque(messages, maxlen=settings.CHAT_HISTORY_LIMIT*2) 
+        messages = list(messages)
         return messages, question_count
 
     async def add_user_message(self, content: str, question_number: int):
