@@ -4,7 +4,7 @@ from pymongo.database import Database
 from app.controllers.chat_controller import ChatController
 from fastapi.responses import JSONResponse
 from starlette import status as starlette_status
-from app.schemas.chat_schema import ChatRequest, ChatResponse
+from app.schemas.chat_schema import ChatRequest, ChatResponse, ChatAgentRequest
 from app.dependencies.chat_dependencies import get_chat_controller
 from fastapi.exceptions import HTTPException
 from app.db import get_db
@@ -36,4 +36,22 @@ async def test_chat(
         # Return a JSON response with an error message
         return JSONResponse(content={"message": str(error)}, status_code=500)
 
+
+
+@router.post("/test_chat_agent", status_code=status.HTTP_200_OK)
+async def test_chat(
+    req_data: ChatAgentRequest,
+    chat_controller: ChatController = Depends(get_chat_controller),
+):
+    
+    try:
+        response = await chat_controller.test_chat_agent(req_data)
+        return JSONResponse(
+                    status_code=200, content={"data": response, "message": "Got Answer successfully"}
+                )
+    except Exception as error:
+        # Log the error
+        logger.exception(error)
+        # Return a JSON response with an error message
+        return JSONResponse(content={"message": str(error)}, status_code=500)
 

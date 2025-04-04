@@ -101,7 +101,7 @@ async def initialization_node(state):
 # --- Node2: Load message history ---
 async def load_history_node(state):
     try:
-        print("load_history_node:: ", state["user_id"], state["mongo_db"])
+        print("load_history_node:: ")
         mongo_history_repo = ChatHistoryRepository(state["user_id"], state["mongo_db"])
         chat_history = await mongo_history_repo.load_messages()
         state["chat_history"] = chat_history
@@ -238,7 +238,6 @@ async def check_vector_db_condition(state):
 async def populate_vector_db_node(state):
     try:
         print("populate_vector_db_node:: ")
-        print(state.keys())
         if not state["pinecone_data_available"]:
             vector_data = state["vector_data"]
             if not state["vectorizer"].vectordb:
@@ -305,7 +304,6 @@ async def conversational_agent_node(state):
         {context}
         {question}
         """
-        print("system_template:: ",system_template)
         # Create the prompt templates:
         messages = [
             SystemMessagePromptTemplate.from_template(system_template),
@@ -316,7 +314,6 @@ async def conversational_agent_node(state):
         state["chain_kwargs"]["combine_docs_chain_kwargs"] = {"prompt": prompt}
         conversational_chain = ConversationalRetrievalChain.from_llm(**state["chain_kwargs"])
         response = conversational_chain.invoke({"question": state["user_query"]})
-        print("resp:: ",response["answer"])
         state["answer"] = response["answer"]
         return state
     except Exception as error:
@@ -383,7 +380,7 @@ async def deinitialization_node(state):
         print("deinitialization_node:: error - ",str(error))
         return state
 
-async def get_state_graph():
+async def build_state_graph():
     # --- LangGraph workflow explicitly defined ---
     workflow = StateGraph(State)
 
@@ -422,13 +419,14 @@ async def get_state_graph():
     workflow.add_edge("conversational_agent_node","persist_messages_node")
     workflow.add_edge("persist_messages_node","deinitialization_node")
     workflow.add_edge("deinitialization_node", END)
-    return workflow
+    runnable_graph = workflow.compile()
+    return runnable_graph
+
+
+runnable_graph = asyncio.run(build_state_graph())
+print(runnable_graph.get_graph().print_ascii())
 
 async def start():
-    graph = await get_state_graph()
-    runnable_graph = graph.compile()
-    print(runnable_graph.get_graph().print_ascii())
- 
     test_input = {
         "user_id": "32b397c1-d160-44bc-9940-3d16542d8718",
         "user_query": "what is chatGPT?",
@@ -437,7 +435,7 @@ async def start():
     }
     print(f"[DEBUG] Test input: {test_input}")  # Debug
     result = await runnable_graph.ainvoke(test_input)
-    print("[DEBUG] Final Output:", result.get("bot_response"))  # Print the OpenAI response
+    print("[DEBUG] Final Output:", result.get("answer"))  # Print the OpenAI response
 
 if __name__ == "__main__":
     asyncio.run(start())
