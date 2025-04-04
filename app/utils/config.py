@@ -82,7 +82,7 @@ class Settings(BaseSettings):
     # DB Configuration
     PINECONE_API_KEY: str = Field(..., env="PINECONE_API_KEY")
     VECTOR_DB_NAME: str = Field(..., env="VECTOR_DB_NAME")
-    VECTOR_DIMENSION: str = Field(..., env="VECTOR_DIMENSION")
+    VECTOR_DIMENSION: int = Field(..., env="VECTOR_DIMENSION")
     EMBEDDING_MODEL_NAME: str = Field(..., env="EMBEDDING_MODEL_NAME")
 
     DB_NAME: str = Field(..., env="DB_NAME")

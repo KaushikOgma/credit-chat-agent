@@ -4,6 +4,8 @@ from fastapi.exceptions import HTTPException
 from pydantic import ValidationError
 from fastapi.responses import JSONResponse
 from pymongo.errors import PyMongoError
+import pymongo
+from datetime import datetime
 from contextlib import asynccontextmanager
 
 import urllib
@@ -60,3 +62,4 @@ def get_db_instance():
         # print("get_db_instance:: error - " + error_message)
         # return JSONResponse(content={"message": error_message}, status_code=500)
         raise HTTPException(status_code=500, detail=f"Database connection error: {str(error)}")
+

@@ -1,7 +1,8 @@
 from fastapi.responses import JSONResponse
 from app.repositories.model_data_repositories import ModelDataRepository
-from app.schemas.chat_schema import ChatRequest
+from app.schemas.chat_schema import ChatAgentRequest, ChatRequest
 from app.services.chat_service import ChatService
+from app.services.chat_agent_service import runnable_graph
 from tqdm import tqdm
 from pymongo.database import Database
 from app.utils.config import settings
@@ -31,3 +32,14 @@ class ChatController:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
 
+
+    async def test_chat_agent(self, req_data: ChatAgentRequest):
+        try:
+            input = req_data.model_dump()
+            print(f"[DEBUG] input: {input}")  # Debug
+            result = await runnable_graph.ainvoke(input)
+            print("[DEBUG] Final Output:", result.get("answer")) 
+            return result.get("answer")
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            raise error

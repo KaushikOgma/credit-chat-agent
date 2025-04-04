@@ -10,8 +10,10 @@ import os
 import json
 import gc
 import time
+from pydantic import BaseModel
 from typing import List, Optional, Dict, Tuple, Any
 from uuid import UUID
+from langchain.schema import BaseRetriever, Document
 import uuid
 from tqdm import tqdm
 import numpy as np
@@ -75,8 +77,10 @@ class VectorizerEngine:
 
     def __init__(
         self,
-        encoder: OpenAIEmbeddings,
-        vector_db_name: str,
+        encoder: OpenAIEmbeddings = OpenAIEmbedding(
+            model_name=settings.EMBEDDING_MODEL_NAME,
+        ),
+        vector_db_name: str = settings.VECTOR_DB_NAME,
         batch_size: int = 128,
         dimension: int = settings.VECTOR_DIMENSION,
         namespace: str = "questions",
@@ -577,9 +581,10 @@ class VectorizerEngine:
                 score_list = {}
                 for data in matched_data:
                     # print("data:: ",json.dumps(data["metadata"], indent=3))
-                    matched_category = data["metadata"].get("category")
-                    matched_summary = data["metadata"].get("summary")
-                    context_list.append(f"{matched_category}:: {matched_summary}")
+                    matched_category = data["metadata"].get("category", "")
+                    matched_summary = data["metadata"].get("summary", "")
+                    metadata = f"{matched_category}:: {matched_summary}"
+                    context_list.append(metadata)
                     score = data["score"] * 100
                     score_list[len(context_list)] = score
                 return context_list, score_list
@@ -587,6 +592,21 @@ class VectorizerEngine:
             print("get_related_topics: ",traceback.format_exc())
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
+
+    async def check_for_data(self, user_id: str) -> bool:
+        try:
+            res = self.vectordb.query(
+                vector=[0]*self.dimension, 
+                filter={
+                    "userId":user_id
+                },
+                top_k=1
+            )
+            return res
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            raise error
+        
 
 
 openai_embedding_encoder = OpenAIEmbedding(
