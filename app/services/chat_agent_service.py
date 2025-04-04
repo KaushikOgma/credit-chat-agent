@@ -318,20 +318,32 @@ async def conversational_agent_node(state):
             retriever = vectorstore.as_retriever(search_type='mmr', search_kwargs={'k': 3, 'filter': filter_dict})
             state["chain_kwargs"]["retriever"] = retriever
 
-        system_template = f"""
+        chat_system_template = f"""
         {chat_system_content_message()}
         """ + """
+        CONTEXT: 
         {context}
-        {question}
+        QUESTION:  {question}
         """
-        # Create the prompt templates:
-        messages = [
-            SystemMessagePromptTemplate.from_template(system_template),
-            HumanMessagePromptTemplate.from_template("{question}"),
-        ]
-        prompt = ChatPromptTemplate.from_messages(messages)
+        # # Create the prompt templates:
+        # chat_messages = [
+        #     SystemMessagePromptTemplate.from_template(chat_system_template),
+        #     HumanMessagePromptTemplate.from_template("{question}"),
+        # ]
+        # chat_prompt = ChatPromptTemplate.from_messages(chat_messages)
+        chat_prompt = PromptTemplate.from_template(chat_system_template)
+        state["chain_kwargs"]["combine_docs_chain_kwargs"] = {"prompt": chat_prompt}
 
-        state["chain_kwargs"]["combine_docs_chain_kwargs"] = {"prompt": prompt}
+
+        condense_question_prompt_template = """Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in ENGLISH language.
+        Chat History:
+        {chat_history}
+        Follow Up Input: {question}
+        Standalone question:"""
+        condense_question_prompt = PromptTemplate.from_template(condense_question_prompt_template)
+        state["chain_kwargs"]["condense_question_prompt"] = condense_question_prompt
+
+
         conversational_chain = ConversationalRetrievalChain.from_llm(**state["chain_kwargs"])
         response = conversational_chain.invoke({"question": state["user_query"]})
         state["answer"] = response["answer"]
