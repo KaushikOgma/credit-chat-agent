@@ -10,8 +10,10 @@ import os
 import json
 import gc
 import time
+from pydantic import BaseModel
 from typing import List, Optional, Dict, Tuple, Any
 from uuid import UUID
+from langchain.schema import BaseRetriever, Document
 import uuid
 from tqdm import tqdm
 import numpy as np
@@ -606,110 +608,6 @@ class VectorizerEngine:
             raise error
         
 
-
-class CustomMetadataRetriever:
-    
-    def __init__(
-        self,
-        user_id: str,
-        top_k: int = 3,
-        encoder: OpenAIEmbeddings = OpenAIEmbedding(
-            model_name=settings.EMBEDDING_MODEL_NAME,
-        ),
-        vector_db_name: str = settings.VECTOR_DB_NAME,
-        batch_size: int = 128,
-        dimension: int = settings.VECTOR_DIMENSION,
-        namespace: str = "credit_reports",
-    ):
-        self.batch_size = batch_size
-        self.vector_db_name = vector_db_name
-        self.dimension = dimension
-        self.namespace = namespace
-        self.semaphore = asyncio.Semaphore(settings.MAX_THREADS)
-        self.encoder = encoder
-        self.service_name = "custom_metadata_retriver"
-        self.user_id = user_id
-        self.top_k = top_k
-        self.vectordb = None
-        self.load_vectorstore()
-
-
-    def load_vectorstore(self) -> None:
-        """
-        Load existing vector store
-        """
-        try:
-            self.vectordb = PineconeVectorStore(
-                index_name=self.vector_db_name,
-                embedding=self.encoder,
-                distance_strategy="COSINE",
-            ).get_pinecone_index(self.vector_db_name)
-            # print("loaded vector store")
-            return True
-        except Exception as error:
-            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
-            raise error
-
-
-    def unload_vectorstore(self) -> None:
-        """
-        Unload existing vector store
-        """
-        try:
-            self.vectordb = None
-            return True
-        except Exception as error:
-            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
-            raise error
-
-    def check_for_data(self) -> bool:
-        try:
-            res = self.vectordb.query(
-                vector=[0]*self.dimension, 
-                filter={
-                    "userId":self.user_id
-                },
-                top_k=1
-            )
-            return res
-        except Exception as error:
-            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
-            raise error
-        
-    async def _fetch_related_documents(self, user_query: str):
-        cleaned_user_query = preprocess_text(user_query)
-        cleaned_user_query_embedding = await asyncio.to_thread(self.encoder.embed_query, cleaned_user_query)
-        
-        matched_data = await asyncio.to_thread(
-            lambda: self.vectordb.query(
-                namespace=self.namespace,
-                vector=cleaned_user_query_embedding,
-                top_k=self.top_k,
-                filter={"$and": [{"userId": {"$in": [self.user_id]}}]},
-                include_metadata=True,
-                include_values=True,
-            )["matches"]
-        )
-
-        if not matched_data:
-            print("No relevant match found in vector database.")
-            return []
-
-        return [
-            Document(page_content=f"{data['metadata'].get('category', '')}:: {data['metadata'].get('summary', '')}")
-            for data in matched_data
-        ]
-
-    def get_related_documents(self, user_query: str):
-        try:
-            return asyncio.run(self._fetch_related_documents(user_query))
-        except Exception as error:
-            print("get_related_topics: ", traceback.format_exc())
-            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
-            raise error
-
-    def as_langchain_retriever(self):
-        return self
 
 openai_embedding_encoder = OpenAIEmbedding(
     model_name=settings.EMBEDDING_MODEL_NAME,

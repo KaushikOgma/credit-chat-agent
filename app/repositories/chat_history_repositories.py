@@ -26,10 +26,11 @@ class ChatHistoryRepository:
     def __init__(self, user_id: str, db: any):
         self.user_id = user_id
         self.db = db
-        self.collection = self.db[DBCollections.CHAT_HISTORY]
+        self.collection = self.db[DBCollections.CHAT_HISTORY.value]
 
     async def load_messages(self):
         docs = self.collection.find({"user_id": self.user_id}).sort("timestamp", pymongo.ASCENDING)
+        print("docs:: ",docs)
         messages = []
         for doc in docs:
             if doc["sender"] == "human":
@@ -43,7 +44,7 @@ class ChatHistoryRepository:
             "user_id": self.user_id, 
             "sender": "human",
             "content": content,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.datetime.now(datetime.UTC)
         })
 
     async def add_ai_message(self, content: str):
@@ -51,7 +52,7 @@ class ChatHistoryRepository:
             "user_id": self.user_id, 
             "sender": "ai",
             "content": content,
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.datetime.now(datetime.UTC)
         })
 
     async def clear(self):
