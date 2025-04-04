@@ -7,6 +7,9 @@ from app.utils.helpers.prompt_helper import chat_system_content_message
 from app.utils.config import settings
 import openai
 import urllib.parse
+from langchain.chat_models import init_chat_model
+from langgraph_codeact import create_codeact
+from langgraph.checkpoint.memory import MemorySaver
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import MongoClient
 from langgraph.graph import StateGraph, START
@@ -14,19 +17,36 @@ from app.dependencies.chat_report_dependencies import get_credit_report_controll
 from app.utils.logger import setup_logger
 from app.db import get_db_instance
 import operator
+import builtins
+import contextlib
+import io
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 logger = setup_logger()
 
 db = get_db_instance()
 
 class ToolFunction:
+    """
+    A class that provides various utility functions for chat history management and context merging.
+    """
     def __init__(self):
+        """Initialize the chat history limit and database connection."""
         self.chat_limit = settings.CHAT_HISTORY_LIMIT
         # Use a different database name for chat storage
         self.chat_db = db  # Synchronous database instance
         self.chat_collection = self.chat_db["chat_history"]
 
     async def fetch_previous_chat(self, state: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Fetches the previous chat history for a given user from the database.
+
+        Args:
+            state (Dict[str, Any]): The state containing user_id and other data.
+
+        Returns:
+            Dict[str, Any]: A dictionary containing the chat history and context.
+        """
         print(f"[DEBUG] Input to fetch_previous_chat: {state}")  # Debugging
         user_id = state.get("user_id")
         print(user_id)  # Debugging
@@ -44,6 +64,14 @@ class ToolFunction:
     async def store_chat(self, user_id: str, user_query: str, bot_response: str) -> Dict[str, Any]:
         """
         Stores the chat in the database and ensures the bot_response is passed through.
+
+        Args:
+            user_id (str): The ID of the user.
+            user_query (str): The user's query.
+            bot_response (str): The bot's response.
+
+        Returns:
+            Dict[str, Any]: A dictionary containing the bot_response.
         """
         print(f"[DEBUG] Storing chat: user_query={user_query}, bot_response={bot_response}")  # Debugging
 
@@ -68,6 +96,15 @@ class ToolFunction:
         return {"bot_response": bot_response}
 
     async def get_user_query_and_id(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Extracts user_id and user_query from the input data.
+
+        Args:
+            input_data (Dict[str, Any]): The input data containing user_id and user_query.
+
+        Returns:
+            Dict[str, Any]: A dictionary containing user_id and user_query.
+        """
         print(f"[DEBUG] Input to get_user_query_and_id: {input_data}")  # Debug
         required_keys = ["user_id", "user_query"]
         for key in required_keys:
@@ -76,17 +113,43 @@ class ToolFunction:
         return {"user_id": input_data["user_id"], "user_query": input_data["user_query"]}
 
     async def get_user_query(self, input_data: Dict[str, Any]) -> Dict[str, str]:
+        """
+        Extracts the user_query from the input data.
+
+        Args:
+            input_data (Dict[str, Any]): The input data containing user_query.
+
+        Returns:
+            Dict[str, str]: A dictionary containing the user_query.
+        """
         if "user_query" not in input_data:
             raise ValueError("Missing required key: user_query in input_data")
         return {"user_query": input_data["user_query"]}
 
     async def get_user_id(self, input_data: Dict[str, Any]) -> Dict[str, str]:
+        """
+        Extracts the user_id from the input data.
+
+        Args:
+            input_data (Dict[str, Any]): The input data containing user_id.
+
+        Returns:
+            Dict[str, str]: A dictionary containing the user_id.
+        """
         if "user_id" not in input_data:
             raise ValueError("Missing required key: user_id in input_data")
         return {"user_id": input_data["user_id"]}
 
     def merge_context(self, data: Union[List[Dict[str, Any]], Dict[str, Any]]) -> Dict[str, Any]:
-        """Merge multiple dictionaries into a single context dictionary."""
+        """
+        Merges multiple dictionaries into a single context dictionary.
+
+        Args:
+            data (Union[List[Dict[str, Any]], Dict[str, Any]]): The data to be merged.
+
+        Returns:
+            Dict[str, Any]: A dictionary containing merged context and chat history.
+        """
         print(f"[DEBUG] Input to merge_context: {data}")
 
         context = []
@@ -112,6 +175,9 @@ class ToolFunction:
 
 class ChatService:
     def __init__(self):
+        """
+        Initializes the ChatService class with OpenAI API settings and configurations.
+        """
         self.temperature = 0.7
         self.max_tokens = 500
         self.openai = openai
@@ -123,6 +189,16 @@ class ChatService:
         self.service_name = "chat_service"
 
     async def get_response(self, question: str, model_id: str) -> Union[str, None]:
+        """
+        Sends a question to the OpenAI API and retrieves a response.
+
+        Args:
+            question (str): The user's question.
+            model_id (str): The model ID to use for the API call.
+
+        Returns:
+            Union[str, None]: The response from the OpenAI API or None if an error occurs.
+        """
         try:
             # system_propmt = "You are a Credit Genius Assistant."
             response = await asyncio.to_thread(
@@ -141,6 +217,15 @@ class ChatService:
             return None
     
     async def get_contextual_response(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Generates a contextual response based on the input data.
+
+        Args:
+            input_data (Dict[str, Any]): The input data containing user query, context, and chat history.
+
+        Returns:
+            Dict[str, Any]: A dictionary containing user_id, user_query, and bot_response.
+        """
         merged_data = input_data.get("merged_data",{})
         user_query = input_data.get("user_query")
         context = merged_data.get("context",input_data.get("context", None))
@@ -216,10 +301,28 @@ class ChatService:
             }
         
 async def credit_report_context_wrapper(state):
+    """
+    Fetches the credit report context for a given user.
+
+    Args:
+        state (Dict[str, Any]): The state containing user_id and user_query.
+
+    Returns:
+        Any: The credit report context.
+    """
     controller = get_credit_report_controller()
     return await controller.get_credit_report_context(db, state["user_id"], state["user_query"])
 
 async def check_recent_data(state: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Checks for recent credit report data for a given user.
+
+    Args:
+        state (Dict[str, Any]): The state containing user_id and user_query.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing the context and chat history.
+    """
     print(f"[DEBUG] Input to check_recent_data: {state}")  # Debug
     try:
         controller = get_credit_report_controller()
@@ -235,92 +338,68 @@ async def check_recent_data(state: Dict[str, Any]) -> Dict[str, Any]:
         logger.error(f"get_credit_report_context failed: {e}")
         return {"context": []}  # Return an empty list if an error occurs
 
-def setup_graph():
-    print("[DEBUG] Setting up graph")  # Debug
+tools = [
+    ToolFunction().get_user_query_and_id,
+    ToolFunction().get_user_query,
+    ToolFunction().get_user_id,
+    check_recent_data,
+    credit_report_context_wrapper,
+    ToolFunction().fetch_previous_chat,
+    ToolFunction().merge_context,
+    ChatService().get_contextual_response,
+    ToolFunction().store_chat,
+    
+]
 
-    # Define the state with all required keys
-    class State(TypedDict):
-        user_id: str
-        user_query: str
-        is_verified: bool
-        context: Annotated[list, operator.add]
-        bot_response: str
-        chat_history: list
-        merged_data: dict
+def eval(state: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Evaluates the current state and returns it as is.
 
-    graph = StateGraph(State)
-    tool = ToolFunction()
-    chat_service = ChatService()
+    Args:
+        state (Dict[str, Any]): The current state.
 
-    # Step 1: Extract user query and user ID separately
-    graph.add_node("get_user_query_and_id", tool.get_user_query_and_id)
-    graph.add_node("get_user_query", tool.get_user_query)
-    graph.add_node("get_user_id", tool.get_user_id)
+    Returns:
+        Dict[str, Any]: The evaluated state.
+    """
+    # This function is a placeholder for any evaluation logic you want to implement.
+    # For now, it just returns the state as is.
+    print(f"[DEBUG] Evaluating state: {state}")  # Debug
+    return state
+prompt = """
+You are a Credit Genius Assistant. You will be given a task to perform. You should output either.
+First you will take the user query and user id and then you will check if the user has a credit report or not. 
+If the user has a credit report then you will fetch the context from the database and then you will merge the context with the chat history. 
+Then you will pass the merged context to the OpenAI API and get the response. Finally you will store the chat in the database."""
 
-    # Step 2: Check for credit report if verified
-    graph.add_node("check_recent_data", check_recent_data)
+model = init_chat_model(
+    model='gpt-4o',
+    temperature=0.7,
+    max_tokens=settings.BASE_MODEL_TOKEN_LIMIT,
+    openai_api_key=settings.OPENAI_API_KEY,
+)
+code_act = create_codeact(
+    model=model,
+    prompt=prompt,
+    tools=tools,
+    eval_fn=eval,
+)
 
-    # Step 3: Fetch previous chat history
-    graph.add_node("fetch_previous_chat", tool.fetch_previous_chat)
+agent = code_act.compile()
 
-    # Step 4: Merge the fetched context
-    graph.add_node("merge_context", tool.merge_context)
-
-    # Step 5: Process query with AI agent
-    graph.add_node("agent1_process", chat_service.get_contextual_response)
-
-    # Step 6: Store chat history
-    async def store_chat_wrapper(state):
-        return await tool.store_chat(state["user_id"], state["user_query"], state["bot_response"])
-
-    graph.add_node("store_chat", store_chat_wrapper)
-
-    # Conditional check for verification
-    def check_verification(state):
-        print("[DEBUG] Checking verification for state:", state)  # Debug
-        if state.get("is_verified", False):
-            # Trigger both `check_recent_data` and `fetch_previous_chat`
-            return "trigger_check_recent_data"
-        # Trigger only `fetch_previous_chat` if not verified
-        return "trigger_fetch_previous_chat"
-
-    # Graph edges
-    graph.add_edge(START, "get_user_query_and_id")
-    graph.add_edge("get_user_query_and_id", "get_user_query")
-    graph.add_edge("get_user_query_and_id", "get_user_id")
-    graph.add_conditional_edges("get_user_query_and_id", check_verification,{
-        "trigger_check_recent_data": "check_recent_data",
-        "trigger_fetch_previous_chat": "fetch_previous_chat"
-    })
-    graph.add_edge("check_recent_data", "fetch_previous_chat")
-    graph.add_edge("fetch_previous_chat", "merge_context")
-    graph.add_edge("merge_context", "agent1_process")  # Ensure agent1_process runs after merge_context
-    graph.add_edge("agent1_process", "store_chat")  # Ensure store_chat runs after agent1_process
-
-    print("[DEBUG] Graph setup completed")  # Debug
-    return graph
-
-async def main():
-    graph = setup_graph()
-    runnable_graph = graph.compile()
-    print(runnable_graph.get_graph().print_ascii())
- 
-    test_input = {
-        "user_id": "32b397c1-d160-44bc-9940-3d16542d8718",
-        "user_query": "What is my credit score?",
-        "is_verified": True,
-        "context": [],
-        "chat_history": [],
-        "merged_data": {}
-        
-    }
-    print(f"[DEBUG] Test input: {test_input}")  # Debug
-    result = await runnable_graph.ainvoke(test_input)
-    print("[DEBUG] Final Output:", result.get("bot_response"))  # Print the OpenAI response
-
-if __name__ == "__main__":
-    asyncio.run(main())
-
+messages = [{
+    "role": "user",
+    "content": "What is the credit score?",
+    "user_id": "32b397c1-d160-44bc-9940-3d16542d8718",
+}]
+for typ, chunk in agent.stream(
+    {"messages": messages},
+    stream_mode=["values", "messages"],
+    config={"configurable": {"thread_id": 1}},
+):
+    if typ == "messages":
+        print(chunk[0].content, end="")
+    elif typ == "values":
+        print("\n\n---answer---\n\n", chunk)
 
 
 # async def get_chat_response():
