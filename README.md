@@ -93,14 +93,8 @@ credit_chat_agent/
 ```
 
 
-## Data Model:
-
-
-## Database Migration Steps:
-
 
 ## Flow Chart:
-
-## Initiate Server Script:
+![Chat Agent Workflow](./docs/chatAgentWOrkflow.png)
 
 

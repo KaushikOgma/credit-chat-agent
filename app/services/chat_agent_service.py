@@ -143,7 +143,7 @@ async def load_history_node(state):
         return state
     
 
-# --- Node3: Check if user is verfied or not ---
+# --- cond edge 1: Check if user is verfied or not ---
 async def check_for_verfied_condition(state):
     """Checks if the user is verified or not.
     This is used to determine the next node in the workflow.
@@ -165,7 +165,7 @@ async def check_for_verfied_condition(state):
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         return "pull_model_config_node"
 
-# --- Node4: Check if user report exists in mongo ---
+# --- Node3: fetch user's report for today from mongo db ---
 async def fetch_today_report_node(state):
     """Fetch the user's credit report for today from MongoDB.
     This function retrieves the report and checks if it has been vectorized.
@@ -190,7 +190,7 @@ async def fetch_today_report_node(state):
         return state
 
 
-# --- Node4: Check if user report exists in mongo ---
+# --- cond edge 2: Check if user's report for today exists in mongo ---
 async def check_today_report_condition(state):
     """Check if the user's credit report for today exists in MongoDB.
     This function determines the next node in the workflow based on the report's vectorization status.
@@ -218,7 +218,7 @@ async def check_today_report_condition(state):
         return "fetch_and_sync_new_data_node"
     
 
-# ---Node5: Fetch and sync data explicitly async---
+# ---Node4: Fetch and sync data explicitly ---
 async def fetch_and_sync_new_data_node(state):
     """Fetch and sync new data from the user's credit report.
     This function processes the report, vectorizes it, and updates the MongoDB and Pinecone database accordingly.
@@ -275,7 +275,7 @@ async def fetch_and_sync_new_data_node(state):
 
 
 
-# --- Node6: Check if user data exists in Pinecone ---
+# --- Node5: fetch user report from vector db ---
 async def fetch_vector_db_node(state):
     """Fetch the vector database node and check if the user data exists in Pinecone.
     This function is used to determine if the user data needs to be populated in the vector database.
@@ -304,6 +304,7 @@ async def fetch_vector_db_node(state):
 
 
 
+# --- cond edge 3: Check if user data exists in Pinecone ---
 async def check_vector_db_condition(state):
     """Check if the vector database needs to be populated or not.
     This function is used to determine the next node in the workflow based on the vector database status.
@@ -327,7 +328,7 @@ async def check_vector_db_condition(state):
         return "pull_model_config_node"
 
 
-# --- Node7: Populate Pinecone if missing ---
+# --- Node6: Populate Pinecone if missing ---
 async def populate_vector_db_node(state):
     """Populate the vector database with the user's data if it is missing.
     This function is called if the vector database needs to be populated.
@@ -357,7 +358,7 @@ async def populate_vector_db_node(state):
         return state
 
 
-# --- Node8: Pull latest model configs ---
+# --- Node7: Pull latest model configs ---
 async def pull_model_config_node(state):
     """Pull the latest model configuration from the database.
     This function retrieves the model configuration and sets it in the state.
@@ -387,7 +388,7 @@ async def pull_model_config_node(state):
         return state
 
 
-# --- Node9: Conversational Retrieval generation ---
+# --- Node8: Conversational Retrieval generation ---
 async def conversational_agent_node(state):
     """Generate a conversational response using the LangChain ConversationalRetrievalChain.
     This function sets up the language model, retriever, and prompt templates for the conversation.
@@ -476,7 +477,7 @@ async def conversational_agent_node(state):
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         return state
 
-# --- Node10: Persist message explicitly ---
+# --- Node9: Persist message explicitly ---
 async def persist_messages_node(state):
     """Persist the user and AI messages in the MongoDB database.
     This function is called after the conversational agent generates a response.
@@ -504,7 +505,7 @@ async def persist_messages_node(state):
 
 
 
-# --- Node11: Load message history ---
+# --- Node10: Load message history ---
 async def deinitialization_node(state):
     """Deinitialize the tools and services used in the workflow.
     This function closes the MongoDB connection, deinitializes the encoder and vectorizer connections,
