@@ -32,7 +32,8 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain.chains import ConversationalRetrievalChain
 from langchain_core.prompts.prompt import PromptTemplate
 from app.repositories.model_data_repositories import ModelDataRepository
-from langchain.memory import ConversationBufferMemory, ChatMessageHistory
+from langchain_community.chat_message_histories import ChatMessageHistory
+from langchain.memory import ConversationBufferMemory
 from app.repositories.credit_report_repositories import CreditReportRepository
 from app.services.credit_report_extractor import CreditReportExtractor
 from app.services.credit_report_processor import CreditReportProcessor
