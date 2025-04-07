@@ -68,6 +68,9 @@ class State(dict):
     answer: str
     tools_initialized: bool
     path: list
+    error_occured: bool
+    error_details: dict
+    next_node: str
 
 
 
@@ -83,6 +86,8 @@ async def initialization_node(state):
     Returns:
         State: The updated state with initialized tools and services.
     """    
+    state["error_occured"] = False
+    state["next_node"] = "load_history_node"
     try:
         print("initialization_node:: ")
         # Explicit Mongo Connection
@@ -109,6 +114,15 @@ async def initialization_node(state):
     except Exception as error:
         print("initialization_node:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
+        # Capture traceback string
+        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        # Store error message and traceback in state for later handling or processing
+        state["error_occured"] = True
+        state["error_details"] = {
+            "message": str(error),
+            "traceback": ''.join(tb_str).strip(),
+            "node": "initialization_node"
+        }
         return state
 
 
@@ -123,6 +137,7 @@ async def load_history_node(state):
     Returns:
         State: The updated state with the loaded chat history and question number.
     """
+    state["next_node"] = "load_history_node"
     try:
         print("load_history_node:: ")
         mongo_history_repo = ChatHistoryRepository(state["user_id"], state["mongo_db"])
@@ -140,6 +155,15 @@ async def load_history_node(state):
     except Exception as error:
         print("load_history_node:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
+        # Capture traceback string
+        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        # Store error message and traceback in state for later handling or processing
+        state["error_occured"] = True
+        state["error_details"] = {
+            "message": str(error),
+            "traceback": ''.join(tb_str).strip(),
+            "node": "load_history_node"
+        }
         return state
     
 
@@ -156,14 +180,26 @@ async def check_for_verfied_condition(state):
     """
     try:
         print("check_for_verfied_condition:: ")
-        if state["is_verified"]:
-            return "fetch_today_report_node"
+        if state["error_occured"]:
+            return "error_handler_node"
         else:
-            return "pull_model_config_node"
+            if state["is_verified"]:
+                return "fetch_today_report_node"
+            else:
+                return "pull_model_config_node"
     except Exception as error:
         print("check_for_verfied_condition:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
-        return "pull_model_config_node"
+        # Capture traceback string
+        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        # Store error message and traceback in state for later handling or processing
+        state["error_occured"] = True
+        state["error_details"] = {
+            "message": str(error),
+            "traceback": ''.join(tb_str).strip(),
+            "node": "check_for_verfied_condition"
+        }
+        return "error_handler_node"
 
 # --- Node3: fetch user's report for today from mongo db ---
 async def fetch_today_report_node(state):
@@ -187,6 +223,15 @@ async def fetch_today_report_node(state):
     except Exception as error:
         print("fetch_today_report_node:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
+        # Capture traceback string
+        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        # Store error message and traceback in state for later handling or processing
+        state["error_occured"] = True
+        state["error_details"] = {
+            "message": str(error),
+            "traceback": ''.join(tb_str).strip(),
+            "node": "fetch_today_report_node"
+        }
         return state
 
 
@@ -204,18 +249,30 @@ async def check_today_report_condition(state):
     """    
     try:
         print("fetch_today_report_node:: ")
-        data = state["current_credit_report"]
-        if data:
-            if data["isVectorized"]:
-                return "fetch_vector_db_node"
+        if state["error_occured"]:
+            return "error_handler_node"
+        else:
+            data = state["current_credit_report"]
+            if data:
+                if data["isVectorized"]:
+                    return "fetch_vector_db_node"
+                else:
+                    return "fetch_and_sync_new_data_node"
             else:
                 return "fetch_and_sync_new_data_node"
-        else:
-            return "fetch_and_sync_new_data_node"
     except Exception as error:
         print("check_today_report_condition:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
-        return "fetch_and_sync_new_data_node"
+        # Capture traceback string
+        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        # Store error message and traceback in state for later handling or processing
+        state["error_occured"] = True
+        state["error_details"] = {
+            "message": str(error),
+            "traceback": ''.join(tb_str).strip(),
+            "node": "check_today_report_condition"
+        }
+        return "error_handler_node"
     
 
 # ---Node4: Fetch and sync data explicitly ---
@@ -229,6 +286,7 @@ async def fetch_and_sync_new_data_node(state):
     Returns:
         State: The updated state with the processed credit report and vectorization status.
     """    
+    state["next_node"] = "fetch_vector_db_node"
     try:
         print("fetch_and_sync_new_data_node:: ")
         state["pinecone_data_available"] = False
@@ -271,6 +329,15 @@ async def fetch_and_sync_new_data_node(state):
     except Exception as error:
         print("fetch_and_sync_new_data_node:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
+        # Capture traceback string
+        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        # Store error message and traceback in state for later handling or processing
+        state["error_occured"] = True
+        state["error_details"] = {
+            "message": str(error),
+            "traceback": ''.join(tb_str).strip(),
+            "node": "fetch_and_sync_new_data_node"
+        }
         return state
 
 
@@ -298,8 +365,17 @@ async def fetch_vector_db_node(state):
         state["path"].append("fetch_vector_db_node")
         return state
     except Exception as error:
-        print("check_vector_db_condition:: error - ",str(error))
+        print("fetch_vector_db_node:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
+        # Capture traceback string
+        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        # Store error message and traceback in state for later handling or processing
+        state["error_occured"] = True
+        state["error_details"] = {
+            "message": str(error),
+            "traceback": ''.join(tb_str).strip(),
+            "node": "fetch_vector_db_node"
+        }
         return state
 
 
@@ -319,13 +395,26 @@ async def check_vector_db_condition(state):
     """    
     try:
         print("check_vector_db_condition:: ")
-        if state["populate_vector_db"]:
-            return "populate_vector_db_node"
-        return "pull_model_config_node"
+        if state["error_occured"]:
+            return "error_handler_node"
+        else:
+            if state["populate_vector_db"]:
+                return "populate_vector_db_node"
+            else:
+                return "pull_model_config_node"
     except Exception as error:
         print("check_vector_db_condition:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
-        return "pull_model_config_node"
+        # Capture traceback string
+        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        # Store error message and traceback in state for later handling or processing
+        state["error_occured"] = True
+        state["error_details"] = {
+            "message": str(error),
+            "traceback": ''.join(tb_str).strip(),
+            "node": "check_vector_db_condition"
+        }
+        return "error_handler_node"
 
 
 # --- Node6: Populate Pinecone if missing ---
@@ -342,6 +431,7 @@ async def populate_vector_db_node(state):
     2. Set the "pinecone_data_available" flag to True.
     3. Append the current node to the state path.
     """    
+    state["next_node"] = "pull_model_config_node"
     try:
         print("populate_vector_db_node:: ")
         if not state["pinecone_data_available"]:
@@ -355,6 +445,15 @@ async def populate_vector_db_node(state):
     except Exception as error:
         print("populate_vector_db_node:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
+        # Capture traceback string
+        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        # Store error message and traceback in state for later handling or processing
+        state["error_occured"] = True
+        state["error_details"] = {
+            "message": str(error),
+            "traceback": ''.join(tb_str).strip(),
+            "node": "populate_vector_db_node"
+        }
         return state
 
 
@@ -375,6 +474,7 @@ async def pull_model_config_node(state):
     5. Print the error message and the traversed path.
     6. Return the state with the default model ID.
     """    
+    state["next_node"] = "conversational_agent_node"
     try:
         print("pull_model_config_node:: ")
         models = await state["model_data_repo"].get_models(state["mongo_db"])
@@ -385,6 +485,15 @@ async def pull_model_config_node(state):
         print("pull_model_config_node:: error - ",str(error))
         state["model_config"] = {"model_id": settings.BASE_MODEL}
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
+        # Capture traceback string
+        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        # Store error message and traceback in state for later handling or processing
+        state["error_occured"] = True
+        state["error_details"] = {
+            "message": str(error),
+            "traceback": ''.join(tb_str).strip(),
+            "node": "pull_model_config_node"
+        }
         return state
 
 
@@ -412,6 +521,7 @@ async def conversational_agent_node(state):
     9. Return the state with the error message.
     10. Print the error message and the traversed path.
     """    
+    state["next_node"] = "persist_messages_node"
     try:
         print("conversational_agent_node:: ")
         llm = ChatOpenAI(model= state["model_config"]["model_id"],openai_api_key=settings.OPENAI_API_KEY, temperature=0)
@@ -475,6 +585,15 @@ async def conversational_agent_node(state):
         print("conversational_agent_node:: error - ",str(error))
         print(traceback.format_exc())
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
+        # Capture traceback string
+        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        # Store error message and traceback in state for later handling or processing
+        state["error_occured"] = True
+        state["error_details"] = {
+            "message": str(error),
+            "traceback": ''.join(tb_str).strip(),
+            "node": "conversational_agent_node"
+        }
         return state
 
 # --- Node9: Persist message explicitly ---
@@ -492,6 +611,7 @@ async def persist_messages_node(state):
         State: The updated state with the persisted messages.
     1. Add the user message to the MongoDB database.
     """    
+    state["next_node"] = "deinitialization_node"
     try:
         print("persist_messages_node:: ")
         await state["mongo_history_repo"].add_user_message(state["user_query"], state["question_number"])
@@ -501,6 +621,15 @@ async def persist_messages_node(state):
     except Exception as error:
         print("persist_messages_node:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
+        # Capture traceback string
+        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        # Store error message and traceback in state for later handling or processing
+        state["error_occured"] = True
+        state["error_details"] = {
+            "message": str(error),
+            "traceback": ''.join(tb_str).strip(),
+            "node": "persist_messages_node"
+        }
         return state
 
 
@@ -573,7 +702,63 @@ async def deinitialization_node(state):
     except Exception as error:
         print("deinitialization_node:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
+        # Capture traceback string
+        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        # Store error message and traceback in state for later handling or processing
+        state["error_occured"] = True
+        state["error_details"] = {
+            "message": str(error),
+            "traceback": ''.join(tb_str).strip(),
+            "node": "deinitialization_node"
+        }
         return state
+
+
+
+# --- Node11: error handle condition explicitly ---
+async def check_error_condition(state): 
+    try:
+        print("check_error_condition:: ")
+        if state["error_occured"]:
+            return "error_handler_node"
+        else:
+            return state["next_node"]
+    except Exception as error:
+        print("check_error_condition:: error - ",str(error))
+        print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
+        # Capture traceback string
+        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        # Store error message and traceback in state for later handling or processing
+        state["error_occured"] = True
+        state["error_details"] = {
+            "message": str(error),
+            "traceback": ''.join(tb_str).strip(),
+            "node": "check_error_condition"
+        }
+        return "error_handler_node"
+
+
+# --- Node11: error handle explicitly ---
+async def error_handler_node(state): 
+    try:
+        print("error_handler_node:: ")
+        print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
+        print("error details:: ", state["error_details"])
+        return state
+    except Exception as error:
+        print("error_handler_node:: error - ",str(error))
+        print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
+        # Capture traceback string
+        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        # Store error message and traceback in state for later handling or processing
+        state["error_occured"] = True
+        state["error_details"] = {
+            "message": str(error),
+            "traceback": ''.join(tb_str).strip(),
+            "node": "error_handler_node"
+        }
+        return state
+
 
 async def build_state_graph():
     """Build the state graph for the LangGraph workflow.
@@ -590,50 +775,78 @@ async def build_state_graph():
     5. Return the runnable graph.
     6. If an error occurs, print the error message and the traversed path.
     """    
-    # --- LangGraph workflow explicitly defined ---
-    workflow = StateGraph(State)
+    try:
+        # --- LangGraph workflow explicitly defined ---
+        workflow = StateGraph(State)
 
 
-    # Existing Nodes explicitly added
-    workflow.add_node("initialization_node", initialization_node)
-    workflow.add_node("load_history_node", load_history_node)
-    workflow.add_node("fetch_today_report_node", fetch_today_report_node)
-    workflow.add_node("fetch_and_sync_new_data_node", fetch_and_sync_new_data_node)
-    workflow.add_node("fetch_vector_db_node", fetch_vector_db_node)
-    workflow.add_node("populate_vector_db_node", populate_vector_db_node)
-    workflow.add_node("pull_model_config_node", pull_model_config_node)
-    workflow.add_node("conversational_agent_node", conversational_agent_node)
-    workflow.add_node("persist_messages_node", persist_messages_node)
-    workflow.add_node("deinitialization_node", deinitialization_node)
+        # Existing Nodes explicitly added
+        workflow.add_node("initialization_node", initialization_node)
+        workflow.add_node("load_history_node", load_history_node)
+        workflow.add_node("fetch_today_report_node", fetch_today_report_node)
+        workflow.add_node("fetch_and_sync_new_data_node", fetch_and_sync_new_data_node)
+        workflow.add_node("fetch_vector_db_node", fetch_vector_db_node)
+        workflow.add_node("populate_vector_db_node", populate_vector_db_node)
+        workflow.add_node("pull_model_config_node", pull_model_config_node)
+        workflow.add_node("conversational_agent_node", conversational_agent_node)
+        workflow.add_node("persist_messages_node", persist_messages_node)
+        workflow.add_node("deinitialization_node", deinitialization_node)
+        workflow.add_node("error_handler_node", error_handler_node)
 
 
-    # Edge Setup explicitly clear and adjusted
-    workflow.set_entry_point("initialization_node")
-    workflow.add_edge("initialization_node","load_history_node")
-    workflow.add_conditional_edges("load_history_node", check_for_verfied_condition,{
-        "fetch_today_report_node": "fetch_today_report_node",
-        "pull_model_config_node": "pull_model_config_node"
-    })
-    workflow.add_conditional_edges("fetch_today_report_node",check_today_report_condition,{
-        "fetch_vector_db_node": "fetch_vector_db_node",
-        "fetch_and_sync_new_data_node": "fetch_and_sync_new_data_node"
-    })
-    workflow.add_edge("fetch_and_sync_new_data_node","fetch_vector_db_node")
-    workflow.add_conditional_edges("fetch_vector_db_node",check_vector_db_condition,{
-        "populate_vector_db_node": "populate_vector_db_node",
-        "pull_model_config_node": "pull_model_config_node"
-    })
-    workflow.add_edge("populate_vector_db_node", "pull_model_config_node")
-    workflow.add_edge("pull_model_config_node","conversational_agent_node")
-    workflow.add_edge("conversational_agent_node","persist_messages_node")
-    workflow.add_edge("persist_messages_node","deinitialization_node")
-    workflow.add_edge("deinitialization_node", END)
-    runnable_graph = workflow.compile()
-    return runnable_graph
+        # Edge Setup explicitly clear and adjusted
+        workflow.set_entry_point("initialization_node")
+        workflow.add_conditional_edges("initialization_node", check_error_condition, {
+            "error_handler_node": "error_handler_node",
+            "load_history_node": "load_history_node"
+        })
+        workflow.add_conditional_edges("load_history_node", check_for_verfied_condition,{
+            "error_handler_node": "error_handler_node",
+            "fetch_today_report_node": "fetch_today_report_node",
+            "pull_model_config_node": "pull_model_config_node"
+        })
+        workflow.add_conditional_edges("fetch_today_report_node",check_today_report_condition,{
+            "error_handler_node": "error_handler_node",
+            "fetch_vector_db_node": "fetch_vector_db_node",
+            "fetch_and_sync_new_data_node": "fetch_and_sync_new_data_node"
+        })
+        workflow.add_conditional_edges("fetch_and_sync_new_data_node", check_error_condition, {
+            "error_handler_node": "error_handler_node",
+            "fetch_vector_db_node": "fetch_vector_db_node"
+        })
+        workflow.add_conditional_edges("fetch_vector_db_node",check_vector_db_condition,{
+            "error_handler_node": "error_handler_node",
+            "populate_vector_db_node": "populate_vector_db_node",
+            "pull_model_config_node": "pull_model_config_node"
+        })
+        workflow.add_conditional_edges("populate_vector_db_node", check_error_condition, {
+            "error_handler_node": "error_handler_node",
+            "pull_model_config_node": "pull_model_config_node"
+        })
+        workflow.add_conditional_edges("pull_model_config_node", check_error_condition, {
+            "error_handler_node": "error_handler_node",
+            "conversational_agent_node": "conversational_agent_node"
+        })
+        workflow.add_conditional_edges("conversational_agent_node", check_error_condition, {
+            "error_handler_node": "error_handler_node",
+            "persist_messages_node": "persist_messages_node"
+        })
+        workflow.add_conditional_edges("persist_messages_node", check_error_condition, {
+            "error_handler_node": "error_handler_node",
+            "deinitialization_node": "deinitialization_node"
+        })
+        workflow.add_edge("error_handler_node", "deinitialization_node")
+        workflow.add_edge("deinitialization_node", END)
+        runnable_graph = workflow.compile()
+        return runnable_graph
+    except Exception as error:
+        print("build_state_graph:: error - ",str(error))
+        raise error
 
 
 runnable_graph = asyncio.run(build_state_graph())
-print(runnable_graph.get_graph().print_ascii())
+# print(runnable_graph.get_graph().print_ascii())
+# print(runnable_graph.get_graph().draw_mermaid())
 
 async def start():
     test_input = {
