@@ -5,3 +5,4 @@ venv312/
 .env.prod
 *__pycache__*
 *.pyc
+.langgraph_api
