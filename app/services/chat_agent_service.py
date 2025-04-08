@@ -4,26 +4,14 @@ import sys
 import traceback
 from pinecone import Pinecone
 from langchain_pinecone import PineconeVectorStore
-from langchain.prompts import SystemMessagePromptTemplate, ChatPromptTemplate, HumanMessagePromptTemplate
-
 sys.path.append(os.getcwd())
 import asyncio
 from typing import List, Union, Dict, Any, Annotated, TypedDict
 from app.utils.helpers.prompt_helper import chat_system_content_message, condense_question_system_content_message
 from app.utils.config import settings
-import openai
-import urllib.parse
-from motor.motor_asyncio import AsyncIOMotorClient
-from pymongo import MongoClient
-from langgraph.graph import StateGraph, START
-from app.dependencies.chat_report_dependencies import get_credit_report_controller
 from app.utils.logger import setup_logger
 from setuptools._distutils.util import strtobool
 from app.db import MONGO_URI
-import operator
-
-logger = setup_logger()
-
 from pydantic import BaseModel
 from app.repositories.chat_history_repositories import ChatHistoryRepository
 from app.services.pinecone_vectorizer import OpenAIEmbedding, VectorizerEngine
@@ -32,16 +20,15 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain.chains import ConversationalRetrievalChain
 from langchain_core.prompts.prompt import PromptTemplate
 from app.repositories.model_data_repositories import ModelDataRepository
-from langchain.memory import ConversationBufferMemory, ChatMessageHistory
+from langchain_community.chat_message_histories import ChatMessageHistory
+from langchain.memory import ConversationBufferMemory
 from app.repositories.credit_report_repositories import CreditReportRepository
 from app.services.credit_report_extractor import CreditReportExtractor
 from app.services.credit_report_processor import CreditReportProcessor
 import pymongo
 
+logger = setup_logger()
 
-class UserQuery(BaseModel):
-    user_id: str
-    query: str
 
 class State(dict):
     user_id: str
@@ -717,6 +704,23 @@ async def deinitialization_node(state):
 
 # --- Node11: error handle condition explicitly ---
 async def check_error_condition(state): 
+    """Check if an error has occurred in the workflow.
+    This function is used to determine the next node in the workflow based on the error status.
+ 
+    Args:
+        state (State): The current state of the workflow.
+ 
+    Returns:
+        str: The next node to be executed in the workflow.
+    1. If an error has occurred, return "error_handler_node".
+    2. Otherwise, return the next node in the workflow.
+    3. If an error occurs, print the error message and the traversed path.
+    4. Capture the traceback string and store it in the state for later handling or processing.
+    5. Store the error message and traceback in the state for later handling or processing.
+    6. Set the "error_occured" flag to True.
+    7. Store the error details in the state.
+    8. Return "error_handler_node".
+    """
     try:
         print("check_error_condition:: ")
         if state["error_occured"]:
@@ -739,7 +743,22 @@ async def check_error_condition(state):
 
 
 # --- Node11: error handle explicitly ---
-async def error_handler_node(state): 
+async def error_handler_node(state):
+    """Handle errors that occur during the workflow.
+    This function captures the error details and appends them to the state.
+    It also prints the error message and the traversed path for debugging purposes.
+ 
+    Args:
+        state (State): The current state of the workflow.
+ 
+    Returns:
+        State: The updated state with error details.
+    1. Print the error message and the traversed path.
+    2. Capture the traceback string and store it in the state.
+    3. Store the error message and traceback in the state for later handling or processing.
+    4. Set the "error_occured" flag to True.
+    5. Return the updated state.
+    """  
     try:
         print("error_handler_node:: ")
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))

@@ -38,9 +38,26 @@ class ChatController:
             input = req_data.model_dump()
             print(f"[DEBUG] input: {input}")  # Debug
             result = await runnable_graph.ainvoke(input)
-            print("[DEBUG] Final Output:", result.get("answer")) 
-            print("Travarsed Path:: ", " --> ".join(elm for elm in result.get("path",[])))
-            return {"question_number": result.get("question_number", None),"question": result.get("question", input["user_query"]),"answer": result.get("answer"), "traversed_path": " --> ".join(elm for elm in result.get("path",[]))}
+            if result["error_occured"]:
+                print("[DEBUG] Error details:", result.get("error_details", {})) 
+                print("Travarsed Path:: ", " --> ".join(elm for elm in result.get("path",[])))
+                return {
+                    "question_number": result.get("question_number", None),
+                    "question": result.get("question", input["user_query"]),
+                    "traversed_path": " --> ".join(elm for elm in result.get("path",[])),
+                    "response": result["error_details"].get("message",""),
+                    "error_occured": result["error_occured"]
+                }
+            else:
+                print("[DEBUG] Final Output:", result.get("answer")) 
+                print("Travarsed Path:: ", " --> ".join(elm for elm in result.get("path",[])))
+                return {
+                    "question_number": result.get("question_number", None),
+                    "question": result.get("question", input["user_query"]),
+                    "response": result.get("answer"), 
+                    "traversed_path": " --> ".join(elm for elm in result.get("path",[])),
+                    "error_occured": result["error_occured"]
+                }
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             raise error
