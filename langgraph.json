@@ -3,7 +3,7 @@
     "graphs": {
       "American_Credit_genius": "./app/services/chat_agent_service.py:runnable_graph"
     },
-    "python_version": "3.3.12.9",
+    "python_version": "3.12",
     "env": "./.env.dev",
     "dependencies": [
       "."

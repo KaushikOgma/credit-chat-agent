@@ -24,7 +24,7 @@ import operator
 
 logger = setup_logger()
 
-from pydantic import BaseModel
+from pydantic import BaseModel, SkipValidation
 from app.repositories.chat_history_repositories import ChatHistoryRepository
 from app.services.pinecone_vectorizer import OpenAIEmbedding, VectorizerEngine
 from langgraph.graph import END, StateGraph
@@ -50,18 +50,18 @@ class State(dict):
     is_verified: bool
     is_premium: bool
     chat_history: list
-    credit_report_processor_service: CreditReportProcessor
-    credit_report_extractor_service: CreditReportExtractor
-    mongo_history_repo: ChatHistoryRepository
-    credit_report_repo: CreditReportRepository
-    model_data_repo: ModelDataRepository
-    encoder: OpenAIEmbedding
-    vectorizer: VectorizerEngine
+    credit_report_processor_service: SkipValidation[CreditReportProcessor]
+    credit_report_extractor_service: SkipValidation[CreditReportExtractor]
+    mongo_history_repo: SkipValidation[ChatHistoryRepository]
+    credit_report_repo: SkipValidation[CreditReportRepository]
+    model_data_repo: SkipValidation[ModelDataRepository]
+    encoder: SkipValidation[OpenAIEmbedding]
+    vectorizer: SkipValidation[VectorizerEngine]
     current_credit_report: dict
     chain_kwargs: dict
-    mongo_client: any
-    mongo_db: any
-    vector_data: any
+    mongo_client: SkipValidation[any]
+    mongo_db: SkipValidation[any]
+    vector_data: SkipValidation[any]
     pinecone_data_available: bool
     populate_vector_db: bool
     model_config: dict
