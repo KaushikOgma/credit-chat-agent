@@ -904,7 +904,7 @@ async def build_state_graph():
 
 runnable_graph = asyncio.run(build_state_graph())
 # print(runnable_graph.get_graph().print_ascii())
-print(runnable_graph.get_graph().draw_mermaid())
+# print(runnable_graph.get_graph().draw_mermaid())
 
 async def start():
     test_input = {
