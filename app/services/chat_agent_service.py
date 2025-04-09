@@ -102,7 +102,7 @@ async def initialization_node(state):
         print("initialization_node:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         # Capture traceback string
-        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        tb_str = traceback.format_exception(error)
         # Store error message and traceback in state for later handling or processing
         state["error_occured"] = True
         state["error_details"] = {
@@ -143,7 +143,7 @@ async def load_history_node(state):
         print("load_history_node:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         # Capture traceback string
-        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        tb_str = traceback.format_exception(error)
         # Store error message and traceback in state for later handling or processing
         state["error_occured"] = True
         state["error_details"] = {
@@ -178,7 +178,7 @@ async def check_for_verfied_condition(state):
         print("check_for_verfied_condition:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         # Capture traceback string
-        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        tb_str = traceback.format_exception(error)
         # Store error message and traceback in state for later handling or processing
         state["error_occured"] = True
         state["error_details"] = {
@@ -204,14 +204,15 @@ async def fetch_today_report_node(state):
         print("fetch_today_report_node:: ")
         data = await state["credit_report_repo"].get_todays_reoprt(state["mongo_db"], state["user_id"])
         state["current_credit_report"] = data
-        state["pinecone_data_available"] = data["isVectorized"]
+        if data is not None:
+            state["pinecone_data_available"] = data["isVectorized"]
         state["path"].append("fetch_today_report_node")
         return state
     except Exception as error:
         print("fetch_today_report_node:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         # Capture traceback string
-        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        tb_str = traceback.format_exception(error)
         # Store error message and traceback in state for later handling or processing
         state["error_occured"] = True
         state["error_details"] = {
@@ -251,7 +252,7 @@ async def check_today_report_condition(state):
         print("check_today_report_condition:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         # Capture traceback string
-        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        tb_str = traceback.format_exception(error)
         # Store error message and traceback in state for later handling or processing
         state["error_occured"] = True
         state["error_details"] = {
@@ -277,18 +278,19 @@ async def fetch_and_sync_new_data_node(state):
     try:
         print("fetch_and_sync_new_data_node:: ")
         state["pinecone_data_available"] = False
-        isVectorized = state["current_credit_report"]["isVectorized"]
         report = state["current_credit_report"]
-        if isVectorized:
-            mongo_data, vector_data = await state["credit_report_processor_service"].process_report(credit_report_json=None, user_id=state["user_id"], categorized_resp=report["report"])   
-            state["vector_data"] = vector_data
-            print("credit report processed")
-            # Sync the vector DB with the latest QA pairs
-            if not state["vectorizer"].vectordb:
-                state["vectorizer"].load_vectorstore()
-            await state["vectorizer"].create_vectorstore(vector_data, "report_data_id", "topics")
-            print("credit report added to vector db")
-            await state["credit_report_repo"].update_report(state["mongo_db"], report["_id"], {"isVectorized": True})
+        if report is not None:
+            isVectorized = state["current_credit_report"]["isVectorized"]
+            if not isVectorized:
+                mongo_data, vector_data = await state["credit_report_processor_service"].process_report(credit_report_json=None, user_id=state["user_id"], categorized_resp=report["report"])   
+                state["vector_data"] = vector_data
+                print("credit report processed")
+                # Sync the vector DB with the latest QA pairs
+                if not state["vectorizer"].vectordb:
+                    state["vectorizer"].load_vectorstore()
+                await state["vectorizer"].create_vectorstore(vector_data, "report_data_id", "topics")
+                print("credit report added to vector db")
+                await state["credit_report_repo"].update_report(state["mongo_db"], report["_id"], {"isVectorized": True})
             state["pinecone_data_available"] = True
         else:
             # There are no report in the mongo db for today
@@ -317,7 +319,7 @@ async def fetch_and_sync_new_data_node(state):
         print("fetch_and_sync_new_data_node:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         # Capture traceback string
-        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        tb_str = traceback.format_exception(error)
         # Store error message and traceback in state for later handling or processing
         state["error_occured"] = True
         state["error_details"] = {
@@ -355,7 +357,7 @@ async def fetch_vector_db_node(state):
         print("fetch_vector_db_node:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         # Capture traceback string
-        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        tb_str = traceback.format_exception(error)
         # Store error message and traceback in state for later handling or processing
         state["error_occured"] = True
         state["error_details"] = {
@@ -393,7 +395,7 @@ async def check_vector_db_condition(state):
         print("check_vector_db_condition:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         # Capture traceback string
-        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        tb_str = traceback.format_exception(error)
         # Store error message and traceback in state for later handling or processing
         state["error_occured"] = True
         state["error_details"] = {
@@ -433,7 +435,7 @@ async def populate_vector_db_node(state):
         print("populate_vector_db_node:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         # Capture traceback string
-        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        tb_str = traceback.format_exception(error)
         # Store error message and traceback in state for later handling or processing
         state["error_occured"] = True
         state["error_details"] = {
@@ -473,7 +475,7 @@ async def pull_model_config_node(state):
         state["model_config"] = {"model_id": settings.BASE_MODEL}
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         # Capture traceback string
-        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        tb_str = traceback.format_exception(error)
         # Store error message and traceback in state for later handling or processing
         state["error_occured"] = True
         state["error_details"] = {
@@ -573,7 +575,7 @@ async def conversational_agent_node(state):
         print(traceback.format_exc())
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         # Capture traceback string
-        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        tb_str = traceback.format_exception(error)
         # Store error message and traceback in state for later handling or processing
         state["error_occured"] = True
         state["error_details"] = {
@@ -609,7 +611,7 @@ async def persist_messages_node(state):
         print("persist_messages_node:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         # Capture traceback string
-        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        tb_str = traceback.format_exception(error)
         # Store error message and traceback in state for later handling or processing
         state["error_occured"] = True
         state["error_details"] = {
@@ -690,7 +692,7 @@ async def deinitialization_node(state):
         print("deinitialization_node:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         # Capture traceback string
-        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        tb_str = traceback.format_exception(error)
         # Store error message and traceback in state for later handling or processing
         state["error_occured"] = True
         state["error_details"] = {
@@ -731,7 +733,7 @@ async def check_error_condition(state):
         print("check_error_condition:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         # Capture traceback string
-        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        tb_str = traceback.format_exception(error)
         # Store error message and traceback in state for later handling or processing
         state["error_occured"] = True
         state["error_details"] = {
@@ -768,7 +770,7 @@ async def error_handler_node(state):
         print("error_handler_node:: error - ",str(error))
         print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
         # Capture traceback string
-        tb_str = traceback.format_exception(etype=type(error), value=error, tb=error.__traceback__)
+        tb_str = traceback.format_exception(error)
         # Store error message and traceback in state for later handling or processing
         state["error_occured"] = True
         state["error_details"] = {
