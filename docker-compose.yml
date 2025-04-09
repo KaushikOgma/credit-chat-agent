@@ -16,5 +16,5 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "2" # Using 2 Cores Maximum
-          memory: 2g # Using 2GB Memory
+          cpus: "3" # Using 3 Cores Maximum
+          memory: 4g # Using 4GB Memory
