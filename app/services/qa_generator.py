@@ -94,7 +94,7 @@ class QAGenerator:
                 logger.exception("ERROR: Insufficient tokens available for this request.", extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
                 return 'ERROR'
 
-            model = ChatOpenAI(temperature=0.0, max_tokens=num_tokens_available)
+            model = ChatOpenAI(model=settings.BASE_MODEL, temperature=0.0, max_tokens=num_tokens_available)
 
             try:
                 async with self.throttler:
