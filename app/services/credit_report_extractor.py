@@ -22,7 +22,7 @@ class CreditReportExtractor:
         self.fetch_credit_report_url = "report/v2"
         self.productCode = "exp1bReportScore"
         self.ttlInMinutes = "60"
-        self.service_name = "credit_report_extractor"
+        self.service_name = "credit_report_service"
  
     async def regenerate_token(self, user_id: str):
         """Regenerates the user token asynchronously."""

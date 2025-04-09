@@ -20,7 +20,7 @@ class FinetuneController:
         self.finetune_repo = finetune_repo
         self.model_data_repo = model_data_repo
         self.opeai_finetuner = opeai_finetuner
-        self.service_name = "finetune"
+        self.service_name = "model_finetune_service"
 
     async def get_train_data(
         self,

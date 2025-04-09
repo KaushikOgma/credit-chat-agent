@@ -23,7 +23,7 @@ logger = setup_logger()
 
 class ArrayReportProcessor:
     def __init__(self):
-        self.service_name = "credit_report_processor"
+        self.service_name = "credit_report_service"
         self.credit_liability_filter = "CREDIT_LIABILITY"
         self.credit_liability_categorizer = "@_AccountStatusType"
         self.credit_inquiry_filter = "CREDIT_INQUIRY"
@@ -32,7 +32,6 @@ class ArrayReportProcessor:
         self.credit_score_factor = "_FACTOR"
         self.credit_summary_filter = "CREDIT_SUMMARY"
         self.credit_summary_dataset = "_DATA_SET"
-        self.service_name = "credit_report_processor"
 
     async def process_credit_liabilities(self, credit_liabilities: list[dict]):
         liabilities = {}
@@ -151,7 +150,7 @@ class CreditReportProcessor:
         self.client = self.openai.Client()  # Create a client instance
         self.report_processor = ArrayReportProcessor()
         self.similarity_threshold = 0.8
-        self.service_name = "credit_report_processor"
+        self.service_name = "credit_report_service"
 
     # Run Model Function
     @retry(wait=wait_random_exponential(min=15, max=40))

@@ -20,7 +20,7 @@ class EvaluationController:
         self.eval_repo = eval_repo
         self.question_evaluator = question_evaluator
         self.model_data_repo = model_data_repo
-        self.service_name = "evaluation"
+        self.service_name = "model_evaluator_service"
 
     async def get_eval_data(
         self,

@@ -24,7 +24,7 @@ logger = setup_logger()
 
 class DataIngestor:
     def __init__(self):
-        self.service_name = "data_ingestor"
+        self.service_name = "data_ingestor_service"
         self.client = OpenAI(api_key=settings.OPENAI_API_KEY)
         self.model = settings.BASE_AUDIO_MODEL
 

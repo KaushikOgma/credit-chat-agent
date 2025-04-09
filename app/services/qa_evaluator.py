@@ -40,7 +40,7 @@ class QAEvaluator:
         self.similarity_threshold = 0.8
         self.system_prompt = chat_system_content_message()
         self.chat_service = ChatService()
-        self.service_name = "qa_evaluator"
+        self.service_name = "model_evaluator_service"
 
     async def get_precision_recall_f1(self, generated_sim_scores: List[float], true_sim_scores: List[float]) -> Union[dict, None]:
         """

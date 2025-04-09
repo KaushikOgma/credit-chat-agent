@@ -33,7 +33,7 @@ class QAGenerator:
             chunk_overlap=self.chunk_overlap,
             separators=["\n\n", "\n", " ", ""]
         )
-        self.service_name = "qa_generator"
+        self.service_name = "qa_generator_service"
 
 
     def extract_questions_from_output(self, output):

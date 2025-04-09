@@ -26,7 +26,7 @@ class OpenAIFineTuner:
         self.model = settings.BASE_MODEL_FOR_FINETUNE
         self.check_interval = 30  
         self.system_prompt = finetune_system_content_massage()
-        self.service_name = "finetune"
+        self.service_name = "model_finetune_service"
 
     def clean_question(self, question: str) -> str:
         """

@@ -37,7 +37,7 @@ class OpenAIEmbedding:
         """Initialize OpenAI embedding model."""
         openai.api_key = settings.OPENAI_API_KEY
         self.model = OpenAIEmbeddings(model=model_name)
-        self.service_name = "pinecone_embedder"
+        self.service_name = "data_vectorizor_service"
 
     def embed_documents(self, documents: List[str]) -> List[List[float]]:
         """Generate embeddings for a list of documents.
@@ -102,7 +102,7 @@ class VectorizerEngine:
         self.namespace = namespace
         self.semaphore = asyncio.Semaphore(settings.MAX_THREADS)
         self.encoder = encoder
-        self.service_name = "pinecone_vectorizer"
+        self.service_name = "data_vectorizor_service"
 
     @staticmethod
     def process_chunk(

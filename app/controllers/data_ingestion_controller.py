@@ -32,7 +32,7 @@ class DataIngestionController:
         self.finetune_controller = finetune_controller
         self.eval_controller = eval_controller
         self.matadata_controller = matadata_controller
-        self.service_name = "data_ingestor"
+        self.service_name = "data_ingestor_service"
 
     async def import_training_data(self, db: Database, req_data: FileUploadRequest):
         try:
