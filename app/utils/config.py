@@ -10,6 +10,7 @@ Usage:
 """
 
 import os
+from typing import Optional
 from pydantic import Field, model_validator
 import yaml
 from pydantic_settings import BaseSettings
@@ -101,6 +102,9 @@ class Settings(BaseSettings):
     
     #Chat Limit
     CHAT_HISTORY_LIMIT: int = Field(..., env="CHAT_HISTORY_LIMIT")
+    SERVER_URL: str = Field(..., env="SERVER_URL")
+    TEST_USER_ID: Optional[str] = Field(None, env="TEST_USER_ID")
+    TEST_ARRAY_USER_ID: Optional[str] = Field(None, env="TEST_ARRAY_USER_ID")
 
     @model_validator(mode="before")
     def load_yaml_values(cls, values):

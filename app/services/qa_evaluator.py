@@ -9,6 +9,7 @@ import numpy as np
 from tqdm import tqdm
 from app.services.pinecone_vectorizer import OpenAIEmbedding, VectorizerEngine
 from app.utils.helpers.prompt_helper import chat_system_content_message
+from app.utils.helpers.request_helper import start_chat
 from app.utils.config import settings
 from app.services.chat_service import ChatService
 import openai
@@ -144,7 +145,17 @@ class QAEvaluator:
             # Load the vector store
             self.vectorizer.load_vectorstore()
             # Get the AI response for the question
-            ai_response = await self.chat_service.get_response(question, model_id)
+            if settings.TEST_USER_ID is not None:
+                resp = await start_chat(question)
+                print("----------------------------------------")
+                print(json.dumps(resp, indent=2))
+                print("----------------------------------------")
+                if resp["success"]:
+                    ai_response = resp["data"]["response"]
+                else:
+                    ai_response = None
+            else:
+                ai_response = await self.chat_service.get_response(question, model_id)
             if ai_response:
                 # Get the similarity score between the question actual answer and the AI response
                 generated_similarity_score, true_similarity_score = await self.vectorizer.get_qa_similarity_score(
