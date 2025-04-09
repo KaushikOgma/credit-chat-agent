@@ -58,8 +58,7 @@ class State(dict):
     error_occured: bool
     error_details: dict
     next_node: str
-
-
+    non_verified_response: bool
 
 
 # --- Node1: Initialize tools ---
@@ -73,7 +72,8 @@ async def initialization_node(state):
     Returns:
         State: The updated state with initialized tools and services.
     """    
-    state["error_occured"] = False
+    state["error_occured"] = False 
+    state["non_verified_response"] = False
     state["next_node"] = "load_history_node"
     try:
         print("initialization_node:: ")
@@ -510,7 +510,7 @@ async def conversational_agent_node(state):
     9. Return the state with the error message.
     10. Print the error message and the traversed path.
     """    
-    state["next_node"] = "persist_messages_node"
+    state["next_node"] = "check_non_verified_response_node"
     try:
         print("conversational_agent_node:: ")
         llm = ChatOpenAI(model= state["model_config"]["model_id"],openai_api_key=settings.OPENAI_API_KEY, temperature=0)
@@ -585,7 +585,39 @@ async def conversational_agent_node(state):
         }
         return state
 
-# --- Node9: Persist message explicitly ---
+
+
+# --- Node9: check for non verified token in answer ---
+async def check_non_verified_response_node(state, token="**<<NA>>**"):
+    state["next_node"] = "persist_messages_node"
+    try:
+        response = state["answer"]
+        # Strip any whitespace from the end of the response
+        response = response.strip()
+        # Check if the response ends with the specified token
+        if response.endswith(token):
+            state["non_verified_response"] = True
+            state["answer"] = response[:-len(token)].rstrip()
+        else:
+            state["non_verified_response"] = False
+        return state
+    except Exception as error:
+        print("check_non_verified_response_node:: error - ",str(error))
+        print("Travarsed Path:: ", " --> ".join(elm for elm in state.get("path",[])))
+        # Capture traceback string
+        tb_str = traceback.format_exception(error)
+        # Store error message and traceback in state for later handling or processing
+        state["error_occured"] = True
+        state["error_details"] = {
+            "message": str(error),
+            "traceback": ''.join(tb_str).strip(),
+            "node": "check_non_verified_response_node"
+        }
+        return state
+
+    
+
+# --- Node10: Persist message explicitly ---
 async def persist_messages_node(state):
     """Persist the user and AI messages in the MongoDB database.
     This function is called after the conversational agent generates a response.
@@ -623,7 +655,7 @@ async def persist_messages_node(state):
 
 
 
-# --- Node10: Load message history ---
+# --- Node11: Load message history ---
 async def deinitialization_node(state):
     """Deinitialize the tools and services used in the workflow.
     This function closes the MongoDB connection, deinitializes the encoder and vectorizer connections,
@@ -704,7 +736,7 @@ async def deinitialization_node(state):
 
 
 
-# --- Node11: error handle condition explicitly ---
+# --- cond edge 4: error handle condition explicitly ---
 async def check_error_condition(state): 
     """Check if an error has occurred in the workflow.
     This function is used to determine the next node in the workflow based on the error status.
@@ -744,7 +776,7 @@ async def check_error_condition(state):
         return "error_handler_node"
 
 
-# --- Node11: error handle explicitly ---
+# --- Node12: error handle explicitly ---
 async def error_handler_node(state):
     """Handle errors that occur during the workflow.
     This function captures the error details and appends them to the state.
@@ -810,9 +842,10 @@ async def build_state_graph():
         workflow.add_node("populate_vector_db_node", populate_vector_db_node)
         workflow.add_node("pull_model_config_node", pull_model_config_node)
         workflow.add_node("conversational_agent_node", conversational_agent_node)
+        workflow.add_node("check_non_verified_response_node", check_non_verified_response_node)
         workflow.add_node("persist_messages_node", persist_messages_node)
         workflow.add_node("deinitialization_node", deinitialization_node)
-        workflow.add_node("error_handler_node", error_handler_node)
+        workflow.add_node("error_handler_node", error_handler_node) 
 
 
         # Edge Setup explicitly clear and adjusted
@@ -850,6 +883,10 @@ async def build_state_graph():
         })
         workflow.add_conditional_edges("conversational_agent_node", check_error_condition, {
             "error_handler_node": "error_handler_node",
+            "check_non_verified_response_node": "check_non_verified_response_node"
+        })
+        workflow.add_conditional_edges("check_non_verified_response_node", check_error_condition, {
+            "error_handler_node": "error_handler_node",
             "persist_messages_node": "persist_messages_node"
         })
         workflow.add_conditional_edges("persist_messages_node", check_error_condition, {
@@ -867,7 +904,7 @@ async def build_state_graph():
 
 runnable_graph = asyncio.run(build_state_graph())
 # print(runnable_graph.get_graph().print_ascii())
-# print(runnable_graph.get_graph().draw_mermaid())
+print(runnable_graph.get_graph().draw_mermaid())
 
 async def start():
     test_input = {

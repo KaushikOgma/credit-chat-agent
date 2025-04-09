@@ -46,7 +46,8 @@ class ChatController:
                     "question": result.get("question", input["user_query"]),
                     "traversed_path": " --> ".join(elm for elm in result.get("path",[])),
                     "response": result["error_details"].get("message",""),
-                    "error_occured": result["error_occured"]
+                    "error_occured": result["error_occured"],
+                    "verified_button": result["non_verified_response"]
                 }
             else:
                 print("[DEBUG] Final Output:", result.get("answer")) 
@@ -56,7 +57,8 @@ class ChatController:
                     "question": result.get("question", input["user_query"]),
                     "response": result.get("answer"), 
                     "traversed_path": " --> ".join(elm for elm in result.get("path",[])),
-                    "error_occured": result["error_occured"]
+                    "error_occured": result["error_occured"],
+                    "verified_button": result["non_verified_response"]
                 }
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
