@@ -95,6 +95,9 @@ credit_chat_agent/
 
 
 ## Flow Chart:
-![Chat Agent Workflow](./docs/chatAgentWOrkflow.png)
+- #### **Model Finetune Workflow:**
+  ![Model Finetune Workflow](./docs/ModelFinetuneWOrkflow.png)
+- #### **Chat Agent Workflow:**
+  ![Chat Agent Workflow](./docs/chatAgentWOrkflow.png)
 
 
