@@ -32,6 +32,7 @@ logger = setup_logger()
 
 class State(dict):
     user_id: str
+    credit_service_user_id: str
     user_query: str
     is_verified: bool
     is_premium: bool
@@ -127,7 +128,7 @@ async def load_history_node(state):
     state["next_node"] = "load_history_node"
     try:
         print("load_history_node:: ")
-        mongo_history_repo = ChatHistoryRepository(state["user_id"], state["mongo_db"])
+        mongo_history_repo = ChatHistoryRepository(state["user_id"], state["credit_service_user_id"], state["mongo_db"])
         chat_history, question_count = await mongo_history_repo.load_messages()
         state["question_number"] = question_count + 1
         state["chat_history"] = chat_history
@@ -289,9 +290,10 @@ async def fetch_and_sync_new_data_node(state):
                 if not state["vectorizer"].vectordb:
                     state["vectorizer"].load_vectorstore()
                 await state["vectorizer"].create_vectorstore(vector_data, "report_data_id", "topics")
+                await asyncio.sleep(3) # wait for 3 second so that vector db get time to load the data
                 print("credit report added to vector db")
                 await state["credit_report_repo"].update_report(state["mongo_db"], report["_id"], {"isVectorized": True})
-            state["pinecone_data_available"] = True
+                state["pinecone_data_available"] = True
         else:
             # There are no report in the mongo db for today
             credit_report = await state["credit_report_extractor_service"].get_credit_report(state["user_id"])     
@@ -307,6 +309,7 @@ async def fetch_and_sync_new_data_node(state):
                     if not state["vectorizer"].vectordb:
                         state["vectorizer"].load_vectorstore()
                     await state["vectorizer"].create_vectorstore(vector_data, "report_data_id", "topics")
+                    await asyncio.sleep(3) # wait for 3 second so that vector db get time to load the data
                     print("credit report added to vector db")
                     await state["credit_report_repo"].update_report(state["mongo_db"], inserted_id, {"isVectorized": True})
                     print("Make credit report is vectorize true")
@@ -422,12 +425,14 @@ async def populate_vector_db_node(state):
     """    
     state["next_node"] = "pull_model_config_node"
     try:
-        print("populate_vector_db_node:: ")
+        print("populate_vector_db_node:: ",state["pinecone_data_available"])
         if not state["pinecone_data_available"]:
             vector_data = state["vector_data"]
             if not state["vectorizer"].vectordb:
                 state["vectorizer"].load_vectorstore()
+            print("vector_data:: ",vector_data)
             await state["vectorizer"].create_vectorstore(vector_data, "report_data_id", "topics")
+            await asyncio.sleep(3) # wait for 3 second so that vector db get time to load the data
             state["pinecone_data_available"] = True
         state["path"].append("populate_vector_db_node")
         return state
@@ -543,7 +548,7 @@ async def conversational_agent_node(state):
             filter_dict = {"$and": [{"userId": {"$in": [state["user_id"]]}}]}
             retriever = vectorstore.as_retriever(search_type='mmr', search_kwargs={'k': 3, 'filter': filter_dict})
             state["chain_kwargs"]["retriever"] = retriever
-
+        # print("retriever:: ",state["chain_kwargs"]["retriever"].invoke(state["user_query"]))
         chat_system_template = f"""
         {chat_system_content_message()}
         """ + """
@@ -909,6 +914,7 @@ runnable_graph = asyncio.run(build_state_graph())
 async def start():
     test_input = {
         "user_id": "32b397c1-d160-44bc-9940-3d16542d8718",
+        ""
         "user_query": "what is chatGPT?",
         "is_verified": True,
         "is_premium": False

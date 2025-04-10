@@ -106,8 +106,8 @@ class CreditReportRepository:
                 },
                 "userId": user_id
             }
-            report = db[DBCollections.CREDIT_REPORT.value].find_one(filter_data, {"report":0})
-            print("report:: ",report)
+            report = db[DBCollections.CREDIT_REPORT.value].find_one(filter_data)
+            # print("report:: ",report)
             return report
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.serviceName})

@@ -104,6 +104,7 @@ class QAEvaluator:
             self.vectorizer.load_vectorstore()
             # Sync the vector DB with the latest QA pairs
             await self.vectorizer.create_vectorstore(qa_pairs, "question_id", "question")
+            await asyncio.sleep(3)
             return True
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
@@ -145,7 +146,7 @@ class QAEvaluator:
             # Load the vector store
             self.vectorizer.load_vectorstore()
             # Get the AI response for the question
-            if settings.TEST_USER_ID is not None:
+            if settings.TEST_USER_ID is not None and len(settings.TEST_USER_ID) > 0:
                 resp = await start_chat(question)
                 print("----------------------------------------")
                 print(json.dumps(resp, indent=2))

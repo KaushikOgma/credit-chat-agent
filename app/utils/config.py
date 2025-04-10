@@ -102,6 +102,7 @@ class Settings(BaseSettings):
     
     #Chat Limit
     CHAT_HISTORY_LIMIT: int = Field(..., env="CHAT_HISTORY_LIMIT")
+    CHAT_HISTORY_DISPLAY_LIMIT: int = Field(..., env="CHAT_HISTORY_DISPLAY_LIMIT")
     SERVER_URL: str = Field(..., env="SERVER_URL")
     TEST_USER_ID: Optional[str] = Field(None, env="TEST_USER_ID")
     TEST_ARRAY_USER_ID: Optional[str] = Field(None, env="TEST_ARRAY_USER_ID")

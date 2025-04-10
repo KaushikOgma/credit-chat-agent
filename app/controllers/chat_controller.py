@@ -1,4 +1,6 @@
+from bson import ObjectId
 from fastapi.responses import JSONResponse
+from app.repositories.chat_history_repositories import ChatHistoryRepository
 from app.repositories.model_data_repositories import ModelDataRepository
 from app.schemas.chat_schema import ChatAgentRequest, ChatRequest
 from app.services.chat_service import ChatService
@@ -33,9 +35,35 @@ class ChatController:
             raise error
 
 
-    async def test_chat_agent(self, req_data: ChatAgentRequest):
+    async def get_chat_history(
+        self,
+        db,
+        user_id: str,
+        credit_service_user_id: str,
+        before_id: str,
+        size: int,
+    ) -> dict:
+        user_id = user_id
+        try:
+            filterData = {}
+            if user_id is not None:
+                filterData["user_id"] = user_id
+            if credit_service_user_id is not None:
+                filterData["credit_service_user_id"] = credit_service_user_id
+            if before_id is not None:
+                filterData["_id"] = {"$lt": ObjectId(before_id)}
+            chat_history_repo = ChatHistoryRepository(user_id, credit_service_user_id, db)
+            data = await chat_history_repo.get_chat_history(filterData, size)
+            return data
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name, "userId": user_id})
+            raise error
+    
+    async def ask_chat_agent(self, req_data: ChatAgentRequest):
+        user_id = None
         try:
             input = req_data.model_dump()
+            user_id = input["user_id"]
             print(f"[DEBUG] input: {input}")  # Debug
             result = await runnable_graph.ainvoke(input)
             if result["error_occured"]:
@@ -47,7 +75,8 @@ class ChatController:
                     "traversed_path": " --> ".join(elm for elm in result.get("path",[])),
                     "response": result["error_details"].get("message",""),
                     "error_occured": result["error_occured"],
-                    "verified_button": result["non_verified_response"]
+                    "verified_button": result["non_verified_response"],
+                    "premium_button": False
                 }
             else:
                 print("[DEBUG] Final Output:", result.get("answer")) 
@@ -58,8 +87,9 @@ class ChatController:
                     "response": result.get("answer"), 
                     "traversed_path": " --> ".join(elm for elm in result.get("path",[])),
                     "error_occured": result["error_occured"],
-                    "verified_button": result["non_verified_response"]
+                    "verified_button": result["non_verified_response"],
+                    "premium_button": False
                 }
         except Exception as error:
-            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name, "userId": user_id})
             raise error

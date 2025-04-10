@@ -133,32 +133,32 @@ class CreditReportExtractor:
     async def get_credit_report(self, user_id: str):
         """Combines all steps to get the final credit report asynchronously."""
         try:
-            # user_token_resp = await self.regenerate_token(user_id)
-            # if not user_token_resp["success"]:
-            #     raise Exception(user_token_resp["message"])
-            # user_token_data = user_token_resp["data"]
-            # user_token = user_token_data.get("userToken")
-            # if not user_token:
-            #     raise Exception("Missing user token in response.")
+            user_token_resp = await self.regenerate_token(user_id)
+            if not user_token_resp["success"]:
+                raise Exception(user_token_resp["message"])
+            user_token_data = user_token_resp["data"]
+            user_token = user_token_data.get("userToken")
+            if not user_token:
+                raise Exception("Missing user token in response.")
     
-            # order_data_response = await self.order_credit_report(user_token)
-            # if not order_data_response["success"]:
-            #     raise Exception(order_data_response["message"])
-            # order_data = order_data_response["data"]
-            # report_key = order_data.get("reportKey")
-            # display_token = order_data.get("displayToken")
-            # if not report_key or not display_token:
-            #     raise Exception("Missing reportKey or displayToken in order response.")
+            order_data_response = await self.order_credit_report(user_token)
+            if not order_data_response["success"]:
+                raise Exception(order_data_response["message"])
+            order_data = order_data_response["data"]
+            report_key = order_data.get("reportKey")
+            display_token = order_data.get("displayToken")
+            if not report_key or not display_token:
+                raise Exception("Missing reportKey or displayToken in order response.")
     
-            # report_response = await self.retrieve_credit_report(report_key, display_token)
-            # if not report_response["success"]:
-            #     raise Exception(report_response["message"])
-            # report = report_response["data"]
+            report_response = await self.retrieve_credit_report(report_key, display_token)
+            if not report_response["success"]:
+                raise Exception(report_response["message"])
+            report = report_response["data"]
 
-            credit_report_json_path = os.path.join(".", settings.LOCAL_UPLOAD_LOCATION ,"array_data.json")
-            report = {}
-            with open(credit_report_json_path, "r") as f:
-                report = json.load(f)
+            # credit_report_json_path = os.path.join(".", settings.LOCAL_UPLOAD_LOCATION ,"array_data.json")
+            # report = {}
+            # with open(credit_report_json_path, "r") as f:
+            #     report = json.load(f)
             return report
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})

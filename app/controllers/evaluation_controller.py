@@ -184,8 +184,8 @@ class EvaluationController:
                         ids_list = [elm["_id"] for elm in qa_data]
                         qa_data = await self.eval_repo.get_eval_qa_pairs(db, ids_list)
                         result = await self.question_evaluator.evaluate_qa_pairs(qa_data, model_id)
-                        # if result:
-                        #     await self.model_data_repo.save_eval_result(db, model_data_id, result["agg_scores"])
+                        if result:
+                            await self.model_data_repo.save_eval_result(db, model_data_id, result["agg_scores"])
         except Exception as error:
             logger.exception(error)
             raise error

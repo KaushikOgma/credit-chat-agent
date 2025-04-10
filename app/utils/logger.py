@@ -67,7 +67,7 @@ class DBLogHandler(logging.Handler):
                 log_filter["moduleName"] = log_entry_data["moduleName"]
 
             existing_log = db[DBCollections.LOG.value].find_one(log_filter)
-            if len(log_filter) == 0 or not existing_log:
+            if not existing_log:
                 log_entry_data["logTrail"] = [log_entry]
                 if log_entry_data["type"] == "INFO":
                     log_entry_data["status"] = "SUCCESS"
