@@ -60,7 +60,7 @@ async def ask_chat_agent(
         return JSONResponse(content={"message": str(error)}, status_code=500)
 
 
-@router.post(
+@router.get(
     "/getChatHistory",
     response_model=ChatHistoryResponseSchema
 )
@@ -77,7 +77,7 @@ async def ask_chat_agent(
         async with db_instance as db:
             data = await chat_controller.get_chat_history(db, user_id, credit_service_user_id, before_id, size)
             return JSONResponse(
-                        status_code=200, content={"chat_historys": data, "message": "Chat History fetched successfully"}
+                        status_code=200, content={"chat_history": data, "message": "Chat History fetched successfully"}
                     )
     except Exception as error:
         # Log the error

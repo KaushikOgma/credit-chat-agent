@@ -28,14 +28,17 @@ class CreditReportExtractor:
         """Regenerates the user token asynchronously."""
         try:
             url = f"{self.array_url}/{self.regenerate_token_url}"
+            print("regenerate_token:: url::",url)
             payload = {"ttlInMinutes": self.ttlInMinutes, "userId": user_id, "appKey": self.app_key}
             headers = {
                 "accept": "application/json",
                 "x-array-server-token": self.server_token,
                 "content-type": "application/json",
             }
+            print("regenerate_token:: payload::",payload)
             async with aiohttp.ClientSession() as session:
                 async with session.post(url, json=payload, headers=headers) as response:
+                    print("regenerate_token:: response::",response.status)
                     if response.status == 200:
                         data = await response.json()
                         return {"success": True, "message": "Token regenerated successfully", "data": data}
@@ -65,6 +68,7 @@ class CreditReportExtractor:
             }
             async with aiohttp.ClientSession() as session:
                 async with session.post(url, json=payload, headers=headers) as response:
+                    print("order_credit_report:: response::",response.status)
                     if response.status == 200:
                         data = await response.json()
                         return {"success": True, "message": "Token regenerated successfully.", "data": data}
@@ -96,6 +100,7 @@ class CreditReportExtractor:
             headers = {"content-type": "application/json"}
             async with aiohttp.ClientSession() as session:
                 async with session.get(url, headers=headers) as response:
+                    print("retrieve_credit_report:: response::",response.status)
                     if response.status == 200:
                         data = await response.json()
                         return {
@@ -141,7 +146,7 @@ class CreditReportExtractor:
             if not user_token:
                 raise Exception("Missing user token in response.")
     
-            order_data_response = await self.order_credit_report(user_token)
+            order_data_response = await self.order_credit_report(user_id, user_token)
             if not order_data_response["success"]:
                 raise Exception(order_data_response["message"])
             order_data = order_data_response["data"]
@@ -154,13 +159,15 @@ class CreditReportExtractor:
             if not report_response["success"]:
                 raise Exception(report_response["message"])
             report = report_response["data"]
-
+            print("resp:: ",report)
+            # with open("resp.json", "w") as f:
+            #     json.dump(report, f)
             # credit_report_json_path = os.path.join(".", settings.LOCAL_UPLOAD_LOCATION ,"array_data.json")
             # report = {}
             # with open(credit_report_json_path, "r") as f:
             #     report = json.load(f)
-            return report
+            return report, None
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
-            return None
+            return None, str(error)
  

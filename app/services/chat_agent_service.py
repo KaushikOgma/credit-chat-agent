@@ -296,7 +296,7 @@ async def fetch_and_sync_new_data_node(state):
                 state["pinecone_data_available"] = True
         else:
             # There are no report in the mongo db for today
-            credit_report = await state["credit_report_extractor_service"].get_credit_report(state["user_id"])     
+            credit_report, error_message = await state["credit_report_extractor_service"].get_credit_report(state["credit_service_user_id"])     
             if credit_report:
                 print("credit report found")
                 mongo_data, vector_data = await state["credit_report_processor_service"].process_report(user_id=state["user_id"], credit_report_json=credit_report, categorized_resp=None)   
@@ -316,6 +316,14 @@ async def fetch_and_sync_new_data_node(state):
                     mongo_data["isVectorized"] = True
                     state["current_credit_report"] = mongo_data
                     state["pinecone_data_available"] = True
+            else:
+                state["pinecone_data_available"] = False
+                # state["error_occured"] = True
+                # state["error_details"] = {
+                #     "message": error_message,
+                #     "traceback": error_message,
+                #     "node": "fetch_and_sync_new_data_node"
+                # }
         state["path"].append("fetch_and_sync_new_data_node")
         return state
     except Exception as error:
@@ -347,11 +355,14 @@ async def fetch_vector_db_node(state):
     """    
     try:
         print("fetch_vector_db_node:: ")
-        if not state["vectorizer"].vectordb:
-            state["vectorizer"].load_vectorstore()
-        res = await state["vectorizer"].check_for_data(state["user_id"])
-        if len(res['matches']) < 1:
-            state["populate_vector_db"] = True
+        if state["pinecone_data_available"]:
+            if not state["vectorizer"].vectordb:
+                state["vectorizer"].load_vectorstore()
+            res = await state["vectorizer"].check_for_data(state["user_id"])
+            if len(res['matches']) < 1:
+                state["populate_vector_db"] = True
+            else:
+                state["populate_vector_db"] = False
         else:
             state["populate_vector_db"] = False
         state["path"].append("fetch_vector_db_node")

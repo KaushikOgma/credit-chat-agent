@@ -36,6 +36,12 @@ langchain-openai==0.3.8
 langchain-pinecone==0.2.3
 langchain-tests==0.3.14
 langchain-text-splitters==0.3.6
+langgraph==0.3.23
+langgraph-api==0.0.47
+langgraph-checkpoint==2.0.23
+langgraph-cli==0.1.89
+langgraph-prebuilt==0.1.7
+langgraph-sdk==0.1.61
 langsmith==0.3.13
 llvmlite==0.44.0
 loguru==0.7.3

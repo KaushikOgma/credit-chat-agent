@@ -65,10 +65,17 @@ class CreditReportController:
                     await self.vectorizer.create_vectorstore(vector_data, "report_data_id", "topics")
                     print("credit report added to vector db")
                     await self.credit_report_repo.update_report(db, report["_id"], {"isVectorized": True})
-                    print("Make credit report is vectorize true")
+                    print("Make credit report is vectorize true") 
+                context_list, score_list = await self.vectorizer.get_related_topics(user_id, user_query, top_context=3)
+                print("get_credit_report_context:: context found - ",len(context_list))
+                print("get_credit_report_context:: score_list found - ",score_list)
+                if context_list is not None:
+                    combined_context = "; \n".join(elm for elm in context_list)
+                    if len(combined_context) > 5:
+                        user_context = combined_context
             else:
                 # There are no report in the mongo db for today
-                credit_report = await self.credit_report_extractor_service.get_credit_report(user_id)     
+                credit_report, error_message = await self.credit_report_extractor_service.get_credit_report(user_id)     
                 if credit_report:
                     print("credit report found")
                     mongo_data, vector_data = await self.credit_report_processor_service.process_report(user_id=user_id, credit_report_json=credit_report, categorized_resp=None)   
@@ -83,14 +90,14 @@ class CreditReportController:
                         print("credit report added to vector db")
                         await self.credit_report_repo.update_report(db, inserted_id, {"isVectorized": True})
                         print("Make credit report is vectorize true")
-            # inserted_id = await self.credit_report_repo.add_report(db ,mongo_data) 
-            context_list, score_list = await self.vectorizer.get_related_topics(user_id, user_query, top_context=3)
-            print("get_credit_report_context:: context found - ",len(context_list))
-            print("get_credit_report_context:: score_list found - ",score_list)
-            if context_list is not None:
-                combined_context = "; \n".join(elm for elm in context_list)
-                if len(combined_context) > 5:
-                    user_context = combined_context
+                    # inserted_id = await self.credit_report_repo.add_report(db ,mongo_data) 
+                    context_list, score_list = await self.vectorizer.get_related_topics(user_id, user_query, top_context=3)
+                    print("get_credit_report_context:: context found - ",len(context_list))
+                    print("get_credit_report_context:: score_list found - ",score_list)
+                    if context_list is not None:
+                        combined_context = "; \n".join(elm for elm in context_list)
+                        if len(combined_context) > 5:
+                            user_context = combined_context
             return user_context
         except Exception as error:
             print("get_credit_report_context:: error:: ",traceback.format_exc())

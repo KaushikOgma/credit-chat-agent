@@ -10,6 +10,7 @@ class ChatProjections:
         tz = timezone if timezone else settings.APP_TIMEZONE
 
         return {
+            "_id": { "$toString": "$_id" },
             "user_id": "$user_id",  # Renamed
             "credit_service_user_id": "$credit_service_user_id",  # Renamed
             "text": "$content",  # Renamed
