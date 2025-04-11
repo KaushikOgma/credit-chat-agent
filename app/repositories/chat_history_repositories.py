@@ -115,3 +115,10 @@ class ChatHistoryRepository:
             return False
 
     
+    async def delete_chat_history(self, filterData: dict):
+        try:
+            res = self.collection.delete_many(filterData)
+            return res
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name, "userId": self.user_id})
+            raise error

@@ -1,3 +1,4 @@
+from typing import Union
 from bson import ObjectId
 from fastapi.responses import JSONResponse
 from app.repositories.chat_history_repositories import ChatHistoryRepository
@@ -6,6 +7,8 @@ from app.schemas.chat_schema import ChatAgentRequest, ChatRequest
 from app.services.chat_service import ChatService
 from app.services.chat_agent_service import runnable_graph
 from tqdm import tqdm
+from app.utils.helpers.date_helper import get_user_time, convert_timezone
+from datetime import datetime
 from pymongo.database import Database
 from app.utils.config import settings
 from app.utils.logger import setup_logger
@@ -93,3 +96,39 @@ class ChatController:
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name, "userId": user_id})
             raise error
+
+    async def delete_chat_history(
+        self,
+        db,
+        chat_history_ids: Union[list[str], None],
+        start_date: datetime,
+        end_date: datetime,
+        user_id: str,
+        credit_service_user_id: str,
+    ) -> dict:
+        try:
+            filterData = {}
+            if chat_history_ids is not None and len(chat_history_ids) > 0:
+                filterData["_id"] = {
+                    "$in": chat_history_ids
+                }
+            if user_id is not None:
+                filterData["user_id"] = user_id
+            if credit_service_user_id is not None:
+                filterData["credit_service_user_id"] = credit_service_user_id
+            if start_date is not None:
+                filterData["timestamp"] = {
+                    '$gte': convert_timezone(start_date, to_string=False, timeZone="UTC"),
+                }
+                if end_date is None:
+                    end_date = start_date.replace(hour=23, minute=59, second=59)
+                    filterData["timestamp"]["$lte"] = convert_timezone(end_date, to_string=False, timeZone="UTC")
+                else:
+                    filterData["timestamp"]["$lte"] = convert_timezone(end_date, to_string=False, timeZone="UTC")
+            chat_history_repo = ChatHistoryRepository(user_id, credit_service_user_id, db)
+            data = await chat_history_repo.delete_chat_history(filterData)
+            return True
+        except Exception as error:
+            logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name, "userId": user_id})
+            raise error
+    

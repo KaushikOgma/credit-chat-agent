@@ -64,7 +64,7 @@ async def ask_chat_agent(
     "/getChatHistory",
     response_model=ChatHistoryResponseSchema
 )
-async def ask_chat_agent(
+async def get_chat_history(
     user_id: str = Query(..., description="User Id for which we need to get the chat history"),
     credit_service_user_id: str = Query(None, description="credit service user_id"),
     before_id: str = Query(None, description="before_id"),
@@ -84,4 +84,31 @@ async def ask_chat_agent(
         logger.exception(error)
         # Return a JSON response with an error message
         return JSONResponse(content={"message": str(error)}, status_code=500)
+
+
+@router.delete(
+    "/deleteChatHistory",
+)
+async def ask_chat_agent(
+    user_id: str = Query(..., description="User Id for which we need to get the chat history"),
+    chat_history_ids: str = Query(None, description="Deleteing chat history ids seperated by comma (,)"),
+    credit_service_user_id: str = Query(None, description="credit service user_id"),
+    start_date: str =  Query(None, description=f"start_date in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
+    end_date: str =  Query(None, description=f"end_date in {settings.ACCEPTED_DATE_TIME_STRING} format to filter createdAt"),
+    chat_controller: ChatController = Depends(get_chat_controller),
+    db_instance: Database = Depends(get_db)
+):
+    
+    try:
+        async with db_instance as db:
+            data = await chat_controller.delete_chat_history(db, chat_history_ids.split(","), start_date, end_date, user_id, credit_service_user_id)
+            return JSONResponse(
+                        status_code=200, content={"chat_history": data, "message": "Chat History fetched successfully"}
+                    )
+    except Exception as error:
+        # Log the error
+        logger.exception(error)
+        # Return a JSON response with an error message
+        return JSONResponse(content={"message": str(error)}, status_code=500)
+
 
