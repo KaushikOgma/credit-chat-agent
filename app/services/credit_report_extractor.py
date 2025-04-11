@@ -94,46 +94,52 @@ class CreditReportExtractor:
  
 
     async def retrieve_credit_report(self, report_key: str, display_token: str):
-        """Retrieves the credit report from Array asynchronously."""
+        """Retrieves the credit report from Array asynchronously, with retries."""
+        url = f"{self.array_url}/{self.fetch_credit_report_url}?reportKey={report_key}&displayToken={display_token}&live=false"
+        headers = {"content-type": "application/json"}
+        retries = 5
         try:
-            url = f"{self.array_url}/{self.fetch_credit_report_url}?reportKey={report_key}&displayToken={display_token}&live=false"
-            headers = {"content-type": "application/json"}
             async with aiohttp.ClientSession() as session:
-                async with session.get(url, headers=headers) as response:
-                    print("retrieve_credit_report:: response::",response.status)
-                    if response.status == 200:
-                        data = await response.json()
-                        return {
-                            "success": True,
-                            "message": "Operation successful. Report delivered.",
-                            "data": data,
-                        }
-                    elif response.status == 202:
-                        return {
-                            "success": False,
-                            "message": "Request accepted, but report is still being generated. Try again later.",
-                        }
-                    elif response.status == 204:
-                        return {
-                            "success": False,
-                            "message": "Report could not be generated. Check bureau error headers.",
-                        }
-                    elif response.status == 400:
-                        return {"success": False, "message": "Invalid or missing reportKey query parameter."}
-                    elif response.status == 401:
-                        return {"success": False, "message": "DisplayToken expired. Regenerate the token."}
-                    elif response.status == 404:
-                        return {"success": False, "message": "ReportKey expired (older than 30 days) or not found."}
-                    elif response.status == 408:
-                        return {"success": False, "message": "Customer cancelled the request."}
-                    elif response.status == 412:
-                        return {"success": False, "message": "Invalid content-type header value."}
-                    else:
-                        return {"success": False, "message": f"Unexpected status {response.status}."}
+                for attempt in range(retries):
+                    async with session.get(url, headers=headers) as response:
+                        print("retrieve_credit_report:: response::", response.status)
+                        if response.status == 200:
+                            data = await response.json()
+                            return {
+                                "success": True,
+                                "message": "Operation successful. Report delivered.",
+                                "data": data,
+                            }
+                        elif response.status == 202:
+                            if attempt < retries - 1:
+                                await asyncio.sleep(3)  # Wait before retrying
+                                continue
+                            return {
+                                "success": False,
+                                "message": "Credit Report is still being generated. Please try again later.",
+                            }
+                        elif response.status == 204:
+                            return {
+                                "success": False,
+                                "message": "Report could not be generated. Check bureau.",
+                            }
+                        elif response.status == 400:
+                            return {"success": False, "message": "Invalid or missing reportKey query parameter."}
+                        elif response.status == 401:
+                            return {"success": False, "message": "DisplayToken expired. Regenerate the token."}
+                        elif response.status == 404:
+                            return {"success": False, "message": "ReportKey expired (older than 30 days) or not found."}
+                        elif response.status == 408:
+                            return {"success": False, "message": "Customer cancelled the request."}
+                        elif response.status == 412:
+                            return {"success": False, "message": "Invalid content-type header value."}
+                        else:
+                            return {"success": False, "message": f"Unexpected status {response.status}."}
+                return {"success": False, "message": "Counld Not Fetch the Credit Report. Please try again later."}
         except Exception as error:
             logger.exception(error, extra={"moduleName": settings.MODULE, "serviceName": self.service_name})
             return None
- 
+    
 
     async def get_credit_report(self, user_id: str):
         """Combines all steps to get the final credit report asynchronously."""
@@ -159,9 +165,7 @@ class CreditReportExtractor:
             if not report_response["success"]:
                 raise Exception(report_response["message"])
             report = report_response["data"]
-            print("resp:: ",report)
-            # with open("resp.json", "w") as f:
-            #     json.dump(report, f)
+
             # credit_report_json_path = os.path.join(".", settings.LOCAL_UPLOAD_LOCATION ,"array_data.json")
             # report = {}
             # with open(credit_report_json_path, "r") as f:

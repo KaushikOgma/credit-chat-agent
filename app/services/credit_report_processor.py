@@ -115,10 +115,14 @@ class ArrayReportProcessor:
                             for category, liability in credit_liabilities.items():
                                 categories[category] = liability
                         elif key in [self.credit_inquiry_filter]:
+                            if isinstance(value, dict):
+                                value = [value]
                             credit_inquiries = await self.process_credit_inquiries(value)
                             for category, inquiry in credit_inquiries.items():
                                 categories[category] = inquiry
                         elif key in [self.credit_score_filter]:
+                            if isinstance(value, dict):
+                                value = [value]
                             credit_score = await self.process_credit_score(value)
                             categories[key] = credit_score
                         elif self.credit_summary_filter in key:

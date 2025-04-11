@@ -60,6 +60,7 @@ class State(dict):
     error_details: dict
     next_node: str
     non_verified_response: bool
+    premium_required: bool
 
 
 # --- Node1: Initialize tools ---
@@ -75,6 +76,7 @@ async def initialization_node(state):
     """    
     state["error_occured"] = False 
     state["non_verified_response"] = False
+    state["premium_required"] = False
     state["next_node"] = "load_history_node"
     try:
         print("initialization_node:: ")
@@ -98,6 +100,7 @@ async def initialization_node(state):
         )
         state["tools_initialized"] = True
         state["path"] = ["initialization_node"]
+        state["error_details"] = None
         return state
     except Exception as error:
         print("initialization_node:: error - ",str(error))
@@ -131,13 +134,22 @@ async def load_history_node(state):
         mongo_history_repo = ChatHistoryRepository(state["user_id"], state["credit_service_user_id"], state["mongo_db"])
         chat_history, question_count = await mongo_history_repo.load_messages()
         state["question_number"] = question_count + 1
-        state["chat_history"] = chat_history
-        state["mongo_history_repo"] = mongo_history_repo
-        state["chain_kwargs"]["memory"] = ConversationBufferMemory(
-            chat_memory=ChatMessageHistory(messages=chat_history),
-            return_messages=True,
-            memory_key="chat_history"
-        )
+        if state["question_number"] > settings.FREE_CHAT_LIMIT and not state["is_premium"]:
+            state["premium_required"] = True 
+            state["error_occured"] = True
+            state["error_details"] = {
+                "message": "Please upgrade to premium to ask more Credit Questions.",
+                "traceback": "Please upgrade to premium to ask more Credit Questions.",
+                "node": "load_history_node"
+            }
+        else:
+            state["chat_history"] = chat_history
+            state["mongo_history_repo"] = mongo_history_repo
+            state["chain_kwargs"]["memory"] = ConversationBufferMemory(
+                chat_memory=ChatMessageHistory(messages=chat_history),
+                return_messages=True,
+                memory_key="chat_history"
+            )
         state["path"].append("load_history_node")
         return state
     except Exception as error:
@@ -319,11 +331,11 @@ async def fetch_and_sync_new_data_node(state):
             else:
                 state["pinecone_data_available"] = False
                 # state["error_occured"] = True
-                # state["error_details"] = {
-                #     "message": error_message,
-                #     "traceback": error_message,
-                #     "node": "fetch_and_sync_new_data_node"
-                # }
+                state["error_details"] = {
+                    "message": error_message,
+                    "traceback": error_message,
+                    "node": "fetch_and_sync_new_data_node"
+                }
         state["path"].append("fetch_and_sync_new_data_node")
         return state
     except Exception as error:
@@ -584,6 +596,8 @@ async def conversational_agent_node(state):
         conversational_chain = ConversationalRetrievalChain.from_llm(**state["chain_kwargs"])
         response = conversational_chain.invoke({"question": state["user_query"]})
         state["answer"] = response["answer"]
+        if state["error_details"] is not None:
+            state["answer"] = f'{state["answer"]}\nNote: {state["error_details"]["message"]}'
         state["path"].append("conversational_agent_node")
         return state
     except Exception as error:
@@ -651,9 +665,10 @@ async def persist_messages_node(state):
     state["next_node"] = "deinitialization_node"
     try:
         print("persist_messages_node:: ")
-        await state["mongo_history_repo"].add_user_message(state["user_query"], state["question_number"])
-        await state["mongo_history_repo"].add_ai_message(state["answer"], state["question_number"])
-        state["path"].append("persist_messages_node")
+        if not state["non_verified_response"]:
+            await state["mongo_history_repo"].add_user_message(state["user_query"], state["question_number"])
+            await state["mongo_history_repo"].add_ai_message(state["answer"], state["question_number"])
+            state["path"].append("persist_messages_node")
         return state
     except Exception as error:
         print("persist_messages_node:: error - ",str(error))
